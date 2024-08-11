@@ -9,8 +9,10 @@
       "start": "ts-node src/index.ts",
       "build": "npx tsc",
       "typeorm": "typeorm-ts-node-commonjs",
-      "run_migration": "npx typeorm-ts-node-commonjs migration:run --dataSource ./src/data-source.ts",
-      "revert_migration": "npx typeorm-ts-node-commonjs migration:revert --dataSource ./src/data-source.ts",
+      "run_db_migration": "npx typeorm-ts-node-commonjs migration:run --dataSource ./src/config/dbSource.ts",
+      "revert_db_migration": "npx typeorm-ts-node-commonjs migration:revert --dataSource ./src/config/dbSource.ts",
+      "run_data_migration": "npx typeorm-ts-node-commonjs migration:run --dataSource ./src/config/dataSource.ts",
+      "revert_data_migration": "npx typeorm-ts-node-commonjs migration:revert --dataSource ./src/config/dataSource.ts",
       "create_migration": "npx ts-node ./src/scripts/create-migration.ts"
    },
    "keywords": [],

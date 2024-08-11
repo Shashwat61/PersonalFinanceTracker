@@ -1,11 +1,11 @@
 import { MigrationInterface, QueryRunner, Table } from "typeorm";
 
-export class CreateUserTable1723292610702 implements MigrationInterface {
+export class CreateBankAccountTable1723348516397 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(
             new Table({
-                name: "user",
+                name: "bank_account",
                 columns: [
                     {
                         name: "id",
@@ -15,23 +15,15 @@ export class CreateUserTable1723292610702 implements MigrationInterface {
                         generationStrategy: "uuid",
                     },
                     {
-                        name: "name",
+                        name: "account_number",
                         type: "varchar",
                         default: null,
                         length: "255"
                     },
                     {
-                        name: "email",
-                        type: "varchar",
-                        default: null,
-                        length: "255",
-                        
-                    },
-                    {
-                        name: "upi_id",
-                        type: "varchar",
+                        name: "user_id",
+                        type: "uuid",
                         isNullable: false,
-                        length: "255",
                     },
                     {
                         name: "created_at",
@@ -48,13 +40,8 @@ export class CreateUserTable1723292610702 implements MigrationInterface {
                 ],
                 indices: [
                     {
-                        columnNames: ["email"],
-                        name: "IDX_USER_EMAIL",
-                        isUnique: true
-                    },
-                    {
-                        columnNames: ["upi_id"],
-                        name: "IDX_USER_UPI",
+                        columnNames: ["account_number"],
+                        name: "IDX_BANK_ACCOUNT_ACCOUNT_NUMBER",
                         isUnique: true
                     }
                 ]
@@ -63,7 +50,7 @@ export class CreateUserTable1723292610702 implements MigrationInterface {
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.dropTable("user")
+        await queryRunner.dropTable("bank_account")
     }
 
 }

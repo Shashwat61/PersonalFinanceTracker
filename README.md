@@ -10,3 +10,41 @@
 5. user can filter all the transactions based on transaction type, categories, date and time, UPI id of other person.
 
 ![alt text](./schema_design.png)
+
+## Migrations Commands
+
+1. DB Table Migration
+
+    ```bash
+    npm run run_db_migration
+    ```
+
+2. Data Migrations
+
+    ```bash
+    npm run run_data_migration
+    ```
+
+3. Rollback DB Migrations
+
+    ```bash
+    npm run revert_db_migration
+    ```
+
+4. Rollback Data Migrations
+
+    ```bash
+    npm run revert_data_migration
+    ```
+
+5. Create DB Migration
+
+   ```bash
+    npm run create_migration db tablename
+    ```
+
+6. Create Data Migration
+
+    ```bash
+     npm run create_migration data tablename
+     ```
