@@ -4,14 +4,18 @@ import { OAuth2Client } from "google-auth-library";
 
 const signUp = async(req:Request, res: Response) => {
     const oAuth2Client = new OAuth2Client(
-        "9028270805-45bek9eucb5ei26q7pnp283ruoefffdc.apps.googleusercontent.com",
+        "",
         "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",
         "http://localhost:5173"
       );
     const { code } = req.body
     // get user profile data and refresh token 
     const { tokens } = await oAuth2Client.getToken(code)
-    console.log(tokens);
+    const userProfile = await oAuth2Client.verifyIdToken({
+        idToken: tokens.id_token!,
+        audience: ""
+    })
+    console.log(tokens, userProfile);
     // {
     //     access_token: 'ya29.a0AcM612y5Uy40uPIfyecDxTLDDQxIXx-a8dUz6ZbfefM547PUnPsk3tRe9yiIYjBmbBDEcpQ_nnghapN3D3ft7AftevfLkgr6c0eiQAnK8CygO_gWLmwUPTUrYmSfjVaCFKuFLTbMHV2D6x0nZ1n3bYnxXAC24ieg-93OaCgYKAZgSARMSFQHGX2MiwWttg7uRdQSq3_-vL7Xgvw0171',
     //     refresh_token: '1//0g6l8Sp-5Z4SuCgYIARAAGBASNwF-L9IrtQU-tsQaWQ-7f6lXnxLXJeqYmHlNzJv9Zpm1ftfzXqUZ-3ncpE1jPi83atxRk1j0pKs',
@@ -24,7 +28,7 @@ const signUp = async(req:Request, res: Response) => {
     // save the access token in cookies with exp date and check in fe when access token has expired logout.
     // but in be refresh that token
     const response = services.userService.signup()
-    res.status(200).send(response)
+    res.status(200).send(userProfile)
 }
 
 export default {
