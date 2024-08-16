@@ -10,8 +10,13 @@ router.use('/api/auth', authRoutes)
 
 router.get('/', authMiddleware.checkForUserSession, controllers.rootRouteController)
 
-router.get('/signin', (req,res)=>{
+router.get('/signin', authMiddleware.checkForUserSession, (req:Request,res:Response)=>{
+    if (res.locals.user) res.redirect('/app')
     res.render('signin')
+})
+
+router.get('/app', authMiddleware.checkForUserSession, (req,res)=>{
+    res.render('app')
 })
 
 

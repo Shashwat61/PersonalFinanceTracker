@@ -5,7 +5,7 @@
    "main": "index.js",
    "scripts": {
       "test": "echo \"Error: no test specified\" && exit 1",
-      "dev": "nodemon src/index.ts",
+      "dev": "nodemon --exec node --inspect -r ts-node/register -r dotenv/config src/index.ts",
       "start": "ts-node src/index.ts",
       "build": "npx tsc",
       "typeorm": "typeorm-ts-node-commonjs",
@@ -13,7 +13,8 @@
       "revert_db_migration": "npx typeorm-ts-node-commonjs migration:revert --dataSource ./src/config/dbSource.ts",
       "run_data_migration": "npx typeorm-ts-node-commonjs migration:run --dataSource ./src/config/dataSource.ts",
       "revert_data_migration": "npx typeorm-ts-node-commonjs migration:revert --dataSource ./src/config/dataSource.ts",
-      "create_migration": "npx ts-node ./src/scripts/create-migration.ts"
+      "create_migration": "npx ts-node ./src/scripts/create-migration.ts",
+      "create_entity": "npx typeorm entity:create src/entity/"
    },
    "keywords": [],
    "author": "",

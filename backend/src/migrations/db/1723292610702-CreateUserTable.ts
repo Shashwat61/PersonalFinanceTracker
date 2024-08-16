@@ -25,7 +25,6 @@ export class CreateUserTable1723292610702 implements MigrationInterface {
                         type: "varchar",
                         default: null,
                         length: "255",
-                        
                     },
                     {
                         name: "created_at",

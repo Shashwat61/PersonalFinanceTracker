@@ -11,7 +11,7 @@ const signIn = async(req: Request, res: Response)=>{
     console.log('here in signin')
     const code = req.query.code
     const userProfileData = await services.userService.signIn(code as string, res)
-    console.log('here in signin redirecting')
+    console.log('===========here in signin redirecting', userProfileData)
     res.redirect('/')
 }
 export default {

@@ -1,6 +1,6 @@
 import { DataSource } from "typeorm"
 
-const AppDataSource = new DataSource({
+const dbSource = new DataSource({
     "type": "postgres",
     "host": "localhost",
     "port": 5432,
@@ -12,11 +12,5 @@ const AppDataSource = new DataSource({
     "migrations": ["./src/migrations/db/*.ts"],
 })
 
-AppDataSource.initialize()
-    .then(() => {
-        console.log("Data Source has been initialized!")
-    })
-    .catch((err) => {
-        console.error("Error during Data Source initialization", err)
-    })
-export {AppDataSource}
+
+export {dbSource}

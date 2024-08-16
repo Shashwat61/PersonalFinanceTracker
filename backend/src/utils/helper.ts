@@ -25,27 +25,19 @@ async function getAuthenticatedUserDetails(oAuth2Client: OAuth2Client){
     return data
 }
 const cookieOptions: CookieOptions = {
-    httpOnly: true,
-    domain: 'localhost',
+    // httpOnly: true,
+    domain: '',
     path: '/',
     sameSite: 'lax',
-    // secure: true
-    // secure: process.env.NODE_ENV === 'production' ? true : false,
+    secure: process.env.NODE_ENV === "production"
 }
 function setCookies(res: Response, id_token: string, tokenIdInfo: TokenPayload){
     const currentTimeInSeconds = Math.floor(Date.now() / 1000);
-    const maxAgeInSeconds = tokenIdInfo.exp - currentTimeInSeconds;
+    const maxAgeInSeconds = (tokenIdInfo.exp - currentTimeInSeconds) * 1000; // 1 hour
     res.cookie('jwt', id_token, {
         ...cookieOptions,
         maxAge: maxAgeInSeconds
     })
-    // set this in redis as it is required in BE not in FE
-    // key would be tokenIdInfo.at_hash || name
-    // res.cookie('access_token', access_token, {
-    //     ...cookieOptions,
-    //     maxAge: tokenIdInfo.exp
-    // })
-    // console.log('setting cookies ended')
 }
 async function getTokenInfo(access_token: string){
     const tokenInfo = await oAuth2ClientInstance().getTokenInfo(access_token)
