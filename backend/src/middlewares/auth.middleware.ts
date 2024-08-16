@@ -1,9 +1,8 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
-import { getTokenIdInfo, getTokenInfo } from "../lib/helper";
+import { getTokenIdInfo, getTokenInfo } from "../utils/helper";
 
 const checkForUserSession: RequestHandler = async(req: Request, res: Response, next: NextFunction) => {
     try {
-        
         const cookies = req.headers.cookie?.split(';')
         if (cookies){
             const jwt_token = cookies?.find(cookie => cookie.includes("jwt"))
@@ -15,7 +14,6 @@ const checkForUserSession: RequestHandler = async(req: Request, res: Response, n
                 return next()
             }
         }
-        // render a login page
         console.log('here in login page')
         res.redirect('/signin')
     } 

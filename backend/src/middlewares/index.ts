@@ -1,4 +1,4 @@
-import authMiddleware from "./authMiddleware";
+import authMiddleware from "./auth.middleware";
 
 export {
     authMiddleware

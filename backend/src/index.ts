@@ -1,8 +1,8 @@
-import { Request, Response } from "express"
-import { OAuth2Client } from "google-auth-library"
 import express from 'express'
 import cors from 'cors'
 import router from "./routes"
+import 'dotenv/config'
+import {redisClient}  from './lib'
 
 const app = express()
 const port = 3000
@@ -17,4 +17,7 @@ app.set('view engine','pug')
 
 
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+app.listen(port, async() => {
+    await redisClient.connect()
+    console.log(`Example app listening on port ${port}!`)
+});

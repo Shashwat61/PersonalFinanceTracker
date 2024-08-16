@@ -1,11 +1,10 @@
 import { OAuth2Client } from "google-auth-library";
-import { getAuthenticatedInfo, getAuthenticatedUserDetails, setCookies } from "../lib/helper";
+import { getAuthenticatedInfo, getAuthenticatedUserDetails, oAuth2ClientInstance, setCookies } from "../utils/helper";
 import { Response } from "express";
+import { redisClient } from "../lib";
 
 const signup = ()=>{
-    const oAuth2Client = new OAuth2Client(
-        ""
-      );
+    const oAuth2Client = oAuth2ClientInstance()
     
       const authorizeUrl = oAuth2Client.generateAuthUrl({
         access_type: 'offline',
@@ -20,6 +19,8 @@ const signIn = async(code: string, res: Response)=> {
         const {id_token} = tokens
         if (tokenIdInfo && id_token && id_token.length > 0){
             // set redis access token
+            console.log(tokenIdInfo.at_hash, 'key')
+            redisClient.setKey(tokenIdInfo.at_hash!, tokens.access_token!, tokenIdInfo.exp)
             setCookies(res, id_token, tokenIdInfo)
             return tokenIdInfo
         }
