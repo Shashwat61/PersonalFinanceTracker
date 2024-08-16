@@ -1,20 +1,28 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
+import { getTokenIdInfo, getTokenInfo } from "../lib/helper";
 
-const checkForUserSession: RequestHandler = (req, res, next) => {
-    console.log('checking for user', req.headers.cookies)
-    // [ 'test=yhaaa', ' server=ohhhyess' ]
-    const cookies = req.headers.cookie?.split(';')
-    if (cookies) {
-        const access_token = cookies?.find(cookie => cookie.includes("access_token"))
-        if (access_token){
-            // check if the access token is valid
-            console.log('user is logged in')
-            return next()
+const checkForUserSession: RequestHandler = async(req: Request, res: Response, next: NextFunction) => {
+    try {
+        
+        const cookies = req.headers.cookie?.split(';')
+        if (cookies){
+            const jwt_token = cookies?.find(cookie => cookie.includes("jwt"))
+            if (jwt_token){
+                const [jwt_prefix, jwt_token_value] = jwt_token.split('=')
+                console.log(jwt_token_value, 'jwt token')
+                const tokenIdInfo = await getTokenIdInfo(jwt_token_value)
+                console.log('user is logged in')
+                return next()
+            }
         }
+        // render a login page
+        console.log('here in login page')
+        res.redirect('/signin')
+    } 
+    catch (error) {
+        console.log(error)
+        throw new Error(`something went wrong with message -${error}`)
     }
-    // render a login page
-    console.log('here in login page')
-    res.redirect('/signin')
 }
 
 export default {

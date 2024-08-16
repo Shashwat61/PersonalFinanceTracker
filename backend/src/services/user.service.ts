@@ -15,18 +15,14 @@ const signup = ()=>{
 }
 
 const signIn = async(code: string, res: Response)=> {
-    console.log('here in signin service')
     try {
-        const {oAuth2Client, tokens} = await getAuthenticatedInfo(code as string);
-        const userProfileData = await getAuthenticatedUserDetails(oAuth2Client)
-        console.log(tokens, 'tokens')
-        const {access_token, expiry_date, id_token} = tokens
-        console.log(access_token && access_token.length > 0 && expiry_date && id_token && id_token.length > 0, 'bool')
-        if (access_token && access_token.length > 0 && expiry_date && id_token && id_token.length > 0){
-            setCookies(res, access_token, expiry_date, id_token)
-            return userProfileData
+        const {tokens, tokenIdInfo} = await getAuthenticatedInfo(code as string);
+        const {id_token} = tokens
+        if (tokenIdInfo && id_token && id_token.length > 0){
+            // set redis access token
+            setCookies(res, id_token, tokenIdInfo)
+            return tokenIdInfo
         }
-        console.log(res.cookie, 'set cookies')
         // store this in user table
         // return userprofiledata
       } catch (error) {
