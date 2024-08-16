@@ -1,7 +1,7 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
 
 const checkForUserSession: RequestHandler = (req, res, next) => {
-    console.log('checking for user')
+    console.log('checking for user', req.headers.cookies)
     // [ 'test=yhaaa', ' server=ohhhyess' ]
     const cookies = req.headers.cookie?.split(';')
     if (cookies) {
