@@ -34,7 +34,7 @@ const cookieOptions: CookieOptions = {
 function setCookies(res: Response, id_token: string, tokenIdInfo: TokenPayload){
     const currentTimeInSeconds = Math.floor(Date.now() / 1000);
     const maxAgeInSeconds = (tokenIdInfo.exp - currentTimeInSeconds) * 1000; // 1 hour
-    res.cookie('jwt', id_token, {
+    res.cookie('token', id_token, {
         ...cookieOptions,
         maxAge: maxAgeInSeconds
     })
@@ -47,7 +47,7 @@ async function getTokenIdInfo(token_id: string){
     try {    
         const tokenInfo = await oAuth2ClientInstance().verifyIdToken({
             idToken: token_id,
-            audience: "9028270805-45bek9eucb5ei26q7pnp283ruoefffdc.apps.googleusercontent.com"
+            audience: process.env.GOOGLE_CLIENT_ID
         })
         return tokenInfo
     } 

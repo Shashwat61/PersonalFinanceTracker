@@ -25,23 +25,30 @@ const signIn = async(code: string, res: Response)=> {
             }
           })
           if(userFound){
-            console.log(userFound, '==========userFound')
-            redisClient.setKey(tokenIdInfo.at_hash!, tokens.access_token!, tokenIdInfo.exp)
-            setCookies(res, id_token, tokenIdInfo)
-            return userFound
+            console.log(userFound, '==========userFound', tokenIdInfo)
+            if(tokenIdInfo && tokenIdInfo.email && tokens.access_token){
+              const currentTimeInSeconds = Math.floor(Date.now() / 1000);
+              const maxAgeInSeconds = (tokenIdInfo.exp - currentTimeInSeconds) * 1000;
+              const resp = await redisClient.setKey('access_token', 'hello', maxAgeInSeconds)
+              console.log(resp, 'resp')
+              setCookies(res, id_token, tokenIdInfo)
+              return userFound
+            }
           }
           const user = new User()
           user.email = tokenIdInfo.email!
           user.name = tokenIdInfo.name!
           await user.save()
           
-          console.log(user, '==========user')
-            redisClient.setKey(tokenIdInfo.at_hash!, tokens.access_token!, tokenIdInfo.exp)
+          console.log(user, '==========user', tokenIdInfo)
+          if(tokenIdInfo && tokenIdInfo.email && tokens.access_token){
+            console.log(tokenIdInfo.email, tokens.access_token, tokenIdInfo.exp, '===============tokenid')
+            const resp = await redisClient.setKey('access_token', tokens.access_token, tokenIdInfo.exp)
+            console.log(resp, '===========resp')
             setCookies(res, id_token, tokenIdInfo)
             return user
+          }
         }
-        // store this in user table
-        // return userprofiledata
       } catch (error) {
         console.error('Error during authentication:', error);
         throw Error(error as string)

@@ -1,4 +1,5 @@
-import userService from "./user.service"
+import transactionService from "./transaction.service"
+import userService from "./auth.service"
 
 
 const rootRouterService = () => {
@@ -7,6 +8,7 @@ const rootRouterService = () => {
 
 export default {
     rootRouterService,
-    userService
+    userService,
+    transactionService
 
 }
