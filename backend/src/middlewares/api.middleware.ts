@@ -11,11 +11,13 @@ const checkApiAutheticated = async (req: Request, res: Response, next: NextFunct
         const [jwt_prefix, jwt_token_value] = jwtToken.split('=')
         const tokenIdInfo = await getTokenIdInfo(jwt_token_value)
         console.log(tokenIdInfo, 'tokenidinfo')
-        if (!tokenIdInfo) throw Error('token id not found, please sign in again')
-        console.log(tokenIdInfo.getPayload()!.email!, 'hashkey')
-        const accessToken = await redisClient.getKey('access_token')
+        if (!tokenIdInfo || !tokenIdInfo.getPayload()) throw Error('token id not found, please sign in again')
+        console.log(tokenIdInfo.getPayload()?.email!, 'hashkey')
+        const email = tokenIdInfo.getPayload()?.email;
+        if (!email) throw new Error('Email not found');
+        const accessToken = await redisClient.getKey(email);
         console.log(accessToken, 'accesstoken')
-        if (accessToken === undefined) throw Error('Access token not found, Please sign in again')
+        if (!accessToken) throw new Error('Access token not found, Please sign in again');
         const user = await User.findOneBy({email: tokenIdInfo?.getPayload()?.email})
         if(!user) throw Error('User not found')
         res.locals.userInfo = {...user, accessToken}

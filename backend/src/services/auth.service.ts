@@ -29,8 +29,9 @@ const signIn = async(code: string, res: Response)=> {
             if(tokenIdInfo && tokenIdInfo.email && tokens.access_token){
               const currentTimeInSeconds = Math.floor(Date.now() / 1000);
               const maxAgeInSeconds = (tokenIdInfo.exp - currentTimeInSeconds) * 1000;
-              const resp = await redisClient.setKey('access_token', 'hello', maxAgeInSeconds)
+              const resp = await redisClient.setKey(tokenIdInfo.email, tokens.access_token, maxAgeInSeconds)
               console.log(resp, 'resp')
+              if (resp !== "OK") throw new Error('error in setting redis key')
               setCookies(res, id_token, tokenIdInfo)
               return userFound
             }

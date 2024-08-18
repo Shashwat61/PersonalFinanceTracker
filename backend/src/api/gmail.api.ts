@@ -9,8 +9,7 @@ const prefixURL = process.env.GMAIL_API_ENDPOINT_URL
                 Authorization: `Bearer ${accessToken}`
             }
         })
-        console.log(response, 'response got for emails')
-        return response
+        return response.data
     }
     catch(error){
         console.error(error, 'error')
