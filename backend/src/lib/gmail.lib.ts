@@ -1,8 +1,12 @@
-import { getMails } from "../api/gmail.api";
+import { GmailMessages } from "../types/transaction.types";
+import RequestManager from "./request-manager.lib";
 
 class GmailClient{
     private static _instance: GmailClient;
-    private constructor(){}
+    private requestManager: RequestManager;
+    private constructor(){
+        this.requestManager = new RequestManager(process?.env?.GMAIL_API_ENDPOINT_URL!)
+    }
 
     static getInstance(){
         if(!GmailClient._instance){
@@ -12,7 +16,12 @@ class GmailClient{
     }
     async getEmails(accessToken: string){
         console.log('getting emails')
-        const response = await getMails(accessToken)
+        const response = await this.requestManager.client.get<GmailMessages>('/me/messages?q=from:alerts@hdfcbank.net', {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        })
+
         return response
     }
 }
