@@ -55,11 +55,22 @@ async function getTokenIdInfo(token_id: string){
         
     }
 }
+function modifyQuery(query: {[key: string]: string}){
+    let q = "q=";
+    for(const key in query){
+        if(query[key]){
+            q+=`${key}:${query[key]}`
+            q+=`${Object.keys(query).at(Object.keys(query).length -1)== key ? '' : '+'}`
+        }
+    }
+    return q
+}
 export {
     getAuthenticatedInfo,
     getAuthenticatedUserDetails,
     setCookies,
     getTokenInfo,
     getTokenIdInfo,
-    oAuth2ClientInstance
+    oAuth2ClientInstance,
+    modifyQuery
 }

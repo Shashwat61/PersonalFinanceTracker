@@ -4,4 +4,5 @@ export interface GmailMessages {
         id: string,
         threadId: string
     }[]
+    nextPageToken?: string;
 }

@@ -14,9 +14,9 @@ class GmailClient{
         }
         return GmailClient._instance
     }
-    async getEmails(accessToken: string){
+    async getEmails(accessToken: string, query: string){
         console.log('getting emails')
-        const response = await this.requestManager.client.get<GmailMessages>('/me/messages?q=from:alerts@hdfcbank.net', {
+        const response = await this.requestManager.client.get<GmailMessages>(`/me/messages?${query}`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`
             }
