@@ -1,5 +1,6 @@
 import { UUID } from "crypto"
-import { BaseEntity, Column, Entity, Generated, Index, PrimaryColumn, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm"
+import { BaseEntity, Column, Entity, Generated, Index, ManyToMany, PrimaryColumn, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm"
+import { WatchEmail } from "./WatchEmail";
 
 @Entity("user")
 export class User extends BaseEntity{
@@ -34,4 +35,7 @@ export class User extends BaseEntity{
         nullable: false
     })
     updated_at!: Date;
+
+    @ManyToMany((type) => WatchEmail, (watchEmail) => watchEmail.users, {cascade: true})
+    watchEmails!: WatchEmail[]
 }

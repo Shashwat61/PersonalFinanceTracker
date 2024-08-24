@@ -2,6 +2,7 @@ import { Request, Response } from "express"
 import services from "../services"
 import userController from "./auth.controller"
 import transactionController from "./transaction.controller"
+import bankEmailController from "./bank-email.controller"
 
 
 const rootRouteController = (req: Request, res: Response)=> {
@@ -15,6 +16,7 @@ const rootRouteController = (req: Request, res: Response)=> {
 export default {
     rootRouteController,
     userController,
-    transactionController
+    transactionController,
+    bankEmailController
 
 }

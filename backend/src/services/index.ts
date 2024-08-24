@@ -1,5 +1,6 @@
 import transactionService from "./transaction.service"
 import userService from "./auth.service"
+import bankEmailService from "./bank-email.service"
 
 
 const rootRouterService = () => {
@@ -9,6 +10,7 @@ const rootRouterService = () => {
 export default {
     rootRouterService,
     userService,
-    transactionService
+    transactionService,
+    bankEmailService
 
 }
