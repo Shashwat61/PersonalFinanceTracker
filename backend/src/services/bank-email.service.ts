@@ -2,8 +2,15 @@ import { dbSource } from "../config/dbSource"
 import { User } from "../entity/User"
 import { WatchEmail } from "../entity/WatchEmail"
 
-const getAllBankEmails = () => {
-    return []
+const getAllBankEmails = async(userId: string, userInfo: {currentUser: User, access_token: string}) => {
+    if (userId !== userInfo.currentUser.id) throw new Error('Not Authorized')
+    const watchEmails = await WatchEmail.find({
+        where: {
+            users: {id: userInfo.currentUser.id}
+        }
+    })
+    console.log(watchEmails, '====watchemails')
+    return watchEmails
 }
 
 const addBankEmail = async(email: string, userId: string, userInfo: {currentUser: User, access_token: string}) => {

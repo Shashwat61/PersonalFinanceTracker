@@ -1,7 +1,7 @@
 import express from 'express';
 import authRoutes from './auth.routes'
 import tranasctionRoutes from './transaction.routes'
-import bankEmailRoutes from './bank-email.routes'
+import bankEmailRoutes from './watch-email.routes'
 import { apiMiddleware } from '../middlewares';
 
 const router = express.Router()

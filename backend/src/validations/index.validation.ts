@@ -1,7 +1,7 @@
-import bankEmailValidations from "./bank-email.validations";
+import watchEmailValidations from "./watch-email.validations";
 import transactionValidation from "./transaction.validation";
 
 export default {
     transactionValidation,
-    bankEmailValidations
+    watchEmailValidations
 }
