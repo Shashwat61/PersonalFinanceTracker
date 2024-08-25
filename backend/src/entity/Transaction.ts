@@ -1,27 +1,34 @@
-import { BaseEntity, Column, Double, Entity, ManyToOne, PrimaryColumn, UpdateDateColumn } from "typeorm"
+import { BaseEntity, Column, Decimal128, Double, Entity, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from "typeorm"
 import { User } from "./User"
+import { UserUpiDetails } from "./UserUpiDetails"
 
 @Entity("transaction")
 export class Transaction extends BaseEntity{
     @PrimaryColumn("uuid")
     id!: string
 
-    @Column()
-    amount!: Double
+    @Column({
+        type: 'numeric',
+        precision: 10,
+        scale: 2,
+        nullable: true,
+        default: null
+    })
+    amount!: number
 
     @Column({
-        type: 'uuid',
+        type: 'varchar',
         nullable: true,
         default: null
     })
     payee_upi_id!: string
 
     @Column({
-        type: 'uuid',
+        type: 'varchar',
         nullable: true,
         default: null
     })
-    user_id!: string
+    receiver_upi_id!: string
 
     @Column({
         type: 'uuid',
@@ -31,11 +38,11 @@ export class Transaction extends BaseEntity{
     category_id!: string
 
     @Column({
-        type: 'uuid',
+        type: 'integer',
         nullable: true,
         default: null
     })
-    bank_account_id!: string
+    bank_account_number!: number
 
     @Column({
         type: 'uuid',
@@ -49,7 +56,20 @@ export class Transaction extends BaseEntity{
         enum: ['credit', 'debit']
     })
     transaction_type!: string
-    
+
+    @Column({
+        type: 'uuid',
+        name: "user_id",
+        nullable: false
+    })
+    user_id!: string
+
+    @Column({
+        type: 'date',
+        nullable: false
+    })
+    transacted_at!: Date
+
     @Column({
         type: 'timestamp',
         default: 'now()',
@@ -65,10 +85,12 @@ export class Transaction extends BaseEntity{
     })
     updated_at!: Date
 
-    @ManyToOne(()=> User, (user) => user.transactions)
+    @ManyToOne(()=> User, (user) => user.transactions, {cascade: true})
+    @JoinColumn({name: "user_id"})
     user!: User
 
-
-
+    @ManyToOne(()=> UserUpiDetails, (userUpiDetails) => userUpiDetails.transactions)
+    @JoinColumn([{name: "receiver_upi_id", referencedColumnName: "id"}, {name: "payee_upi_id", referencedColumnName: "upi_id"}])
+    userUpiDetails!: UserUpiDetails
 
 }

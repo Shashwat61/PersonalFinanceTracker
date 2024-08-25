@@ -2,6 +2,7 @@ import { UUID } from "crypto"
 import { BaseEntity, Column, Entity, Generated, Index, ManyToMany, OneToMany, PrimaryColumn, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm"
 import { WatchEmail } from "./WatchEmail";
 import { Transaction } from "./Transaction";
+import { UserUpiDetails } from "./UserUpiDetails";
 
 @Entity("user")
 export class User extends BaseEntity{
@@ -39,6 +40,9 @@ export class User extends BaseEntity{
 
     @ManyToMany((type) => WatchEmail, (watchEmail) => watchEmail.users, {cascade: true})
     watchEmails!: WatchEmail[]
+
+    @OneToMany(()=> UserUpiDetails, (userUpiDetails) => userUpiDetails.user)
+    userUpiDetails!: UserUpiDetails[]
 
     @OneToMany(()=> Transaction, (transaction) => transaction.user)
     transactions!: Transaction[]

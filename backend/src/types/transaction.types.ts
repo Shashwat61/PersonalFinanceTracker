@@ -1,6 +1,6 @@
 export interface GmailMessages {
     resultSizeEstimated: number;
-    messages: {
+    messages?: {
         id: string,
         threadId: string
     }[]
@@ -10,7 +10,7 @@ export interface GmailMessages {
 export interface GmailThreadMessages{
     id: string;
     historyId: string;
-    messages: Message
+    messages: Message[]
 }
 
 export interface Message{
