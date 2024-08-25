@@ -132,6 +132,12 @@ export class CreateTransactionTable1723350863018 implements MigrationInterface {
                         referencedTableName: "transaction_metadata",
                         referencedColumnNames: ["id"],
                         onDelete: "CASCADE"
+                    },
+                    {
+                        columnNames: ["user_id"],
+                        referencedTableName: "user",
+                        referencedColumnNames: ["id"],
+                        onDelete: "CASCADE"
                     }
                 ]
             })
