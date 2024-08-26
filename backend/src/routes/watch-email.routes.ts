@@ -6,8 +6,8 @@ const router = express.Router()
 const {validate} = validationMiddleware
 const {watchEmailValidations} = indexValidation
 
-router.get('/', validate(watchEmailValidations.getAllWatchEmails), controllers.bankEmailController.getAllBankEmails)
-router.post('/create', validate(watchEmailValidations.addWatchEmail), controllers.bankEmailController.addBankEmail)
+router.get('/', validate(watchEmailValidations.getAllWatchEmails), controllers.watchEmailController.getAllBankEmails)
+router.post('/create', validate(watchEmailValidations.addWatchEmail), controllers.watchEmailController.addBankEmail)
 
 
 export default router

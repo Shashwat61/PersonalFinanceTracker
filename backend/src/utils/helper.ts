@@ -5,6 +5,7 @@ import { GmailThreadMessages, Message } from "../types/transaction.types";
 import { Transaction } from "../entity/Transaction";
 import { User } from "../entity/User";
 import { UserUpiDetails } from "../entity/UserUpiDetails";
+import services from "../services";
 
 function oAuth2ClientInstance(){
     return new OAuth2Client(
@@ -70,19 +71,21 @@ function modifyQuery(query: {[key: string]: string}){
     return q
 }
 
-function modifyTransactionData(transactionData: GmailThreadMessages[], user: User){
+ async function modifyTransactionData(transactionData: GmailThreadMessages[], user: User){
     console.log(user, '========user')
     const transactions: Transaction[] = []
-    transactionData.forEach((transaction) => {
-        transaction.messages.forEach((message, i)=> {
-            if (i ==0) console.log(message.snippet)
-            transactions.push(parseTransactionMessage(message, user))
-        })
-    })
+    await Promise.all(transactionData.map(async (transaction) => {
+        for (const message of transaction.messages) {
+            if (message.snippet) {
+                transactions.push(await parseTransactionMessage(message, user));
+            }
+        }
+    }));
+    console.log(transactions, '=========transactions returning')
     return transactions
 }
 
-function parseTransactionMessage(message: Message, user: User) {
+async function parseTransactionMessage(message: Message, user: User) {
     // Dear Customer, Rs. 1.00 is successfully credited to your account **8730 by VPA 8802135135@ptaxis on 25-08-24. Your UPI transaction reference number is 4238593610416. Thank you for banking with us. Warm
 
     // Dear Customer, Rs.1.00 has been debited from account **8730 to VPA 8802135135@ptaxis on 25-08-24. Your UPI transaction reference number is 460404752423. If you did not authorize this transaction,
@@ -102,12 +105,14 @@ function parseTransactionMessage(message: Message, user: User) {
 
     const vpaMatch = message.snippet.match(/VPA ([\w@]+)/);
     if (vpaMatch){
+        // check if userupidetails is created if not then create
+        const userUpiDetails = await services.userUpiDetailsService.findOrCreate(vpaMatch[1])
         if(transactionInstance.transaction_type === "credit"){
-            transactionInstance.payee_upi_id = vpaMatch[1]
+            transactionInstance.payee_upi_id = userUpiDetails.upi_id
             transactionInstance.user = user
         }
         else{
-            transactionInstance.receiver_upi_id = vpaMatch[1]
+            transactionInstance.receiver_upi_id = userUpiDetails.upi_id
             transactionInstance.user = user
         }
     }

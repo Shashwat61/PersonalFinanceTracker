@@ -1,15 +1,26 @@
 import { Transaction } from "../entity/Transaction";
 import { User } from "../entity/User";
-import { gmailClient } from "../lib"
+import { gmailClient, redisClient } from "../lib"
 import { modifyTransactionData } from "../utils/helper";
 
 
 const getTransactions = async (accessToken: string, apiQuery: string, user: User) => {
     console.log('getting from gmail api client')
+    // get from cache
+    const resultSize = await redisClient.getKey(`${user.id}:result_size`)
+    if (resultSize){
+        console.log("getting data from cache")
+        const cachedTransactions = await redisClient.getKey(`${user.id}:transactions`)
+        console.log(cachedTransactions, '=======cached')
+        if (cachedTransactions) return JSON.parse(cachedTransactions)
+    }
     const response = await gmailClient.getMessages(accessToken, apiQuery)
+    console.log(response, '=======messages')
+    // store in redis
+    const resultSizeEstimated = await redisClient.setKey(`${user.id}:result_size`, response.resultSizeEstimate.toString(), 43200)
+    if (resultSizeEstimated !== "OK") throw new Error('Error in storing resultSizeEstimated in redis')
     // find unique threadIds
-    console.log(response, '=========messages')
-    if (response.resultSizeEstimated === 0) return []
+    if (response.resultSizeEstimate === 0) return []
     if (response.messages && response.messages.length > 0){
 
         const uniqueThreadIds = [...new Set(response.messages.map((message: {id:string, threadId:string})=> message.threadId))];
@@ -31,11 +42,11 @@ const getTransactions = async (accessToken: string, apiQuery: string, user: User
         // 9. this will save in user_category_upi_mapping, category table and  update transaction models where upi_id is this.
         // 10. response comes back with category id and upi id.
         // 11. now user can see upi name and category on the transaction.
-        const modifiedResponse = modifyTransactionData(transactionData, user)
-        console.log(modifiedResponse[0], '======modified response got')
-        const entity = await Transaction.save(modifiedResponse[0])
-        console.log(entity, '=====modified entity')
-        
+        const modifiedResponse = await modifyTransactionData(transactionData, user)
+        const savedTransactions = await Transaction.save(modifiedResponse)
+        // set in redis
+        const resultSize = await redisClient.setKey(`${user.id}:transactions`, JSON.stringify(savedTransactions), 43200)
+        if (resultSize !== "OK") throw new Error('Error in storing transactions in redis')
         return transactionData
     }
 }

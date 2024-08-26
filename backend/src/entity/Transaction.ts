@@ -90,7 +90,7 @@ export class Transaction extends BaseEntity{
     user!: User
 
     @ManyToOne(()=> UserUpiDetails, (userUpiDetails) => userUpiDetails.transactions)
-    @JoinColumn([{name: "receiver_upi_id", referencedColumnName: "id"}, {name: "payee_upi_id", referencedColumnName: "upi_id"}])
+    @JoinColumn([{name: "receiver_upi_id", referencedColumnName: "upi_id"}, {name: "payee_upi_id", referencedColumnName: "upi_id"}])
     userUpiDetails!: UserUpiDetails
 
 }

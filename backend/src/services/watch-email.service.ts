@@ -35,7 +35,6 @@ const addBankEmail = async(email: string, userId: string, userInfo: {currentUser
         return res
 }
 
-
 export default {
     getAllBankEmails,
     addBankEmail

@@ -1,4 +1,4 @@
-import { BaseEntity, Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
 import { Transaction } from "./Transaction"
 import { User } from "./User"
 
@@ -39,5 +39,9 @@ export class UserUpiDetails extends BaseEntity{
     transactions!: Transaction[]
 
     @ManyToOne(()=> User, (user) => user.userUpiDetails)
+    @JoinColumn({
+        name: "user_id",
+        referencedColumnName: "id"
+    })
     user!: User
 }

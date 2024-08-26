@@ -6,7 +6,7 @@ import { HttpStatusCode } from "axios"
 const getAllBankEmails = async(req: Request, res: Response) => {
     try{
         const {body} = indexValidation.watchEmailValidations.getAllWatchEmails.parse(req)
-        const bankEmails = await services.bankEmailService.getAllBankEmails(body.userId, res.locals.userInfo)
+        const bankEmails = await services.watchEmailService.getAllBankEmails(body.userId, res.locals.userInfo)
         res.status(HttpStatusCode.Ok).json({response: bankEmails})
     }
     catch(err){
@@ -18,7 +18,7 @@ const getAllBankEmails = async(req: Request, res: Response) => {
 const addBankEmail = async (req: Request, res: Response) => {
     try{
         const {body} = indexValidation.watchEmailValidations.addWatchEmail.parse(req)
-        const bankEmail = await services.bankEmailService.addBankEmail(body.email, body.userId, res.locals.userInfo)
+        const bankEmail = await services.watchEmailService.addBankEmail(body.email, body.userId, res.locals.userInfo)
         res.status(HttpStatusCode.Ok).json(bankEmail)
     }
     catch(err){

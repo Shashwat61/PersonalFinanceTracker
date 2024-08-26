@@ -1,5 +1,5 @@
 export interface GmailMessages {
-    resultSizeEstimated: number;
+    resultSizeEstimate: number;
     messages?: {
         id: string,
         threadId: string
