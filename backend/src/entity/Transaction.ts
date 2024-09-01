@@ -1,4 +1,4 @@
-import { BaseEntity, Column, Decimal128, Double, Entity, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from "typeorm"
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from "typeorm"
 import { User } from "./User"
 import { UserUpiDetails } from "./UserUpiDetails"
 
@@ -84,6 +84,12 @@ export class Transaction extends BaseEntity{
         nullable: false
     })
     updated_at!: Date
+
+    @Column({
+        type: 'varchar',
+        nullable: false,
+    })
+    message_id!: string
 
     @ManyToOne(()=> User, (user) => user.transactions, {cascade: true})
     @JoinColumn({name: "user_id"})

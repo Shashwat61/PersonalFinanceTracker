@@ -71,21 +71,21 @@ function modifyQuery(query: {[key: string]: string}){
     return q
 }
 
- async function modifyTransactionData(transactionData: GmailThreadMessages[], user: User){
+  function modifyTransactionData(transactionData: GmailThreadMessages[], user: User){
     console.log(user, '========user')
     const transactions: Transaction[] = []
-    await Promise.all(transactionData.map(async (transaction) => {
+    transactionData.map((transaction) => {
         for (const message of transaction.messages) {
             if (message.snippet) {
-                transactions.push(await parseTransactionMessage(message, user));
+                transactions.push(parseTransactionMessage(message, user));
             }
         }
-    }));
+    });
     console.log(transactions, '=========transactions returning')
     return transactions
 }
 
-async function parseTransactionMessage(message: Message, user: User) {
+ function parseTransactionMessage(message: Message, user: User) {
     // Dear Customer, Rs. 1.00 is successfully credited to your account **8730 by VPA 8802135135@ptaxis on 25-08-24. Your UPI transaction reference number is 4238593610416. Thank you for banking with us. Warm
 
     // Dear Customer, Rs.1.00 has been debited from account **8730 to VPA 8802135135@ptaxis on 25-08-24. Your UPI transaction reference number is 460404752423. If you did not authorize this transaction,
@@ -103,30 +103,23 @@ async function parseTransactionMessage(message: Message, user: User) {
     if (accountMatch)
     transactionInstance.bank_account_number = parseInt(accountMatch[1])
 
-    const vpaMatch = message.snippet.match(/VPA ([\w@]+)/);
+    const vpaMatch = message.snippet.match(/VPA ([^\s]+)/);
     if (vpaMatch){
         // check if userupidetails is created if not then create
-        const userUpiDetails = await services.userUpiDetailsService.findOrCreate(vpaMatch[1])
+        // const userUpiDetails = await services.userUpiDetailsService.findOrCreate(vpaMatch[1])
         if(transactionInstance.transaction_type === "credit"){
-            transactionInstance.payee_upi_id = userUpiDetails.upi_id
-            transactionInstance.user = user
+            transactionInstance.payee_upi_id = vpaMatch[1]
+            transactionInstance.user_id = user.id
         }
         else{
-            transactionInstance.receiver_upi_id = userUpiDetails.upi_id
-            transactionInstance.user = user
+            transactionInstance.receiver_upi_id = vpaMatch[1]
+            transactionInstance.user_id = user.id
         }
     }
 
-
-    // Extract the date
     const dateMatch = message.snippet.match(/on (\d{2}-\d{2}-\d{2})/);
-    if (dateMatch)
-    transactionInstance.transacted_at = getDate(dateMatch[1])
-
-    // Extract the transactionInstance reference number
-    // const referenceMatch = message.snippet.match(/reference number is (\d+)/);
-    // transactionInstance.referenceNumber = referenceMatch ? referenceMatch[1] : null;
-
+    if (dateMatch) transactionInstance.transacted_at = getDate(dateMatch[1])
+    transactionInstance.message_id = message.id
     return transactionInstance;
 }
 
