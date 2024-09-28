@@ -11,14 +11,16 @@ router.use('/api', apiRoutes)
 router.get('/', authMiddleware.checkForUserSession, controllers.rootRouteController)
 
 router.get('/signin', authMiddleware.checkForUserSession, (req:Request,res:Response)=>{
-    console.log(req.url, req.route.path)
-    if (res.locals.user) res.redirect('/app')
-    res.render('signin')
+    console.log(req.url, req.route.path, 'after middleware')
+    if (res.locals.user) {
+        res.redirect('/app')
+    }
+    else res.render('signin')
 })
 
 router.get('/app', authMiddleware.checkForUserSession, (req,res)=>{
     // get the build of react and send that.
-    res.render('app')
+    res.redirect('http://localhost:5173')
 })
 
 

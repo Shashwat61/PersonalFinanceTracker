@@ -7,11 +7,12 @@ const checkForUserSession: RequestHandler = async(req: Request, res: Response, n
     try {
         const cookies = req.headers.cookie?.split(';')
         if (cookies){
-            const jwt_token = cookies?.find(cookie => cookie.includes("token"))
+            const jwt_token = cookies?.find(cookie => cookie.replace(/=.+$/, "").trim() === "token")
             if (jwt_token){
                 const [jwt_prefix, jwt_token_value] = jwt_token.split('=')
                 console.log(jwt_token_value, 'jwt token')
                 const tokenIdInfo = await getTokenIdInfo(jwt_token_value)
+                if (!tokenIdInfo) throw Error('wrong token')
                 console.log(tokenIdInfo, 'tokenidinfo')
                 const user = await User.findOneBy({email: tokenIdInfo?.getPayload()?.email})
                 if(!user) throw Error('User not found')
@@ -26,7 +27,8 @@ const checkForUserSession: RequestHandler = async(req: Request, res: Response, n
     } 
     catch (error) {
         console.log(error)
-        throw new Error(`something went wrong with message -${error}`)
+        req.url.includes("signin") ? res.render("signin") : res.redirect('/signin')
+        // throw new Error(`something went wrong with message -${(error as Error).message}`)
     }
 }
 

@@ -3,12 +3,13 @@ import { User } from "../entity/User"
 import { UserBankMapping } from "../entity/UserBankMapping"
 
 const getUserBanks = async (id: string)=> {
-    const userBankList = await UserBankMapping.find({
+    const userBankList = await User.findOne({
         where: {
-            user_id: id
+            id,
         },
+        relations: ['banks']
     })
-    return userBankList
+    return userBankList?.banks
 }
 
 const createUserBank = async (userId: string, bankId: string) => {
