@@ -17,6 +17,7 @@ router.get('/signin', authMiddleware.checkForUserSession, (req:Request,res:Respo
 })
 
 router.get('/app', authMiddleware.checkForUserSession, (req,res)=>{
+    // get the build of react and send that.
     res.render('app')
 })
 

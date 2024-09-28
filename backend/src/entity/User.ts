@@ -1,8 +1,10 @@
 import { UUID } from "crypto"
-import { BaseEntity, Column, Entity, Generated, Index, ManyToMany, OneToMany, PrimaryColumn, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm"
+import { BaseEntity, Column, Entity, Generated, Index, JoinTable, ManyToMany, OneToMany, PrimaryColumn, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm"
 import { WatchEmail } from "./WatchEmail";
 import { Transaction } from "./Transaction";
 import { UserUpiDetails } from "./UserUpiDetails";
+import { UserBankMapping } from "./UserBankMapping";
+import { Bank } from "./Bank";
 
 @Entity("user")
 export class User extends BaseEntity{
@@ -46,4 +48,18 @@ export class User extends BaseEntity{
 
     @OneToMany(()=> Transaction, (transaction) => transaction.user)
     transactions!: Transaction[]
+
+    @ManyToMany(type => Bank)
+    @JoinTable({
+        name: "user_bank_mapping",
+        joinColumn: {
+            name: "user_id",
+            referencedColumnName: "id"
+        },
+        inverseJoinColumn: {
+            name: "bank_id",
+            referencedColumnName: "id"
+        }
+    })
+    banks!: Bank[]
 }

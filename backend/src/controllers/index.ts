@@ -3,6 +3,8 @@ import services from "../services"
 import userController from "./auth.controller"
 import transactionController from "./transaction.controller"
 import watchEmailController from "./watch-email.controller"
+import bankController from "./bank.controller"
+import userBankController from "./user-bank.controller"
 
 
 const rootRouteController = (req: Request, res: Response)=> {
@@ -17,6 +19,8 @@ export default {
     rootRouteController,
     userController,
     transactionController,
-    watchEmailController
+    watchEmailController,
+    bankController,
+    userBankController
 
 }

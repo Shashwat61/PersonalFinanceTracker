@@ -12,7 +12,8 @@ const signIn = async(req: Request, res: Response)=>{
     const code = req.query.code
     const userProfileData = await services.userService.signIn(code as string, res)
     console.log('===========here in signin redirecting', userProfileData)
-    res.redirect('/')
+    // if user profile data successful, then redirect to /app
+    res.redirect('/app')
 }
 export default {
     signUp,

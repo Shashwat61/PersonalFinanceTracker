@@ -7,5 +7,6 @@ const {validate} = validationMiddleware
 const {transactionValidation} = indexValidation
 
 router.get('/', validate(transactionValidation.getTransactions),  transactionController.getTransactions)
+router.post('/save_transactions', transactionController.saveTransactions)
 
 export default router

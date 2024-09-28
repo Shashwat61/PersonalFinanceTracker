@@ -2,6 +2,8 @@ import transactionService from "./transaction.service"
 import userService from "./auth.service"
 import watchEmailService from "./watch-email.service"
 import userUpiDetailsService from "./user-upi-details.service"
+import bankService from "./bank.service"
+import userBankService from "./user-bank.service"
 
 
 const rootRouterService = () => {
@@ -13,6 +15,8 @@ export default {
     userService,
     transactionService,
     watchEmailService,
-    userUpiDetailsService
+    userUpiDetailsService,
+    bankService,
+    userBankService
 
 }

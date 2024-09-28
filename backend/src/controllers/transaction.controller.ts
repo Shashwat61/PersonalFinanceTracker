@@ -19,6 +19,19 @@ const getTransactions = async (req: Request, res: Response)=> {
     }
 }
 
+const saveTransactions = async (req: Request, res: Response)=>{
+    try {
+        const {currentUser, accessToken}: {currentUser: User, accessToken: string} = res.locals.userInfo
+        // const {transactions} = indexValidation.transactionValidation.saveTransactions.parse(req)
+        // const response = await transactionService.saveTransactions(transactions, currentUser)
+        res.status(200).json([])
+    } catch (error) {
+        console.error(error)
+        res.status(500).json(error)
+    }   
+}
+
 export default {
-    getTransactions
+    getTransactions,
+    saveTransactions
 }
