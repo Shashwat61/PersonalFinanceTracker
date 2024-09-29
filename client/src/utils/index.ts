@@ -27,3 +27,9 @@ export const sideBarList = [
     redirectLink: '/bills'
   },
 ]
+
+export function getCookie(key: string) {
+  const cookies = document.cookie.split(";")
+  const cookie = cookies.find(cookie => cookie.replace(/=.+$/, "")?.trim() === key)
+  return cookie?.split("=")[1] || ""
+}

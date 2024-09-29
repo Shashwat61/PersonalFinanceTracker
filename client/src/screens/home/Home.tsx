@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import WithLayout from '../../components/WithLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -7,18 +7,32 @@ import { Button } from '@/components/ui/button'
 import {Calendar as CalendarComponent} from '../../components/ui/calendar'
 import { Calendar, ChevronRight, CreditCard, DollarSign, Lock, TrendingDown, TrendingUp } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
+import { useUserContext } from '@/contexts/UserContext'
 
 function Home() {
   const [date, setDate] = React.useState<Date | undefined>(new Date())
-
+  const {userData, userDataLoading} = useUserContext()
+  if (!userData?.banks?.length) {
+    return (
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <h1 className="text-3xl font-bold mb-2">
+            Welcome Boss <span className="wave">👋</span>
+          </h1>
+          <p className="text-muted-foreground mb-4">You haven't added any banks yet. Add a bank to get started.</p>
+          <Button variant="outline">Add Bank</Button>
+        </CardContent>
+      </Card>
+    )
+  }
   return (
     <>
     <Card className="mb-6">
       <CardContent className="pt-6">
         <h1 className="text-3xl font-bold mb-2">
-          Welcome mafiaa <span className="wave">👋</span>
+          Welcome Boss <span className="wave">👋</span>
         </h1>
-        <p className="text-muted-foreground mb-4">This is the Central Hub for all your Home.</p>
+        {/* <p className="text-muted-foreground mb-4">This is the Central Hub for all your Home.</p> */}
         <div className="flex flex-col sm:flex-row gap-4">
           <Select>
             <SelectTrigger className="w-full sm:w-[200px]">
@@ -61,10 +75,10 @@ function Home() {
             </Select>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground mt-2 flex items-center">
+        {/* <p className="text-sm text-muted-foreground mt-2 flex items-center">
           <Lock className="h-3 w-3 mr-1" />
           Upgrade to LITE or above to unlock more time frames
-        </p>
+        </p> */}
       </CardContent>
     </Card>
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -138,7 +152,7 @@ function Home() {
         {/* Flexi Benefits */}
         <Card className="col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
-            <CardTitle>Flexi Benefits</CardTitle>
+            <CardTitle>Bills</CardTitle>
             <Button variant="ghost" size="sm">
               Manage
               <ChevronRight className="ml-2 h-4 w-4" />

@@ -8,19 +8,10 @@ type LayoutProps = {
 
 function Layout(props: LayoutProps) {
   return (
-    // <div>
-    //   <Header title="FinTrack"/>
-    // <div className="flex">
-    //     {/* sidebar */}
-    //     <Sidebar activePage='home'/>
-    //     {props.children}
-    //     {/* main */}
-    // </div>
-    // </div>
       <div className="flex h-screen bg-gray-100">
-        <Sidebar activePage={"home"} />
+        <Sidebar activePage={"dashboard"} />
         <main className="flex-1 overflow-y-auto">
-          <Header title={"FinTrack"} />
+          <Header title={""} />
           <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
             {props.children}
           </div>

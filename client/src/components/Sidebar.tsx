@@ -3,6 +3,7 @@ import { sideBarList } from '@/utils'
 import { NavLink } from 'react-router-dom'
 
 function Sidebar({activePage}: {activePage: string}) {
+  console.log(activePage)
   return (
     <aside className="w-64 bg-white shadow-md">
     <div className="p-6">
