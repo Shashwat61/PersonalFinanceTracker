@@ -1,12 +1,13 @@
-import { User } from "@/types";
+import { Bank, User } from "@/types";
 import { getCookie } from "@/utils";
 import { QUERY_STALE_TIME } from "@/utils/constants";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 
 function useUserData(){
     const queryClient = useQueryClient()
-
-    const {data: userData, isLoading: userDataLoading  } = useQuery({
+    let userBanks: Bank[] = []
+    const {data: userData, isLoading: userDataLoading, isSuccess: userDataSuccess  } = useQuery({
         queryKey: ["user"],
         queryFn:  async (): Promise<User> => {
             const response = await fetch("http://localhost:3000/api/user/me", 
@@ -18,15 +19,38 @@ function useUserData(){
             )
             return response.json()
         },
+        
         enabled: true,
         retry: false,
         staleTime: QUERY_STALE_TIME,
         throwOnError: false
     })
+    if (userDataSuccess) userBanks = userData.banks ?? []
+
+
+    const {mutate: addUserBank} = useMutation({
+        mutationFn: (data: {userId: string, bankId: string}) => {
+            return fetch("http://localhost:3000/api/banks/user", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: getCookie("token")
+                },
+                body: JSON.stringify(data)
+            })
+        },
+        onSuccess: (data, variables, context) => {
+            window.alert("User bank is added")
+            queryClient.invalidateQueries({queryKey: ['user']})
+        }
+    })
+
 
     return {
         userData,
-        userDataLoading
+        userDataLoading,
+        userBanks,
+        addUserBank
     }
 }
 export default useUserData;

@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useState } from 'react'
 import WithLayout from '../../components/WithLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -8,11 +8,24 @@ import {Calendar as CalendarComponent} from '../../components/ui/calendar'
 import { Calendar, ChevronRight, CreditCard, DollarSign, Lock, TrendingDown, TrendingUp } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
 import { useUserContext } from '@/contexts/UserContext'
+import { useBankContext } from '@/contexts/BankContext'
+import { Bank } from '@/types'
 
 function Home() {
   const [date, setDate] = React.useState<Date | undefined>(new Date())
-  const {userData, userDataLoading} = useUserContext()
-  if (!userData?.banks?.length) {
+  const {userData, userDataLoading, userBanks, addUserBank} = useUserContext()
+  const {bankSeedData} = useBankContext()
+  const [selectedBankId, setSelectedBankId] = useState<string | null>(null)
+  console.log(selectedBankId, 'selectedbank')
+  
+  
+  function handleAddUserBank(){
+    if (userData && selectedBankId){
+      addUserBank({userId: userData.id, bankId: selectedBankId})
+    }
+  }
+
+  if (!userBanks?.length) {
     return (
       <Card className="mb-6">
         <CardContent className="pt-6">
@@ -20,7 +33,23 @@ function Home() {
             Welcome Boss <span className="wave">👋</span>
           </h1>
           <p className="text-muted-foreground mb-4">You haven't added any banks yet. Add a bank to get started.</p>
-          <Button variant="outline">Add Bank</Button>
+          <CardContent className='flex gap-6 -p-6'>
+
+          <Select onValueChange={(val) => setSelectedBankId(val)}>
+            <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectValue placeholder="All Bank Branches" />
+            </SelectTrigger>
+            <SelectContent>
+            {
+              bankSeedData?.map(bank => (
+                <SelectItem key={bank.id} value={bank.id}>{bank.name}</SelectItem>
+              ))
+            }
+            </SelectContent>
+          </Select>
+          <Button onClick={handleAddUserBank} variant="outline">Add Bank</Button>
+              </CardContent>
+          <p className='text-muted-foreground pt-2'>Note: Automatic retrieval of online transactions are only valid for HDFC bank for now.</p>
         </CardContent>
       </Card>
     )
