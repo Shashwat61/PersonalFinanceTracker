@@ -5,11 +5,9 @@ import { redisClient } from "../lib";
 
 const checkApiAutheticated = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const cookies = req.headers.cookie?.split(';')
-        const jwtToken = cookies?.find(cookie => cookie.includes("token"))
-        if (!jwtToken) throw Error('JWT token not found, please sign in again')
-        const [jwt_prefix, jwt_token_value] = jwtToken.split('=')
-        const tokenIdInfo = await getTokenIdInfo(jwt_token_value)
+        const authorizationToken = req.headers.authorization
+        if(!authorizationToken) throw Error('JWT token not found, please sign in again')
+        const tokenIdInfo = await getTokenIdInfo(authorizationToken)
         console.log(tokenIdInfo, 'tokenidinfo')
         if (!tokenIdInfo || !tokenIdInfo.getPayload()) throw Error('token id not found, please sign in again')
         console.log(tokenIdInfo.getPayload()?.email!, 'hashkey')
