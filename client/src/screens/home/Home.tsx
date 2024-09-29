@@ -13,16 +13,28 @@ import { Bank } from '@/types'
 
 function Home() {
   const [date, setDate] = React.useState<Date | undefined>(new Date())
-  const {userData, userDataLoading, userBanks, addUserBank} = useUserContext()
+  const {userData, userDataLoading, userBanks, addUserBank, isUserError, userError} = useUserContext()
   const {bankSeedData} = useBankContext()
   const [selectedBankId, setSelectedBankId] = useState<string | null>(null)
-  console.log(selectedBankId, 'selectedbank')
+  console.log(selectedBankId, 'selectedbank', isUserError, userError)
   
   
   function handleAddUserBank(){
     if (userData && selectedBankId){
       addUserBank({userId: userData.id, bankId: selectedBankId})
     }
+  }
+  if (isUserError){
+    return (
+      // show some error screen with shadcn
+      <Card>
+        <CardContent className="pt-6">
+          <h1 className="text-3xl font-bold mb-2">Error</h1>
+          <p className="text-muted-foreground">There was an error fetching your data. Please try again later.</p>
+        </CardContent>
+      </Card>
+
+    )
   }
 
   if (!userBanks?.length) {
