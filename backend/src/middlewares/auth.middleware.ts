@@ -23,11 +23,15 @@ const checkForUserSession: RequestHandler = async(req: Request, res: Response, n
         }
         console.log('here in login page')
 
-        req.url.includes("signin") ? res.render("signin") : res.redirect('/signin')
+        req.url.includes("signin") ? req.query.error ? res.render("signin", {
+            error: req.query.error
+        }) : res.render("signin") : res.redirect('/signin')
     } 
     catch (error) {
         console.log(error)
-        req.url.includes("signin") ? res.render("signin") : res.redirect('/signin')
+        req.url.includes("signin") ? req.query.error ? res.render("signin", {
+            error: req.query.error
+        }) : res.render("signin") : res.redirect('/signin')
         // throw new Error(`something went wrong with message -${(error as Error).message}`)
     }
 }
