@@ -4,124 +4,47 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
-import {Calendar as CalendarComponent} from '../../components/ui/calendar'
+
 import { Calendar, ChevronRight, CreditCard, DollarSign, Lock, TrendingDown, TrendingUp } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
 import { useUserContext } from '@/contexts/UserContext'
 import { useBankContext } from '@/contexts/BankContext'
+import { PRIMARY_BANK_KEY } from '@/utils/constants'
 import { Bank } from '@/types'
+import HomeHeader from '@/components/custom/HomeHeader'
 
 function Home() {
-  const [date, setDate] = React.useState<Date | undefined>(new Date())
-  const {userData, userDataLoading, userBanks, addUserBank, isUserError, userError} = useUserContext()
+  
+  const {userData, primaryUserBank, userDataLoading, userBanks, addUserBank, addUserBankSuccess ,isUserError, userError, addUserBankPending} = useUserContext()
   const {bankSeedData} = useBankContext()
-  const [selectedBankId, setSelectedBankId] = useState<string | null>(null)
-  console.log(selectedBankId, 'selectedbank', isUserError, userError)
+  
+
+
+
   
   
-  function handleAddUserBank(){
-    if (userData && selectedBankId){
-      addUserBank({userId: userData.id, bankId: selectedBankId})
-    }
-  }
   if (isUserError){
     return (
-      // show some error screen with shadcn
       <Card>
         <CardContent className="pt-6">
           <h1 className="text-3xl font-bold mb-2">Error</h1>
           <p className="text-muted-foreground">There was an error fetching your data. Please try again later.</p>
         </CardContent>
       </Card>
-
     )
   }
 
-  if (!userBanks?.length) {
-    return (
-      <Card className="mb-6">
-        <CardContent className="pt-6">
-          <h1 className="text-3xl font-bold mb-2">
-            Welcome Boss <span className="wave">👋</span>
-          </h1>
-          <p className="text-muted-foreground mb-4">You haven't added any banks yet. Add a bank to get started.</p>
-          <CardContent className='flex gap-6 -p-6'>
-
-          <Select onValueChange={(val) => setSelectedBankId(val)}>
-            <SelectTrigger className="w-full sm:w-[200px]">
-              <SelectValue placeholder="All Bank Branches" />
-            </SelectTrigger>
-            <SelectContent>
-            {
-              bankSeedData?.map(bank => (
-                <SelectItem key={bank.id} value={bank.id}>{bank.name}</SelectItem>
-              ))
-            }
-            </SelectContent>
-          </Select>
-          <Button onClick={handleAddUserBank} variant="outline">Add Bank</Button>
-              </CardContent>
-          <p className='text-muted-foreground pt-2'>Note: Automatic retrieval of online transactions are only valid for HDFC bank for now.</p>
-        </CardContent>
-      </Card>
-    )
-  }
   return (
     <>
-    <Card className="mb-6">
-      <CardContent className="pt-6">
-        <h1 className="text-3xl font-bold mb-2">
-          Welcome Boss <span className="wave">👋</span>
-        </h1>
-        {/* <p className="text-muted-foreground mb-4">This is the Central Hub for all your Home.</p> */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Select>
-            <SelectTrigger className="w-full sm:w-[200px]">
-              <SelectValue placeholder="All Branches" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Branches</SelectItem>
-              <SelectItem value="main">Main Street</SelectItem>
-              <SelectItem value="downtown">Downtown</SelectItem>
-              <SelectItem value="suburb">Suburb</SelectItem>
-            </SelectContent>
-          </Select>
-          <div className="flex-1 flex gap-2">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full sm:w-[200px] justify-start text-left font-normal">
-                  <Calendar className="mr-2 h-4 w-4" />
-                  {date ? date.toLocaleDateString() : "Select date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <CalendarComponent
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-            <Select>
-              <SelectTrigger className="w-[120px]">
-                <SelectValue placeholder="Today" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="today">Today</SelectItem>
-                <SelectItem value="yesterday">Yesterday</SelectItem>
-                <SelectItem value="last7">Last 7 days</SelectItem>
-                <SelectItem value="last30">Last 30 days</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        {/* <p className="text-sm text-muted-foreground mt-2 flex items-center">
-          <Lock className="h-3 w-3 mr-1" />
-          Upgrade to LITE or above to unlock more time frames
-        </p> */}
-      </CardContent>
-    </Card>
+   <HomeHeader
+        userDataLoading = {userDataLoading}
+        userData = {userData}
+        addUserBank = {addUserBank}
+        userBanks = {userBanks}
+        addUserBankPending = {addUserBankPending}
+        primaryUserBank = {primaryUserBank}
+        bankSeedData={bankSeedData}
+   />
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

@@ -1,9 +1,12 @@
 import { Bank, User } from "@/types";
 import { createSingle, getSingle } from "@/utils/api";
-import { QUERY_STALE_TIME } from "@/utils/constants";
+import { PRIMARY_BANK_KEY, QUERY_STALE_TIME } from "@/utils/constants";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 function useUserData(){
+    const [primaryUserBank, setPrimaryUserBank] = useState<Bank | null>(null)
     const queryClient = useQueryClient()
     let userBanks: Bank[] = []
     const {data: userData, isLoading: userDataLoading, isSuccess: userDataSuccess, error: userError, isError: isUserError } = useQuery({
@@ -16,13 +19,27 @@ function useUserData(){
     if (userDataSuccess) userBanks = userData.banks ?? []
 
 
-    const {mutate: addUserBank} = useMutation({
+    const {mutate: addUserBank, isSuccess: addUserBankSuccess, isPending: addUserBankPending} = useMutation({
         mutationFn: (data: {userId: string, bankId: string}) => createSingle<unknown, {userId: string, bankId: string}>('/banks/user', data),
         onSuccess: (data, variables, context) => {
             queryClient.invalidateQueries({queryKey: ['user']})
+            toast.success("Added Bank Successfully")
         }
     })
 
+    useEffect(()=>{
+        if (userData?.banks?.length){
+            // store the first bank in local storage as the primary bank
+            if (!localStorage.getItem(PRIMARY_BANK_KEY)){
+                localStorage.setItem(PRIMARY_BANK_KEY, userData.banks[0].id)
+            }else{
+                const primaryBankId = localStorage.getItem(PRIMARY_BANK_KEY)
+                const primaryBank = userData.banks.find(bank => bank.id === primaryBankId)
+                setPrimaryUserBank(primaryBank ?? null)
+            }
+            
+        }
+    },[userData])
 
     return {
         userData,
@@ -30,7 +47,11 @@ function useUserData(){
         userBanks,
         addUserBank,
         userError,
-        isUserError
+        isUserError,
+        primaryUserBank,
+        setPrimaryUserBank,
+        addUserBankSuccess,
+        addUserBankPending
     }
 }
 export default useUserData;
