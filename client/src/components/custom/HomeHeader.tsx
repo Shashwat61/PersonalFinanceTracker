@@ -5,9 +5,8 @@ import { Button } from '../ui/button'
 import { PRIMARY_BANK_KEY } from '@/utils/constants'
 import { Bank, User } from '@/types'
 import { UseMutateFunction } from '@tanstack/react-query'
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
-import { Calendar as CalendarComponent } from '../../components/ui/calendar'
-import { Calendar } from 'lucide-react'
+import DatePicker from './DatePicker'
+import BankSelect from './BankSelector'
 
 interface HomeHeaderProps {
   addUserBank: UseMutateFunction<unknown, Error, { userId: string; bankId: string }, unknown>;
@@ -18,38 +17,6 @@ interface HomeHeaderProps {
   primaryUserBank?: Bank | null
   bankSeedData: Bank[] | undefined
 }
-
-const BankSelect = ({ banks, onChange, placeholder }: { banks: Bank[] | undefined, onChange: (val: string) => void, placeholder: string }) => (
-  <Select onValueChange={onChange}>
-    <SelectTrigger className="w-full sm:w-[200px]">
-      <SelectValue placeholder={placeholder} />
-    </SelectTrigger>
-    <SelectContent>
-      {banks?.map(bank => (
-        <SelectItem key={bank.id} value={bank.id}>{bank.name}</SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
-);
-
-const DatePicker = ({ date, setDate }: { date: Date | undefined, setDate: (date: Date | undefined) => void }) => (
-  <Popover>
-    <PopoverTrigger asChild>
-      <Button variant="outline" className="w-full sm:w-[200px] justify-start text-left font-normal">
-        <Calendar className="mr-2 h-4 w-4" />
-        {date ? date.toLocaleDateString() : "Select date"}
-      </Button>
-    </PopoverTrigger>
-    <PopoverContent className="w-auto p-0" align="start">
-      <CalendarComponent
-        mode="single"
-        selected={date}
-        onSelect={setDate}
-        initialFocus
-      />
-    </PopoverContent>
-  </Popover>
-);
 
 function HomeHeader({ addUserBank, userBanks, bankSeedData, addUserBankPending, userData, userDataLoading, primaryUserBank }: HomeHeaderProps) {
   const [selectedBankId, setSelectedBankId] = useState<string | null>(null)

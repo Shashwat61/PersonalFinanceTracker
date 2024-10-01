@@ -1,5 +1,5 @@
-import { Bank, User } from "@/types";
-import { createSingle, getSingle } from "@/utils/api";
+import { Bank, Transaction, User } from "@/types";
+import { createSingle, getMany, getSingle } from "@/utils/api";
 import { PRIMARY_BANK_KEY, QUERY_STALE_TIME } from "@/utils/constants";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -9,6 +9,7 @@ function useUserData(){
     const [primaryUserBank, setPrimaryUserBank] = useState<Bank | null>(null)
     const queryClient = useQueryClient()
     let userBanks: Bank[] = []
+
     const {data: userData, isLoading: userDataLoading, isSuccess: userDataSuccess, error: userError, isError: isUserError } = useQuery({
         queryKey: ["user"],
         queryFn:  () => getSingle<User>('/user/me'),
@@ -25,6 +26,14 @@ function useUserData(){
             queryClient.invalidateQueries({queryKey: ['user']})
             toast.success("Added Bank Successfully")
         }
+    })
+
+    const {data: userTransactions, isLoading: userTransactionsLoading, isSuccess: userTransactionsSuccess} = useQuery({
+        queryKey: ["transactions"],
+        queryFn: () => getMany<Transaction[]>(`/transactions/v1?after=2024-10-01&before=2024-10-02&bankId=${primaryUserBank?.id}&from=${primaryUserBank?.listener_email}`),
+        enabled: !!userData?.id && !!primaryUserBank?.listener_email,
+        retry: false,
+        staleTime: QUERY_STALE_TIME
     })
 
     useEffect(()=>{
@@ -51,7 +60,10 @@ function useUserData(){
         primaryUserBank,
         setPrimaryUserBank,
         addUserBankSuccess,
-        addUserBankPending
+        addUserBankPending,
+        userTransactions,
+        userTransactionsLoading,
+        userTransactionsSuccess
     }
 }
 export default useUserData;
