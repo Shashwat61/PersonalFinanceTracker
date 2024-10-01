@@ -6,6 +6,8 @@ import { Transaction } from "../entity/Transaction";
 import { User } from "../entity/User";
 import { UserUpiDetails } from "../entity/UserUpiDetails";
 import services from "../services";
+import { UserBankMapping } from "../entity/UserBankMapping";
+import { Between } from "typeorm";
 
 function oAuth2ClientInstance(){
     return new OAuth2Client(
@@ -69,6 +71,44 @@ function modifyQuery(query: {[key: string]: string}){
         }
     }
     return q
+}
+
+async function modifyTransactionDataVersionOne(transactionData: GmailThreadMessages[], user: User, apiQuery: {[key: string]: string}, bankId: string){
+    const transactions: Transaction[] = []
+    const {after, before} = apiQuery
+    const userBankMapping = await UserBankMapping.findOne({
+        where: {
+            user_id: user.id,
+            bank_id: bankId
+        }
+    })
+    if(!userBankMapping){
+        throw new Error('User bank mapping not found')
+    }
+    // get transactions of with date after from db
+    const dbSavedTransactions = await Transaction.find({
+        where: {
+            user_id: user.id,
+            user_bank_mapping_id: userBankMapping.id,
+            transacted_at: Between(new Date(after), new Date(before))
+        }
+    })
+
+
+    transactionData.map((transaction, i)=>{
+        for(const message of transaction.messages){
+            if (message.snippet){
+                const foundSavedTransaction = dbSavedTransactions.find(t => t.message_id == message.id)
+                if(foundSavedTransaction){
+                    transactions.push(foundSavedTransaction)
+                }
+                else{
+                    transactions.push(parseTransactionMessage(message, user));
+                }
+            }
+        }
+    })
+    return transactions
 }
 
   function modifyTransactionData(transactionData: GmailThreadMessages[], user: User){
@@ -138,5 +178,6 @@ export {
     getTokenIdInfo,
     oAuth2ClientInstance,
     modifyQuery,
-    modifyTransactionData
+    modifyTransactionData,
+    modifyTransactionDataVersionOne
 }

@@ -1,4 +1,5 @@
-import { BaseEntity, Column, Entity, Index, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm"
+import { BaseEntity, Column, Entity, Index, OneToMany, PrimaryGeneratedColumn,  Unique, UpdateDateColumn } from "typeorm"
+import { Transaction } from "./Transaction"
 
 @Entity("user_bank_mapping")
 @Index(["user_id", "bank_id"], {unique: true})
@@ -31,5 +32,9 @@ export class UserBankMapping extends BaseEntity {
         default: 'now()',
         nullable: false
     })
-    updated_at!: Date    
+    updated_at!: Date
+
+
+    @OneToMany(()=> Transaction, (transaction)=> transaction.userBankMapping)
+    transactions!: Transaction[]
 }

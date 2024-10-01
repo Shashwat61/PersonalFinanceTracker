@@ -1,6 +1,7 @@
 import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from "typeorm"
 import { User } from "./User"
 import { UserUpiDetails } from "./UserUpiDetails"
+import { UserBankMapping } from "./UserBankMapping"
 
 @Entity("transaction")
 export class Transaction extends BaseEntity{
@@ -65,6 +66,13 @@ export class Transaction extends BaseEntity{
     user_id!: string
 
     @Column({
+        type: 'uuid',
+        name: "user_bank_mapping_id",
+        nullable: false
+    })
+    user_bank_mapping_id!: string
+
+    @Column({
         type: 'date',
         nullable: false
     })
@@ -98,5 +106,9 @@ export class Transaction extends BaseEntity{
     @ManyToOne(()=> UserUpiDetails, (userUpiDetails) => userUpiDetails.transactions)
     @JoinColumn([{name: "receiver_upi_id", referencedColumnName: "upi_id"}, {name: "payee_upi_id", referencedColumnName: "upi_id"}])
     userUpiDetails!: UserUpiDetails
+
+    @ManyToOne(() => UserBankMapping, (userBankMapping) => userBankMapping.transactions, { cascade: true })
+    @JoinColumn({ name: "user_bank_mapping_id" })
+    userBankMapping!: UserBankMapping;
 
 }

@@ -8,6 +8,15 @@ const getTransactions = z.object({
     })
 })
 
+const getTransactionsVersionOne = z.object({
+    query: z.object({
+        bankId: z.string(),
+        after: z.string(),
+        before: z.string(),
+        from: z.string()
+    })
+})
+
 const saveTransactions = z.object({
     // transactions: z.array<>({
     //     messageId: z.string(),
@@ -19,5 +28,6 @@ const saveTransactions = z.object({
 })
 export default {
     getTransactions,
-    saveTransactions
+    saveTransactions,
+    getTransactionsVersionOne
 }
