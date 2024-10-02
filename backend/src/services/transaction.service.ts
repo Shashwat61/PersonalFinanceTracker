@@ -154,14 +154,63 @@ const getTransactionsVersionOne = async(access_token: string, apiQuery: {[key:st
     const modifiedQuery = modifyQuery(apiQuery)
     const gmailMessages = await gmailClient.getMessages(access_token, modifiedQuery);
     if (gmailMessages.resultSizeEstimate === 0) return []
-    const stored = await redisClient.setKey(`${user.id}_resultSizeEstimate`, gmailMessages.resultSizeEstimate.toString(), 86400)
-    if (stored !== "OK") throw new Error('Error in storing resultSizeEstimation in redis')
-    // finding unique threadIds from response
-    const uniqueThreadIds = [...new Set(gmailMessages.messages?.map(message => message.threadId))]
-    const gmailThreadMessages = uniqueThreadIds.map(threadId => gmailClient.getEmailsFromThreads(threadId, access_token))
-    const transactionData = await Promise.all(gmailThreadMessages)
-    const modifiedResponse  = await modifyTransactionDataVersionOne(transactionData, user, apiQuery, bankId)
-    return modifiedResponse;
+    const userCachedResultSizeEstimation = await redisClient.getKey(`${user.id}_resultSizeEstimate`)
+    if (userCachedResultSizeEstimation){
+        if ((Number(userCachedResultSizeEstimation) < gmailMessages.resultSizeEstimate) && gmailMessages.messages){
+            const difference = gmailMessages.resultSizeEstimate - Number(userCachedResultSizeEstimation)
+            const slicedMessages = gmailMessages.messages.slice(0, difference)
+            const uniqueThreadIds = [...new Set(slicedMessages.map(msg => msg.threadId))]
+            const threadIdCount = new Map()
+            slicedMessages.forEach(message=> {
+                if(threadIdCount.has(message.threadId)){
+                    threadIdCount.set(message.threadId, threadIdCount.get(message.threadId)+1)
+                }
+                else {
+                    threadIdCount.set(message.threadId, 1)
+                }
+            })
+            const userCachedTransactions = await redisClient.getKey(`${user.id}_${modifiedQuery}`)
+            if (userCachedTransactions){
+                const slicedThreadMessages: GmailThreadMessages[] = []
+                const gmailThreadMessages = uniqueThreadIds.map(async threadId => {
+                    const messages = await gmailClient.getEmailsFromThreads(threadId, access_token)
+                    const slicedMessages = messages.messages.slice(-threadIdCount.get(threadId)).reverse()
+                    slicedThreadMessages.push({historyId: messages.historyId, id: messages.id, messages: slicedMessages})
+                })
+                await Promise.all(gmailThreadMessages)
+                const modifiedDummyTransactions = await modifyTransactionDataVersionOne(slicedThreadMessages, user, apiQuery, bankId)
+                const updatedTransactions = [...modifiedDummyTransactions, ...JSON.parse(userCachedTransactions)]
+                const stored = await redisClient.setKey(`${user.id}_${modifiedQuery}`, JSON.stringify(updatedTransactions), 86400)
+                if (stored !== "OK") throw new Error('Error in storing transactions in redis')
+                const storedResultSizeEstimation = await redisClient.setKey(`${user.id}_resultSizeEstimate`, gmailMessages.resultSizeEstimate.toString(), 86400)
+                if (storedResultSizeEstimation !== "OK") throw new Error('Error in storing resultSizeEstimation in redis')
+                return updatedTransactions
+            }
+            else {
+                const gmailThreadMessages = uniqueThreadIds.map(threadId => gmailClient.getEmailsFromThreads(threadId, access_token))
+                const transactionData = await Promise.all(gmailThreadMessages)
+                const modifiedResponse  = await modifyTransactionDataVersionOne(transactionData, user, apiQuery, bankId)
+                const stored = await redisClient.setKey(`${user.id}_${modifiedQuery}`, JSON.stringify(modifiedResponse), 86400)
+                if (stored !== "OK") throw new Error('Error in storing transactions in redis')
+                const storedResultSizeEstimation = await redisClient.setKey(`${user.id}_resultSizeEstimate`, gmailMessages.resultSizeEstimate.toString(), 86400)
+                if (storedResultSizeEstimation !== "OK") throw new Error('Error in storing resultSizeEstimation in redis')
+                return modifiedResponse;
+            }
+        }
+    }
+    else{
+
+        const stored = await redisClient.setKey(`${user.id}_resultSizeEstimate`, gmailMessages.resultSizeEstimate.toString(), 86400)
+        if (stored !== "OK") throw new Error('Error in storing resultSizeEstimation in redis')
+        // finding unique threadIds from response
+        const uniqueThreadIds = [...new Set(gmailMessages.messages?.map(message => message.threadId))]
+        const gmailThreadMessages = uniqueThreadIds.map(threadId => gmailClient.getEmailsFromThreads(threadId, access_token))
+        const transactionData = await Promise.all(gmailThreadMessages)
+        const modifiedResponse  = await modifyTransactionDataVersionOne(transactionData, user, apiQuery, bankId)
+        const storedTransactions = await redisClient.setKey(`${user.id}_${modifiedQuery}`, JSON.stringify(modifiedResponse), 86400)
+        if (storedTransactions !== "OK") throw new Error('Error in storing transactions in redis')
+        return modifiedResponse;
+    }
 }
 
 
