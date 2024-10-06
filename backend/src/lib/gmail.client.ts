@@ -4,7 +4,7 @@ import RequestManager from "./request-manager.lib";
 class GmailClient{
     private static _instance: GmailClient;
     private requestManager: RequestManager;
-    private  _limit = 20;
+    private _limit = 50; // fixed this as this would mean less gmail api calls
     private constructor(){
         this.requestManager = new RequestManager(process?.env?.GMAIL_API_ENDPOINT_URL!)
     }

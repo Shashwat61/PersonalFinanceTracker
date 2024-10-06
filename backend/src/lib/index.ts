@@ -1,5 +1,5 @@
-import {redisClient} from "./redis.lib";
-import { gmailClient } from "./gmail.lib";
+import {redisClient} from "./redis.client";
+import { gmailClient } from "./gmail.client";
 export {
     redisClient,
     gmailClient
