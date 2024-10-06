@@ -13,7 +13,19 @@ const getTransactionsVersionOne = z.object({
         bankId: z.string(),
         after: z.string(),
         before: z.string(),
-        from: z.string()
+        from: z.string(),
+        trackedId: z.string().optional(),
+        limit: z.string().refine(
+            (val: string) => {
+                if (Number(val) > 100) {
+                    throw new Error('Limit should be less than 100')
+                }
+                else if(Number(val) < 10){
+                    throw new Error('Limit should be greater than 10')
+                }
+                return true
+            },
+        )
     })
 })
 

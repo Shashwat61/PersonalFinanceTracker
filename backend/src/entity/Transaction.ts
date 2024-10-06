@@ -1,11 +1,11 @@
-import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from "typeorm"
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
 import { User } from "./User"
 import { UserUpiDetails } from "./UserUpiDetails"
 import { UserBankMapping } from "./UserBankMapping"
 
 @Entity("transaction")
 export class Transaction extends BaseEntity{
-    @PrimaryColumn("uuid")
+    @PrimaryGeneratedColumn("uuid")
     id!: string
 
     @Column({
@@ -98,6 +98,12 @@ export class Transaction extends BaseEntity{
         nullable: false,
     })
     message_id!: string
+
+    @Column({
+        type: 'integer',
+        nullable: false,
+    })
+    sequence!: number
 
     @ManyToOne(()=> User, (user) => user.transactions, {cascade: true})
     @JoinColumn({name: "user_id"})

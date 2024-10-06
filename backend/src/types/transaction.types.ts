@@ -1,10 +1,12 @@
 export interface GmailMessages {
     resultSizeEstimate: number;
-    messages?: {
-        id: string,
-        threadId: string
-    }[]
+    messages?: GmailMessage[]
     nextPageToken?: string;
+}
+
+export interface GmailMessage {
+    id: string;
+    threadId: string;
 }
 
 export interface GmailThreadMessages{
@@ -47,4 +49,14 @@ export interface Message{
     mimeType: string;
     headers: Header[];
     body: Body;
+  }
+
+
+  export interface TransactionParams{
+    bankId: string,
+    after: string,
+    before: string,
+    from: string,
+    trackedId?: string | undefined,
+    limit: string
   }

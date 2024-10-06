@@ -15,9 +15,10 @@ class GmailClient{
         }
         return GmailClient._instance
     }
-    async getMessages(accessToken: string, query: string){
+    async getMessages(accessToken: string, query: string, pageToken?: string){
         console.log('getting emails')
-        const response = await this.requestManager.client.get<GmailMessages>(`/me/messages?maxResults=${this._limit}&${query}`, {
+        const queries = pageToken ? `maxResults=${this._limit}&${query}&pageToken=${pageToken}` : `maxResults=${this._limit}&${query}`
+        const response = await this.requestManager.client.get<GmailMessages>(`/me/messages?${queries}`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`
             }

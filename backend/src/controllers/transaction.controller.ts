@@ -33,10 +33,10 @@ const saveTransactions = async (req: Request, res: Response)=>{
 
 const getTransactionsVersionOne = async(req: Request, res: Response) => {
     try {
-        const {currentUser, accessToken}: {currentUser: User, accessToken: string} = res.locals.userInfo
-        const {query} = indexValidation.transactionValidation.getTransactionsVersionOne.parse(req)
-        const response = await transactionService.getTransactionsVersionOne(accessToken, query, currentUser)
-        res.status(200).json(response)
+        // const {currentUser, accessToken}: {currentUser: User, accessToken: string} = res.locals.userInfo
+        // const {query} = indexValidation.transactionValidation.getTransactionsVersionOne.parse(req)
+        // const response = await transactionService.getTransactionsVersionOne(accessToken, query, currentUser)
+        // res.status(200).json(response)
     } catch (error) {
         console.log(error)
         res.status(500).json(error)

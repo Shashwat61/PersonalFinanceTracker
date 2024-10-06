@@ -1,7 +1,7 @@
 import { OAuth2Client, TokenPayload } from "google-auth-library";
 import { userProfileData } from "../types/auth.types";
 import { CookieOptions, Response } from "express";
-import { GmailThreadMessages, Message } from "../types/transaction.types";
+import { GmailThreadMessages, Message, TransactionParams } from "../types/transaction.types";
 import { Transaction } from "../entity/Transaction";
 import { User } from "../entity/User";
 import { UserUpiDetails } from "../entity/UserUpiDetails";
@@ -62,7 +62,7 @@ async function getTokenIdInfo(token_id: string){
         
     }
 }
-function modifyQuery(query: {[key: string]: string}){
+function modifyQuery(query: {[key:string]: string}){
     let q = "q=";
     for(const key in query){
         if(query[key]){
@@ -73,59 +73,9 @@ function modifyQuery(query: {[key: string]: string}){
     return q
 }
 
-// async function modifyTransactionDataVersionOne(transactionData: GmailThreadMessages[], user: User, apiQuery: {[key: string]: string}, bankId: string){
-//     const transactions: Transaction[] = []
-//     const {after, before} = apiQuery
-//     const userBankMapping = await UserBankMapping.findOne({
-//         where: {
-//             user_id: user.id,
-//             bank_id: bankId
-//         }
-//     })
-//     if(!userBankMapping){
-//         throw new Error('User bank mapping not found')
-//     }
-//     // get transactions of with date after from db
-//     const dbSavedTransactions = await Transaction.find({
-//         where: {
-//             user_id: user.id,
-//             user_bank_mapping_id: userBankMapping.id,
-//             transacted_at: Between(new Date(after), new Date(before))
-//         }
-//     })
 
 
-//     transactionData.map((transaction, i)=>{
-//         for(const message of transaction.messages){
-//             if (message.snippet){
-//                 const foundSavedTransaction = dbSavedTransactions.find(t => t.message_id == message.id)
-//                 if(foundSavedTransaction){
-//                     transactions.push(foundSavedTransaction)
-//                 }
-//                 else{
-//                     transactions.push(parseTransactionMessage(message, user));
-//                 }
-//             }
-//         }
-//     })
-//     return transactions
-// }
-
-//   function modifyTransactionData(transactionData: GmailThreadMessages[], user: User){
-//     console.log(user, '========user')
-//     const transactions: Transaction[] = []
-//     transactionData.map((transaction) => {
-//         for (const message of transaction.messages) {
-//             if (message.snippet) {
-//                 transactions.push(parseTransactionMessage(message, user));
-//             }
-//         }
-//     });
-//     console.log(transactions, '=========transactions returning')
-//     return transactions
-// }
-
- function parseTransactionMessage(message: Message, userBankMapping: UserBankMapping){
+ function parseTransactionMessage(message: Message, userBankMapping: UserBankMapping, userUpiDetails: string[]){
     // Dear Customer, Rs. 1.00 is successfully credited to your account **8730 by VPA 8802135135@ptaxis on 25-08-24. Your UPI transaction reference number is 4238593610416. Thank you for banking with us. Warm
 
     // Dear Customer, Rs.1.00 has been debited from account **8730 to VPA 8802135135@ptaxis on 25-08-24. Your UPI transaction reference number is 460404752423. If you did not authorize this transaction,
@@ -145,8 +95,9 @@ function modifyQuery(query: {[key: string]: string}){
 
     const vpaMatch = message.snippet.match(/VPA ([^\s]+)/);
     if (vpaMatch){
-        // check if userupidetails is created if not then create
-        // const userUpiDetails = await services.userUpiDetailsService.findOrCreate(vpaMatch[1])
+        // change this, this should not be here
+         userUpiDetails.push(vpaMatch[1])
+
         if(transactionInstance.transaction_type === "credit"){
             transactionInstance.payee_upi_id = vpaMatch[1]
             transactionInstance.user_id = userBankMapping.user_id
@@ -164,16 +115,17 @@ function modifyQuery(query: {[key: string]: string}){
     return transactionInstance;
 }
 
- function modifyTransactionDataVersionTwo(transactionData: GmailThreadMessages[], userBankMapping: UserBankMapping){
+ function modifyTransactionDataVersionTwo(transactionData: GmailThreadMessages[], userBankMapping: UserBankMapping): [Transaction[], string[]]{
     const transactions: Transaction[] = []
+    const userUpiDetails: string[] = []
     transactionData.map(t=> {
         for(const message of t.messages){
             if(message.snippet){
-                transactions.push(parseTransactionMessage(message, userBankMapping))
+                transactions.push(parseTransactionMessage(message, userBankMapping, userUpiDetails))
             }
         }
     })
-    return transactions
+    return [transactions, [...new Set(userUpiDetails)]]
 }
 
 function getDate(date:string){
