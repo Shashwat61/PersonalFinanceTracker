@@ -120,7 +120,7 @@ function modifyQuery(query: {[key:string]: string}){
     const userUpiDetails: string[] = []
     transactionData.map(t=> {
         for(const message of t.messages){
-            if(message.snippet){
+            if(message.snippet && (message.snippet.includes("credited") || message.snippet.includes("debited"))){
                 transactions.push(parseTransactionMessage(message, userBankMapping, userUpiDetails))
             }
         }

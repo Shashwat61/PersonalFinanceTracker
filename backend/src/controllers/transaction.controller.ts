@@ -4,21 +4,6 @@ import indexValidation from "../validations/index.validation"
 import { modifyQuery } from "../utils/helper"
 import { User } from "../entity/User"
 
-const getTransactions = async (req: Request, res: Response)=> {
-    try {
-        console.log('getting transactions')
-        const {currentUser, accessToken}: {currentUser: User, accessToken: string} = res.locals.userInfo
-        const {query} = indexValidation.transactionValidation.getTransactions.parse(req)
-        const modifiedQuery = modifyQuery(query)
-        const response = await transactionService.getTransactions(accessToken, modifiedQuery, currentUser)
-        console.log(response, 'response got in controller')
-        res.status(200).json(response)
-    } catch (error) {
-        console.error(error)
-        res.status(500).json(error) 
-    }
-}
-
 const saveTransactions = async (req: Request, res: Response)=>{
     try {
         const {currentUser, accessToken}: {currentUser: User, accessToken: string} = res.locals.userInfo
@@ -31,17 +16,6 @@ const saveTransactions = async (req: Request, res: Response)=>{
     }   
 }
 
-const getTransactionsVersionOne = async(req: Request, res: Response) => {
-    try {
-        // const {currentUser, accessToken}: {currentUser: User, accessToken: string} = res.locals.userInfo
-        // const {query} = indexValidation.transactionValidation.getTransactionsVersionOne.parse(req)
-        // const response = await transactionService.getTransactionsVersionOne(accessToken, query, currentUser)
-        // res.status(200).json(response)
-    } catch (error) {
-        console.log(error)
-        res.status(500).json(error)
-    }
-}
 
 const getTransactionsVersionTwo = async(req: Request, res:Response)=>{
     try {
@@ -56,8 +30,6 @@ const getTransactionsVersionTwo = async(req: Request, res:Response)=>{
 }
 
 export default {
-    getTransactions,
     saveTransactions,
-    getTransactionsVersionOne,
     getTransactionsVersionTwo
 }
