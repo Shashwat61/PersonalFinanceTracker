@@ -30,7 +30,7 @@ function useUserData(){
 
     const {data: userTransactions, isLoading: userTransactionsLoading, isSuccess: userTransactionsSuccess} = useQuery({
         queryKey: ["transactions"],
-        queryFn: () => getMany<Transaction[]>(`/transactions/v1?after=2024-10-01&before=2024-10-02&bankId=${primaryUserBank?.id}&from=${primaryUserBank?.listener_email}`),
+        queryFn: () => getMany<Transaction[]>(`/transactions/v2?after=2024-10-06&before=2024-10-07&bankId=${primaryUserBank?.id}&from=${primaryUserBank?.listener_email}&limit=${10}`),
         enabled: !!userData?.id && !!primaryUserBank?.listener_email,
         retry: false,
         staleTime: QUERY_STALE_TIME

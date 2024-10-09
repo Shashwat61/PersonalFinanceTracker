@@ -16,18 +16,18 @@ export interface Bank{
 }
 
 export interface Transaction{
-    id?: string
+    id: string
     amount: number
-    payee_upi_id: string
-    receiver_upi_id: string
+    payee_upi_id?: string
+    receiver_upi_id?: string
     category_id?: string
-    bank_account_number: number
+    bank_account_number?: number
     transaction_metadata_id?: string
     transaction_type: string
     user_id?: string
     user_bank_mapping_id?: string
-    transacted_at: Date
-    created_at: Date
-    updated_at: Date
+    transacted_at: string
+    created_at: string
+    updated_at: string
     message_id: string
 }
