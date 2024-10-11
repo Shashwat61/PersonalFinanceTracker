@@ -31,3 +31,20 @@ export interface Transaction{
     updated_at: string
     message_id: string
 }
+
+export type DefaultGetManyParams = {
+    filters?: Filter;
+    // sort?: Sort;
+    dates?: DateRangeValue;
+    id?: string;
+  };
+
+export type Filter = {
+    from: string
+    limit: number
+}
+
+export type DateRangeValue = {
+    after: string
+    before: string
+}

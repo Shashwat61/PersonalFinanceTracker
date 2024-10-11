@@ -33,3 +33,14 @@ export function getCookie(key: string) {
   const cookie = cookies.find(cookie => cookie.replace(/=.+$/, "")?.trim() === key)
   return cookie?.split("=")[1] || ""
 }
+
+export function appendParamsInUrl(...args: Record<string, any>[]){
+  console.log(args)
+  const urlSearchParams = new URLSearchParams()
+  args.forEach((arg)=>{
+    for(const key in arg){
+      urlSearchParams.append(key, arg[key].toString())
+    }
+  })
+  return urlSearchParams
+}

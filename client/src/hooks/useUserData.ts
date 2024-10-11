@@ -1,15 +1,19 @@
-import { Bank, Transaction, User } from "@/types";
+import { Bank, DefaultGetManyParams, Transaction, User } from "@/types";
 import { createSingle, getMany, getSingle } from "@/utils/api";
 import { PRIMARY_BANK_KEY, QUERY_STALE_TIME } from "@/utils/constants";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import useFilters from "./useFilters";
 
 function useUserData(){
     const [primaryUserBank, setPrimaryUserBank] = useState<Bank | null>(null)
+    const {selectedDate, setSelectedDate} = useFilters()
+    console.log(selectedDate, 'selectedDate')
     const queryClient = useQueryClient()
     let userBanks: Bank[] = []
-
+    console.log(primaryUserBank, 'primaryuserbank')
+    
     const {data: userData, isLoading: userDataLoading, isSuccess: userDataSuccess, error: userError, isError: isUserError } = useQuery({
         queryKey: ["user"],
         queryFn:  () => getSingle<User>('/user/me'),
@@ -18,7 +22,8 @@ function useUserData(){
         staleTime: QUERY_STALE_TIME
     })
     if (userDataSuccess) userBanks = userData.banks ?? []
-
+    console.log(!!userData?.id && !!primaryUserBank?.listener_email)
+    
 
     const {mutate: addUserBank, isSuccess: addUserBankSuccess, isPending: addUserBankPending} = useMutation({
         mutationFn: (data: {userId: string, bankId: string}) => createSingle<unknown, {userId: string, bankId: string}>('/banks/user', data),
@@ -29,8 +34,19 @@ function useUserData(){
     })
 
     const {data: userTransactions, isLoading: userTransactionsLoading, isSuccess: userTransactionsSuccess} = useQuery({
-        queryKey: ["transactions"],
-        queryFn: () => getMany<Transaction[]>(`/transactions/v2?after=2024-10-06&before=2024-10-07&bankId=${primaryUserBank?.id}&from=${primaryUserBank?.listener_email}&limit=${10}`),
+        queryKey: ["transactions", userData?.id, primaryUserBank?.id],
+        // after=2024-10-06&before=2024-10-07&bankId=${primaryUserBank?.id}&from=${primaryUserBank?.listener_email}&limit=${10}
+        queryFn: () => getMany<Transaction[], DefaultGetManyParams>(`/transactions/v2`, {
+            filters: {
+                from: primaryUserBank!.listener_email!,
+                limit: 10
+            },
+            dates: {
+                after: selectedDate.toISOString(),
+                before: new Date(selectedDate.getTime() + 24 * 60 * 60 * 1000).toISOString(),
+            },
+            id: primaryUserBank!.id,
+        }),
         enabled: !!userData?.id && !!primaryUserBank?.listener_email,
         retry: false,
         staleTime: QUERY_STALE_TIME
@@ -63,7 +79,9 @@ function useUserData(){
         addUserBankPending,
         userTransactions,
         userTransactionsLoading,
-        userTransactionsSuccess
+        userTransactionsSuccess,
+        selectedDate,
+        setSelectedDate
     }
 }
 export default useUserData;

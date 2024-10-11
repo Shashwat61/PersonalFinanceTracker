@@ -13,13 +13,20 @@ import { PRIMARY_BANK_KEY } from '@/utils/constants'
 import { Bank } from '@/types'
 import HomeHeader from '@/components/custom/HomeHeader'
 import HomeAnalytics from '@/components/custom/HomeAnalytics'
+import { useQueries, useQueryClient } from '@tanstack/react-query'
 
 function Home() {
   
-  const {userData, primaryUserBank, userDataLoading, userBanks, addUserBank, addUserBankSuccess ,isUserError, userError, addUserBankPending, userTransactions, userTransactionsLoading, userTransactionsSuccess} = useUserContext()
+  const {userData, primaryUserBank, userDataLoading, userBanks, addUserBank, addUserBankSuccess ,isUserError, userError, addUserBankPending, userTransactions, userTransactionsLoading, userTransactionsSuccess, setPrimaryUserBank, setSelectedDate, selectedDate} = useUserContext()
   const {bankSeedData} = useBankContext()
+  const queryClient = useQueryClient()
   
-
+  function handleSelectDate(val:Date){
+    setSelectedDate(val)
+    queryClient.invalidateQueries({
+      queryKey: ["transactions", userData?.id, primaryUserBank?.id]
+    })
+  }
 
 
   
@@ -50,6 +57,8 @@ function Home() {
           addUserBankPending = {addUserBankPending}
           primaryUserBank = {primaryUserBank}
           bankSeedData={bankSeedData}
+          setSelectedDate= {handleSelectDate}
+          selectedDate = {selectedDate}
      />
      <HomeAnalytics recentTransactions={userTransactions || []} userTransactionsLoading = {userTransactionsLoading}/>
       

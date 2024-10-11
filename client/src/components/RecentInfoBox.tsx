@@ -28,7 +28,6 @@ function RecentInfoBox({title, subtitle, recentListLimit, recentData, ComponentT
         </CardHeader>
             <CardContent>
             <div className="space-y-4">
-                
                 {recentData.length > 0 ? (
                     recentData.slice(0,recentListLimit).map((data, i)=> (
                         <ComponentToRender key={i} data={data}/>
