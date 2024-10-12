@@ -38,7 +38,7 @@ function TransactionSlab({ transaction, onEdit }: TransactionSlabProps) {
                 {!isTransactionDebit ? '+' : ''}₹{Math.abs(transaction.amount).toFixed(2)}
               </span>
               <Badge variant="outline" className="mt-1">
-                {transaction?.transaction_type}
+                {"Category"}
               </Badge>
             </div>
           </div>

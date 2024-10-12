@@ -14,8 +14,12 @@ export function getMany<R, D extends DefaultGetManyParams>(path:string, params: 
         return apiManager.client.get<R>(`${pathString}?${queryParams.toString()}`)
     }
     return apiManager.client.get<R>(pathString)
-    
 }
+
+export function getManyWithoutParams<R>(path: string){
+    return apiManager.client.get<R>(path)
+}
+
 export function updateSingle<R, D>(path: string, params: D) {
     return apiManager.client.put<R>(path, params);
   };

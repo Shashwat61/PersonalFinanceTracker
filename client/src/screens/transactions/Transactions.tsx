@@ -15,6 +15,10 @@ import useDebounce from '@/hooks/useDebounce'
 import useTransactions from '@/hooks/useTransactions'
 import { useUserContext } from '@/contexts/UserContext'
 import useFilters from '@/hooks/useFilters'
+import { useQuery } from '@tanstack/react-query'
+import { getMany, getManyWithoutParams } from '@/utils/api'
+import { Category } from '@/types'
+import { QUERY_STALE_TIME } from '@/utils/constants'
 
 const initialTransactions = [
   { id: 1, type: 'Online Payment', date: '2023-06-30', amount: -1500, category: 'Shopping', description: 'Amazon.com', balance: 3500 },
@@ -46,6 +50,13 @@ const initialTransactions = [
     setTransactions(transactions.map(t => t.id === editedTransaction.id ? editedTransaction : t))
   }
 
+  const {data} = useQuery({
+    queryKey: ['categories'],
+    queryFn: ()=> getManyWithoutParams<Category[]>('/categories'),
+    enabled: true,
+    staleTime: QUERY_STALE_TIME
+  })
+  console.log(data,'categories')
   return (
     <>
       <div className="space-y-4">
