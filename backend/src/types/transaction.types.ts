@@ -53,7 +53,6 @@ export interface Message{
 
 
   export interface TransactionParams{
-    bankId: string,
     after: string,
     before: string,
     from: string,

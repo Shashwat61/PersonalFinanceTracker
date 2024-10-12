@@ -1,6 +1,7 @@
 import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
 import { Transaction } from "./Transaction"
 import { User } from "./User"
+import { UserUpiCategoryNameMapping } from "./UserUpiCategoryNameMapping"
 
 @Entity("user_upi_details")
 export class UserUpiDetails extends BaseEntity{
@@ -44,4 +45,7 @@ export class UserUpiDetails extends BaseEntity{
         referencedColumnName: "id"
     })
     user!: User
+
+    @OneToMany(()=> UserUpiCategoryNameMapping, (userUpiCategoryNameMapping) => userUpiCategoryNameMapping.userUpiDetails)
+    userUpiCategoryNameMappings!: UserUpiCategoryNameMapping[]
 }

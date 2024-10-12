@@ -109,11 +109,14 @@ export class Transaction extends BaseEntity{
     @JoinColumn({name: "user_id"})
     user!: User
 
-    @ManyToOne(()=> UserUpiDetails, (userUpiDetails) => userUpiDetails.transactions)
+    @ManyToOne(()=> UserUpiDetails, (userUpiDetails) => userUpiDetails.transactions, {
+        eager: true,
+        nullable: true
+    })
     @JoinColumn([{name: "receiver_upi_id", referencedColumnName: "upi_id"}, {name: "payee_upi_id", referencedColumnName: "upi_id"}])
-    userUpiDetails!: UserUpiDetails
+    userUpiDetails?: UserUpiDetails
 
-    @ManyToOne(() => UserBankMapping, (userBankMapping) => userBankMapping.transactions, { cascade: true })
+    @ManyToOne(() => UserBankMapping, (userBankMapping) => userBankMapping.transactions, { cascade: true})
     @JoinColumn({ name: "user_bank_mapping_id" })
     userBankMapping!: UserBankMapping;
 

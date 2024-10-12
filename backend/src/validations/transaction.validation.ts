@@ -10,7 +10,6 @@ const getTransactions = z.object({
 
 const getTransactionsVersionOne = z.object({
     query: z.object({
-        bankId: z.string(),
         after: z.string(),
         before: z.string(),
         from: z.string(),
@@ -26,6 +25,9 @@ const getTransactionsVersionOne = z.object({
                 return true
             },
         )
+    }),
+    params: z.object({
+        id: z.string()
     })
 })
 

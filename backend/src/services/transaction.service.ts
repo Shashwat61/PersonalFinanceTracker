@@ -8,13 +8,15 @@ import { gmailClient, redisClient } from "../lib"
 import { GmailMessage, GmailMessages, GmailThreadMessages, Message, TransactionParams } from "../types/transaction.types";
 import { modifyQuery, modifyTransactionDataVersionTwo } from "../utils/helper";
 import { UserUpiDetails } from "../entity/UserUpiDetails";
+import { UserUpiCategoryNameMapping } from "../entity/UserUpiCategoryNameMapping";
 
 
 
 const getTransactionsVersionTwo = async(
-    access_token: string, apiQuery: TransactionParams, user: User
+    access_token: string, apiQuery: TransactionParams, bankId:string, user: User
 ) => {
-    const {bankId, trackedId, limit} = apiQuery // TODO: take it as hashed value and unhash it here
+    const {trackedId, limit} = apiQuery // TODO: take it as hashed value and unhash it here
+    
     const query = Object.assign({},{
         from: apiQuery.from,
         after: apiQuery.after,
@@ -34,10 +36,13 @@ const getTransactionsVersionTwo = async(
         .leftJoinAndSelect('t.userBankMapping', 'ubm')
         .where('ubm.user_id = :userId', { userId: user.id })
         .andWhere('ubm.bank_id = :bankId', { bankId })
+        .andWhere('t.created_at >= :after', { after: apiQuery.after })
+        .andWhere('t.created_at <= :before', { before: apiQuery.before })
         .orderBy('t.created_at', 'DESC')
         .getOne();
     }
-    return await setGmailMessages(modifiedQuery, access_token, userBankMapping, currentDayLastTransaction, trackedId, Number(limit))
+    const transactions =  await setGmailMessages(modifiedQuery, access_token, userBankMapping, currentDayLastTransaction, trackedId, Number(limit))
+    return {transactions, cursor: transactions[transactions.length-1]}
 }
 
 async function setGmailMessages(modifiedQuery: string, access_token: string, userBankMapping: UserBankMapping, lastTransaction: Transaction | null, trackedId: string | undefined, limit: number){
@@ -51,6 +56,7 @@ async function setGmailMessages(modifiedQuery: string, access_token: string, use
         let transactions: Transaction[] = []
         if (!trackedId){
              transactions = await Transaction.find({
+                // relations: ["userUpiDetails"],
                 where: {
                     user_bank_mapping_id: userBankMapping.id
                 },
@@ -65,6 +71,9 @@ async function setGmailMessages(modifiedQuery: string, access_token: string, use
                 where:{
                     user_bank_mapping_id: userBankMapping.id,
                     sequence: LessThan(lastTransaction.sequence)
+                },
+                loadRelationIds: {
+                    relations: ['category'],
                 },
                 take: limit
             })
@@ -82,6 +91,8 @@ async function setGmailMessages(modifiedQuery: string, access_token: string, use
     // save and implement tracker
     const lastSavedTransaction = savedTransactions[savedTransactions.length - 1]
     await redisClient.setKey(`${userBankMapping.user_id}_${userBankMapping.bank_id}_last_transaction`, lastSavedTransaction.message_id.toString(), 86400)
+    // if trackedId is present then return the transactions 10 conditions
+
     return savedTransactions
 }
 
@@ -110,32 +121,47 @@ async function modifyAndSaveTransactions(messages: GmailMessage[], access_token:
          const toSaveUpiIds = userUpiDetails
          .filter(upiId => !dbUserUpiDetails.some(dbUpiId => dbUpiId.upi_id === upiId))
          .map(upiId => ({ upi_id: upiId! }));
-
+        // also save in userupicategorynamemapping table
+        // whenever a new upi id comes, it will be saved
         if (toSaveUpiIds.length > 0) {
             await UserUpiDetails.insert(toSaveUpiIds);
+            const userUpiCategoryNameMappingList = toSaveUpiIds.map((upiId)=> {
+                const userUpiCategoryNameMappingInstance = new UserUpiCategoryNameMapping()
+                userUpiCategoryNameMappingInstance.upi_id = upiId.upi_id
+                userUpiCategoryNameMappingInstance.user_id = userBankMapping.user_id
+                return userUpiCategoryNameMappingInstance
+            }
+            )
+            await UserUpiCategoryNameMapping.save(userUpiCategoryNameMappingList)
         }
 
 
         // save the last transaction in redis
         const savedTransactions = await Transaction.save(sortedOrder, {
             reload: true,
-
         })
-        return savedTransactions
+        const loadedTransactions = await Transaction.find({
+            relations: ["userUpiDetails"],
+            where:{
+                id: In(savedTransactions.map(item => item.id))
+            }
+        })
+        return loadedTransactions
 }
 
 async function getGmailMessages(access_token:string, modifiedQuery: string, lastTransaction: Transaction | null): Promise<GmailMessage[]>{
     const messages: GmailMessage[]= []
     const gmailMessages = await gmailClient.getMessages(access_token, modifiedQuery)
     if (gmailMessages.resultSizeEstimate === 0 && gmailMessages.messages?.length ==0) return messages
-    for(const [index, msg] of gmailMessages.messages!.entries()){
-        if (lastTransaction && lastTransaction.message_id === msg.id) break;
-        messages.push(msg)
-        if (index==messages.length-1 && gmailMessages.nextPageToken){
-            const recursiveMessages = await getGmailMessages(access_token, modifiedQuery, lastTransaction)
-            messages.push(...recursiveMessages)
+    if (gmailMessages.resultSizeEstimate > 0){
+        for(const [index, msg] of gmailMessages.messages!.entries()){
+            if (lastTransaction && lastTransaction.message_id === msg.id) break;
+            messages.push(msg)
+            if (index==messages.length-1 && gmailMessages.nextPageToken){
+                const recursiveMessages = await getGmailMessages(access_token, modifiedQuery, lastTransaction)
+                messages.push(...recursiveMessages)
+            }       
         }
-
     }
     return messages
 }

@@ -8,6 +8,7 @@ const dbSource = new DataSource({
     "password": "",
     "database": "financetracker",
     "logging": true,
+    "logger": "advanced-console",
     "entities": ["./src/entity/*.ts"],
     "migrations": ["./src/migrations/db/*.ts"],
 })

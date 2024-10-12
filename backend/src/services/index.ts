@@ -5,6 +5,7 @@ import userUpiDetailsService from "./user-upi-details.service"
 import bankService from "./bank.service"
 import userBankService from "./user-bank.service"
 import userService from "./user.service"
+import categoryService from "./category.service"
 
 
 const rootRouterService = () => {
@@ -19,6 +20,7 @@ export default {
     userUpiDetailsService,
     bankService,
     userBankService,
-    userService
+    userService,
+    categoryService
 
 }

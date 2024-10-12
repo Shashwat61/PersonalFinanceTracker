@@ -5,6 +5,7 @@ import bankEmailRoutes from './watch-email.routes'
 import bankRoutes from './bank.routes'
 import userBankRoutes from './user-bank.routes'
 import userRoutes from './user.routes'
+import categoryRoutes from './category.routes'
 import { apiMiddleware } from '../middlewares';
 
 const router = express.Router()
@@ -16,6 +17,7 @@ router.use('/banks/user', apiMiddleware.checkApiAutheticated, userBankRoutes)
 router.use('/transactions', apiMiddleware.checkApiAutheticated,  tranasctionRoutes)
 router.use('/watch_emails', apiMiddleware.checkApiAutheticated, bankEmailRoutes)
 router.use('/user', apiMiddleware.checkApiAutheticated, userRoutes)
+router.use('/categories', apiMiddleware.checkApiAutheticated, categoryRoutes)
 
 
 

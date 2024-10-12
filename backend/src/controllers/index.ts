@@ -6,6 +6,7 @@ import watchEmailController from "./watch-email.controller"
 import bankController from "./bank.controller"
 import userBankController from "./user-bank.controller"
 import userController from "./user.controller"
+import categoryController from "./category.controller"
 
 
 
@@ -24,6 +25,7 @@ export default {
     watchEmailController,
     bankController,
     userBankController,
-    userController
+    userController,
+    categoryController
 
 }
