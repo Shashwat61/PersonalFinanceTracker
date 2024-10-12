@@ -6,6 +6,7 @@ data: Transaction
 }
 
 function RecentTransactionRow({data}: RecentTransactionRowProps) {
+  console.log(data,' data')
   return (
     <div className="flex items-center">
         <div className="flex items-center justify-center mr-3 rounded-full w-9 h-9 bg-primary/10">

@@ -14,18 +14,19 @@ import { Bank } from '@/types'
 import HomeHeader from '@/components/custom/HomeHeader'
 import HomeAnalytics from '@/components/custom/HomeAnalytics'
 import { useQueries, useQueryClient } from '@tanstack/react-query'
+import useFilters from '@/hooks/useFilters'
+import useTransactions from '@/hooks/useTransactions'
 
 function Home() {
   
-  const {userData, primaryUserBank, userDataLoading, userBanks, addUserBank, addUserBankSuccess ,isUserError, userError, addUserBankPending, userTransactions, userTransactionsLoading, userTransactionsSuccess, setPrimaryUserBank, setSelectedDate, selectedDate} = useUserContext()
+  const {userData, primaryUserBank, userDataLoading, userBanks, addUserBank, addUserBankSuccess ,isUserError, userError, addUserBankPending, setPrimaryUserBank} = useUserContext()
   const {bankSeedData} = useBankContext()
+  const {selectedDate, setSelectedDate}= useFilters()
+  const {userTransactions,  userTransactionsLoading, userTransactionsSuccess} = useTransactions(userData?.id, primaryUserBank, selectedDate)
   const queryClient = useQueryClient()
   
   function handleSelectDate(val:Date){
     setSelectedDate(val)
-    queryClient.invalidateQueries({
-      queryKey: ["transactions", userData?.id, primaryUserBank?.id]
-    })
   }
 
 
@@ -60,7 +61,7 @@ function Home() {
           setSelectedDate= {handleSelectDate}
           selectedDate = {selectedDate}
      />
-     <HomeAnalytics recentTransactions={userTransactions || []} userTransactionsLoading = {userTransactionsLoading}/>
+     <HomeAnalytics recentTransactions={userTransactions} userTransactionsLoading = {userTransactionsLoading}/>
       
       </>
     )

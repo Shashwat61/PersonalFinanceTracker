@@ -8,8 +8,6 @@ import useFilters from "./useFilters";
 
 function useUserData(){
     const [primaryUserBank, setPrimaryUserBank] = useState<Bank | null>(null)
-    const {selectedDate, setSelectedDate} = useFilters()
-    console.log(selectedDate, 'selectedDate')
     const queryClient = useQueryClient()
     let userBanks: Bank[] = []
     console.log(primaryUserBank, 'primaryuserbank')
@@ -33,24 +31,7 @@ function useUserData(){
         }
     })
 
-    const {data: userTransactions, isLoading: userTransactionsLoading, isSuccess: userTransactionsSuccess} = useQuery({
-        queryKey: ["transactions", userData?.id, primaryUserBank?.id],
-        // after=2024-10-06&before=2024-10-07&bankId=${primaryUserBank?.id}&from=${primaryUserBank?.listener_email}&limit=${10}
-        queryFn: () => getMany<Transaction[], DefaultGetManyParams>(`/transactions/v2`, {
-            filters: {
-                from: primaryUserBank!.listener_email!,
-                limit: 10
-            },
-            dates: {
-                after: selectedDate.toISOString(),
-                before: new Date(selectedDate.getTime() + 24 * 60 * 60 * 1000).toISOString(),
-            },
-            id: primaryUserBank!.id,
-        }),
-        enabled: !!userData?.id && !!primaryUserBank?.listener_email,
-        retry: false,
-        staleTime: QUERY_STALE_TIME
-    })
+    
 
     useEffect(()=>{
         if (userData?.banks?.length){
@@ -77,11 +58,6 @@ function useUserData(){
         setPrimaryUserBank,
         addUserBankSuccess,
         addUserBankPending,
-        userTransactions,
-        userTransactionsLoading,
-        userTransactionsSuccess,
-        selectedDate,
-        setSelectedDate
     }
 }
 export default useUserData;

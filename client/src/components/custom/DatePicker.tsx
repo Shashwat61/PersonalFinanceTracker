@@ -4,7 +4,6 @@ import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 function DatePicker({ date, setDate }: { date: Date | undefined, setDate: (date: Date | undefined) => void }){
-  console.log(date)
   
 return (
     <Popover>

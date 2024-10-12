@@ -11,9 +11,10 @@ interface RecentInfoBoxProps{
     ComponentToRender: React.ComponentType<any>
     cta: () => void
     type: string
+    loading: boolean
 }
 
-function RecentInfoBox({title, subtitle, recentListLimit, recentData, ComponentToRender, cta}: RecentInfoBoxProps) {
+function RecentInfoBox({title, subtitle, recentListLimit, recentData, ComponentToRender, cta, loading}: RecentInfoBoxProps) {
 
   return (
     <Card className="col-span-1 min-h-80">
@@ -21,21 +22,26 @@ function RecentInfoBox({title, subtitle, recentListLimit, recentData, ComponentT
             <CardTitle>
                 {title}
             </CardTitle>
-            <Button variant="ghost" size="sm" onClick={()=>cta()}>
+            {!loading && <Button variant="ghost" size="sm" onClick={()=>cta()}>
                 {subtitle}
             <ChevronRight className="w-4 h-4 ml-2" />
-            </Button>
+            </Button>}
         </CardHeader>
             <CardContent>
             <div className="space-y-4">
-                {recentData.length > 0 ? (
+                {loading? (
+                    <div className="text-center text-muted-foreground">Loading...</div>
+                ): 
+                 recentData.length > 0 ? (
                     recentData.slice(0,recentListLimit).map((data, i)=> (
                         <ComponentToRender key={i} data={data}/>
                     ))
-                ) : (
+                 ): (
                     <div className="text-center text-muted-foreground">No {title.toLowerCase()} available</div>
-                )}
+                 )
+                }
             </div>
+            
             </CardContent>
     </Card>
   )

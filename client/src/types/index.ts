@@ -31,7 +31,10 @@ export interface Transaction{
     updated_at: string
     message_id: string
 }
-
+export interface TransactionResponse{
+    transactions: Transaction[]
+    nextCursor: string
+}
 export type DefaultGetManyParams = {
     filters?: Filter;
     // sort?: Sort;

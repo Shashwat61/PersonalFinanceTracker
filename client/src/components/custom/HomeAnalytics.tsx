@@ -13,7 +13,7 @@ interface HomeAnalyticsProps{
   userTransactionsLoading: boolean
 }
 
-function HomeAnalytics({recentTransactions}: HomeAnalyticsProps) {
+function HomeAnalytics({recentTransactions, userTransactionsLoading}: HomeAnalyticsProps) {
   const navigate = useNavigate()
   
   function redirectTo(val: string){
@@ -65,6 +65,7 @@ function HomeAnalytics({recentTransactions}: HomeAnalyticsProps) {
               ComponentToRender={RecentTransactionRow}
               recentListLimit={5}
               cta={()=> redirectTo('transactions')}
+              loading = {userTransactionsLoading}
           />
   
           {/* Flexi Benefits */}
