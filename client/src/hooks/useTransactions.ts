@@ -4,11 +4,10 @@ import { QUERY_STALE_TIME, TRANSACTION_RESPONSE_LIMIT } from '@/utils/constants'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 
 
-function useTransactions(userId:string | undefined, primaryUserBank: Bank, selectedDate:Date) {
+function useTransactions(userId:string | undefined, primaryUserBank: Bank | null, selectedDate:Date) {
 
     const {data: userTransactions, isLoading: userTransactionsLoading, isSuccess: userTransactionsSuccess, } = useInfiniteQuery({
         queryKey: ["transactions", userId, primaryUserBank?.id, selectedDate],
-        // after=2024-10-06&before=2024-10-07&bankId=${primaryUserBank?.id}&from=${primaryUserBank?.listener_email}&limit=${10}
         queryFn: () => getMany<TransactionResponse, DefaultGetManyParams>(`/transactions/v2`, {
             filters: {
                 from: primaryUserBank!.listener_email!,
