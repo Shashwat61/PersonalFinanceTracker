@@ -59,3 +59,9 @@ export interface Message{
     trackedId?: string | undefined,
     limit: string
   }
+
+  export type UpdateTransactionRequestBody = {
+    transactionIds: string[],
+    categoryId?: string,
+    vpaName?: string
+  }

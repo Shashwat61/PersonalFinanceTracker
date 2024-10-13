@@ -29,7 +29,20 @@ const getTransactionsVersionTwo = async(req: Request, res:Response)=>{
     }
 }
 
+const updateTransactions = async(req: Request, res: Response) => {
+    try {
+        const {currentUser, accessToken}: {currentUser: User, accessToken: string} = res.locals.userInfo
+        const {body} = indexValidation.transactionValidation.updateTransactions.parse(req)
+        const response = await transactionService.updateTransactions(body, currentUser)
+        res.status(200).json(response)
+        res.status(200).json
+    } catch (error) {
+        res.status(500).json(error)
+    }
+}
+
 export default {
     saveTransactions,
-    getTransactionsVersionTwo
+    getTransactionsVersionTwo,
+    updateTransactions
 }

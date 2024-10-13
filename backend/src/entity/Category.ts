@@ -1,4 +1,5 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
+import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
+import { UserUpiCategoryNameMapping } from "./UserUpiCategoryNameMapping"
 
 @Entity("category")
 export class Category extends BaseEntity {
@@ -26,4 +27,7 @@ export class Category extends BaseEntity {
         nullable: false
     })
     updated_at!: Date
+
+    @OneToMany(()=> UserUpiCategoryNameMapping, (userUpiCategoryNameMapping) => userUpiCategoryNameMapping.category)
+    userUpiCategoryNameMappings!: UserUpiCategoryNameMapping[]
 }

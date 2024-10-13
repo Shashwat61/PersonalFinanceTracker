@@ -1,5 +1,7 @@
-import { BaseEntity, Column, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
 import { UserUpiDetails } from "./UserUpiDetails"
+import { Transaction } from "./Transaction"
+import { Category } from "./Category"
 
 @Entity("user_upi_category_name_mapping")
 export class UserUpiCategoryNameMapping extends BaseEntity{
@@ -48,7 +50,24 @@ export class UserUpiCategoryNameMapping extends BaseEntity{
     updated_at!: Date
 
     @ManyToOne(()=> UserUpiDetails, (userUpiDetails) => userUpiDetails.userUpiCategoryNameMappings)
+    @JoinColumn({
+        name: "upi_id",
+        referencedColumnName: "upi_id"
+    })
     userUpiDetails!: UserUpiDetails
+
+    @OneToMany(()=> Transaction, (transaction) => transaction.userUpiCategoryNameMapping)
+    transactions!: Transaction[]
+
+
+    @ManyToOne(()=> Category, (category) => category.userUpiCategoryNameMappings, {
+        eager: true
+    })
+    @JoinColumn({
+        name: "category_id",
+        referencedColumnName: "id"
+    })
+    category!: Category
 
 
 }

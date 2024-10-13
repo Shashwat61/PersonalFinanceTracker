@@ -1,11 +1,11 @@
-import { In, LessThan, MoreThan } from "typeorm";
+import { Equal, In, LessThan, MoreThan, MoreThanOrEqual } from "typeorm";
 import { dbSource } from "../config/dbSource";
 import { Bank } from "../entity/Bank";
 import { Transaction } from "../entity/Transaction";
 import { User } from "../entity/User";
 import { UserBankMapping } from "../entity/UserBankMapping";
 import { gmailClient, redisClient } from "../lib"
-import { GmailMessage, GmailMessages, GmailThreadMessages, Message, TransactionParams } from "../types/transaction.types";
+import { GmailMessage, GmailMessages, GmailThreadMessages, Message, TransactionParams, UpdateTransactionRequestBody } from "../types/transaction.types";
 import { modifyQuery, modifyTransactionDataVersionTwo } from "../utils/helper";
 import { UserUpiDetails } from "../entity/UserUpiDetails";
 import { UserUpiCategoryNameMapping } from "../entity/UserUpiCategoryNameMapping";
@@ -24,7 +24,7 @@ const getTransactionsVersionTwo = async(
     })
     const modifiedQuery = modifyQuery(query)
     let currentDayLastTransaction = null
-    const userBankLastCachedTransactionId = await redisClient.getKey(`${user.id}_${bankId}_last_transaction`)
+    const userBankLastCachedTransactionId = await redisClient.getKey(`${user.id}_${bankId}${apiQuery.after}${apiQuery.before}_last_transaction`)
     const userBankMapping = await UserBankMapping.findOneBy({user_id: user.id, bank_id: bankId})
     if (!userBankMapping) throw new Error('User bank mapping not found')
     if (userBankLastCachedTransactionId){
@@ -36,16 +36,17 @@ const getTransactionsVersionTwo = async(
         .leftJoinAndSelect('t.userBankMapping', 'ubm')
         .where('ubm.user_id = :userId', { userId: user.id })
         .andWhere('ubm.bank_id = :bankId', { bankId })
-        .andWhere('t.created_at >= :after', { after: apiQuery.after })
-        .andWhere('t.created_at <= :before', { before: apiQuery.before })
-        .orderBy('t.created_at', 'DESC')
+        .andWhere('t.transacted_at = :after', {after: apiQuery.after})
+        // .andWhere('t.created_at >= :after', { after: apiQuery.after })
+        // .andWhere('t.created_at <= :before', { before: apiQuery.before })
+        .orderBy('t.sequence', 'DESC')
         .getOne();
     }
-    const transactions =  await setGmailMessages(modifiedQuery, access_token, userBankMapping, currentDayLastTransaction, trackedId, Number(limit))
+    const transactions =  await setGmailMessages(modifiedQuery, access_token, userBankMapping, currentDayLastTransaction, trackedId, Number(limit), apiQuery)
     return {transactions, cursor: transactions[transactions.length-1]}
 }
 
-async function setGmailMessages(modifiedQuery: string, access_token: string, userBankMapping: UserBankMapping, lastTransaction: Transaction | null, trackedId: string | undefined, limit: number){
+async function setGmailMessages(modifiedQuery: string, access_token: string, userBankMapping: UserBankMapping, lastTransaction: Transaction | null, trackedId: string | undefined, limit: number, query: TransactionParams){
     const messages = await getGmailMessages(access_token, modifiedQuery, lastTransaction)
     if (!messages.length && !lastTransaction) return []
     if (lastTransaction && !messages.length){
@@ -58,7 +59,8 @@ async function setGmailMessages(modifiedQuery: string, access_token: string, use
              transactions = await Transaction.find({
                 // relations: ["userUpiDetails"],
                 where: {
-                    user_bank_mapping_id: userBankMapping.id
+                    user_bank_mapping_id: userBankMapping.id,
+                    transacted_at: MoreThanOrEqual(new Date(query.after))                    
                 },
                 order: {
                     sequence: 'DESC'
@@ -78,7 +80,7 @@ async function setGmailMessages(modifiedQuery: string, access_token: string, use
                 take: limit
             })
             await redisClient.setKey(
-                `${userBankMapping.user_id}_${userBankMapping.bank_id}_last_transaction`,
+                `${userBankMapping.user_id}_${userBankMapping.bank_id}${query.after}${query.before}_last_transaction`,
                 transactions[transactions.length - 1].message_id.toString(),
                 86400
             )
@@ -90,7 +92,7 @@ async function setGmailMessages(modifiedQuery: string, access_token: string, use
     const savedTransactions = await modifyAndSaveTransactions(messages, access_token, userBankMapping, lastTransaction)
     // save and implement tracker
     const lastSavedTransaction = savedTransactions[savedTransactions.length - 1]
-    await redisClient.setKey(`${userBankMapping.user_id}_${userBankMapping.bank_id}_last_transaction`, lastSavedTransaction.message_id.toString(), 86400)
+    await redisClient.setKey(`${userBankMapping.user_id}_${userBankMapping.bank_id}${query.after}${query.before}_last_transaction`, lastSavedTransaction.message_id.toString(), 86400)
     // if trackedId is present then return the transactions 10 conditions
 
     return savedTransactions
@@ -125,14 +127,14 @@ async function modifyAndSaveTransactions(messages: GmailMessage[], access_token:
         // whenever a new upi id comes, it will be saved
         if (toSaveUpiIds.length > 0) {
             await UserUpiDetails.insert(toSaveUpiIds);
-            const userUpiCategoryNameMappingList = toSaveUpiIds.map((upiId)=> {
-                const userUpiCategoryNameMappingInstance = new UserUpiCategoryNameMapping()
-                userUpiCategoryNameMappingInstance.upi_id = upiId.upi_id
-                userUpiCategoryNameMappingInstance.user_id = userBankMapping.user_id
-                return userUpiCategoryNameMappingInstance
-            }
-            )
-            await UserUpiCategoryNameMapping.save(userUpiCategoryNameMappingList)
+            // const userUpiCategoryNameMappingList = toSaveUpiIds.map((upiId)=> {
+            //     const userUpiCategoryNameMappingInstance = new UserUpiCategoryNameMapping()
+            //     userUpiCategoryNameMappingInstance.upi_id = upiId.upi_id
+            //     userUpiCategoryNameMappingInstance.user_id = userBankMapping.user_id
+            //     return userUpiCategoryNameMappingInstance
+            // }
+            // )
+            // await UserUpiCategoryNameMapping.save(userUpiCategoryNameMappingList)
         }
 
 
@@ -140,13 +142,13 @@ async function modifyAndSaveTransactions(messages: GmailMessage[], access_token:
         const savedTransactions = await Transaction.save(sortedOrder, {
             reload: true,
         })
-        const loadedTransactions = await Transaction.find({
-            relations: ["userUpiDetails"],
-            where:{
-                id: In(savedTransactions.map(item => item.id))
-            }
-        })
-        return loadedTransactions
+        // const loadedTransactions = await Transaction.find({
+        //     relations: ["userUpiDetails"],
+        //     where:{
+        //         id: In(savedTransactions.map(item => item.id))
+        //     }
+        // })
+        return savedTransactions
 }
 
 async function getGmailMessages(access_token:string, modifiedQuery: string, lastTransaction: Transaction | null): Promise<GmailMessage[]>{
@@ -166,7 +168,64 @@ async function getGmailMessages(access_token:string, modifiedQuery: string, last
     return messages
 }
 
+const updateTransactions = async(requestBody: UpdateTransactionRequestBody, currentUser: User) => {
+    // find if all the transction ids received belong to the user
+    // if not then throw an error
+    // else update the transactions
+    // return the updated transactions
+    const {transactionIds, categoryId, vpaName} = requestBody
+    // const transactions = await dbSource.manager
+    //         .createQueryBuilder(Transaction, "t")
+    //         .leftJoinAndSelect("t.userUpiDetails", "userUpiDetails")
+    //         .leftJoinAndSelect("t.userBankMapping", "userBankMapping")
+    //         .where("t.id IN (:...transactionIds)", { transactionIds })
+    //         .getMany();
+    const transactions = await Transaction.find(
+        {
+            where: {
+                id: In(transactionIds)
+            },
+            relations: ["userUpiDetails", "userBankMapping"]
+        }
+    )
+    if (!transactions.length) throw new Error('No transactions found')
+    if (transactions.length !== transactionIds.length) throw new Error('Transaction not found')
+    // only run this logic if either of them is present in request body
+    if (categoryId || vpaName){
+        const userBankMapping = transactions[0].userBankMapping
+        const userUpiDetails = transactions[0].userUpiDetails
+        // at this point of flow, there cannot be a transaction without a userUpiDetails relation
+        // would always get a single mapping for a user id and upi id both when selected together
+        let userUpiCategoryNameMapping = transactions[0]?.userUpiCategoryNameMapping
+        if (userBankMapping.user_id !== currentUser.id) throw new Error('Unauthorized')
+            if (!userUpiCategoryNameMapping && userUpiDetails){
+                const userUpiCategoryNameMappingInstance = new UserUpiCategoryNameMapping()
+                userUpiCategoryNameMappingInstance.user_id = currentUser.id
+                userUpiCategoryNameMappingInstance.upi_id = userUpiDetails?.upi_id
+                await UserUpiCategoryNameMapping.save(userUpiCategoryNameMappingInstance)
+                userUpiCategoryNameMapping = userUpiCategoryNameMappingInstance
+            }
+            if (categoryId && userUpiCategoryNameMapping){
+                transactions.forEach((txn)=>{
+                    txn.category_id = categoryId
+                })
+                userUpiCategoryNameMapping.category_id= categoryId
+            }
+            if (vpaName && userUpiCategoryNameMapping){
+                userUpiCategoryNameMapping.upi_name = vpaName
+            }
+            const reloadedInstance = await UserUpiCategoryNameMapping.save(userUpiCategoryNameMapping!)
+            transactions.forEach(txn=> txn.user_upi_category_name_mapping_id = reloadedInstance.id)
+            const reloadedTransactions = await Transaction.save(transactions, {
+                reload: true,
+            })
+            reloadedTransactions.forEach(txn => txn.userUpiCategoryNameMapping = reloadedInstance)
+            return reloadedTransactions
+        }
+}
+
 
 export default {
-    getTransactionsVersionTwo
+    getTransactionsVersionTwo,
+    updateTransactions
 }

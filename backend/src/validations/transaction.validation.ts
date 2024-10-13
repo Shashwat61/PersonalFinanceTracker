@@ -31,6 +31,14 @@ const getTransactionsVersionOne = z.object({
     })
 })
 
+const updateTransactions = z.object({
+    body: z.object({
+        transactionIds: z.string().array(),
+        categoryId: z.string().optional(),
+        vpaName: z.string().optional()
+    })
+})
+
 const saveTransactions = z.object({
     // transactions: z.array<>({
     //     messageId: z.string(),
@@ -43,5 +51,6 @@ const saveTransactions = z.object({
 export default {
     getTransactions,
     saveTransactions,
-    getTransactionsVersionOne
+    getTransactionsVersionOne,
+    updateTransactions
 }

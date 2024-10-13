@@ -46,6 +46,8 @@ export class UserUpiDetails extends BaseEntity{
     })
     user!: User
 
-    @OneToMany(()=> UserUpiCategoryNameMapping, (userUpiCategoryNameMapping) => userUpiCategoryNameMapping.userUpiDetails)
+    @OneToMany(()=> UserUpiCategoryNameMapping, (userUpiCategoryNameMapping) => userUpiCategoryNameMapping.userUpiDetails, {
+        cascade: true,
+    })
     userUpiCategoryNameMappings!: UserUpiCategoryNameMapping[]
 }

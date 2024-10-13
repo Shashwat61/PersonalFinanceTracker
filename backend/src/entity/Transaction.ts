@@ -2,6 +2,7 @@ import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, Prima
 import { User } from "./User"
 import { UserUpiDetails } from "./UserUpiDetails"
 import { UserBankMapping } from "./UserBankMapping"
+import { UserUpiCategoryNameMapping } from "./UserUpiCategoryNameMapping"
 
 @Entity("transaction")
 export class Transaction extends BaseEntity{
@@ -105,12 +106,18 @@ export class Transaction extends BaseEntity{
     })
     sequence!: number
 
+    @Column({
+        type: 'uuid',
+        nullable: true,
+        default: null
+    })
+    user_upi_category_name_mapping_id!: string
+
     @ManyToOne(()=> User, (user) => user.transactions, {cascade: true})
     @JoinColumn({name: "user_id"})
     user!: User
 
     @ManyToOne(()=> UserUpiDetails, (userUpiDetails) => userUpiDetails.transactions, {
-        eager: true,
         nullable: true
     })
     @JoinColumn([{name: "receiver_upi_id", referencedColumnName: "upi_id"}, {name: "payee_upi_id", referencedColumnName: "upi_id"}])
@@ -119,5 +126,13 @@ export class Transaction extends BaseEntity{
     @ManyToOne(() => UserBankMapping, (userBankMapping) => userBankMapping.transactions, { cascade: true})
     @JoinColumn({ name: "user_bank_mapping_id" })
     userBankMapping!: UserBankMapping;
+
+    @ManyToOne(()=> UserUpiCategoryNameMapping, (
+        userUpiCategoryNameMapping) => userUpiCategoryNameMapping.transactions, {
+        eager: true,
+        nullable: true
+    })
+    @JoinColumn({name: "user_upi_category_name_mapping_id"})
+    userUpiCategoryNameMapping?: UserUpiCategoryNameMapping
 
 }
