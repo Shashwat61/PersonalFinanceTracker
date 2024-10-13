@@ -20,9 +20,14 @@ export function getManyWithoutParams<R>(path: string){
     return apiManager.client.get<R>(path)
 }
 
-export function updateSingle<R, D>(path: string, params: D) {
-    return apiManager.client.put<R>(path, params);
+export const updateSingle = <R, D extends { id: string }>(path: string, data: D) => {
+    const { id, ...rest } = data;
+    return apiManager.client.put<R>(`${path}/${id}`, rest);
   };
+
+export function updateMany<R, D>(path: string, data:D){
+    return apiManager.client.put<R>(path, data)
+}
 export function createSingle<R, D>(path: string, params: D){
     return apiManager.client.post<R>(path, params)
 }

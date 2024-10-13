@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Dispatch, SetStateAction } from 'react';
 
-function DatePicker({ date, setDate }: { date: Date | undefined, setDate: Dispatch<SetStateAction<Date>> }){
+function DatePicker({ date, setDate }: { date: Date | undefined, setDate: (val: Date) => void }){
   
 return (
     <Popover>
@@ -18,7 +18,7 @@ return (
         <CalendarComponent
           mode="single"
           selected={date}
-          onSelect={setDate}
+          onSelect={(day) => day && setDate(day)}
           initialFocus
         />
       </PopoverContent>

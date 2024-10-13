@@ -12,6 +12,9 @@ interface TransactionHeaderProps{
     setSelectedDate: Dispatch<SetStateAction<Date>>
 }
 function TransactionHeader({selectedDate, setSelectedDate, setSearch}: TransactionHeaderProps) {
+    function handleSelectDate(date: Date){
+        setSelectedDate(date)
+    }
   return (
     <div>
         <div className="flex flex-col items-start justify-between mb-6 space-y-4 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
@@ -21,7 +24,7 @@ function TransactionHeader({selectedDate, setSelectedDate, setSearch}: Transacti
                   <Search className="w-4 h-4"  />
                 </Button>
               </div>
-              <DatePicker date={selectedDate} setDate={setSelectedDate} />
+              <DatePicker date={selectedDate} setDate={handleSelectDate} />
               <div className="flex items-center w-full space-x-2 sm:w-auto">
                 <Button variant="outline" size="sm">
                   <Filter className="w-4 h-4 mr-2" />

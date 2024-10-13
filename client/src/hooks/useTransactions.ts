@@ -1,10 +1,12 @@
-import { Bank, DefaultGetManyParams, Transaction, TransactionResponse } from '@/types'
-import { getMany } from '@/utils/api'
+import { Bank, DefaultGetManyParams, EditTransaction, Transaction, TransactionResponse } from '@/types'
+import { getDates } from '@/utils'
+import { getMany, updateMany } from '@/utils/api'
 import { QUERY_STALE_TIME, TRANSACTION_RESPONSE_LIMIT } from '@/utils/constants'
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query'
 
 
 function useTransactions(userId:string | undefined, primaryUserBank: Bank | null, selectedDate:Date) {
+    console.log(selectedDate, 'in usetransaction')
 
     const {data: userTransactions, isLoading: userTransactionsLoading, isSuccess: userTransactionsSuccess, } = useInfiniteQuery({
         queryKey: ["transactions", userId, primaryUserBank?.id, selectedDate],
@@ -14,8 +16,7 @@ function useTransactions(userId:string | undefined, primaryUserBank: Bank | null
                 limit: TRANSACTION_RESPONSE_LIMIT
             },
             dates: {
-                after: selectedDate.toISOString(),
-                before: new Date(selectedDate.getTime() + 24 * 60 * 60 * 1000).toISOString(),
+                ...getDates(selectedDate)
             },
             id: primaryUserBank!.id,
         }),
@@ -35,10 +36,25 @@ function useTransactions(userId:string | undefined, primaryUserBank: Bank | null
         })
     }
     console.log(transactions, 'transactions... ')
+
+
+    const {mutate: updateTransactions, isSuccess: updateTransactionsSuccess, isPending: updateTransactionsPending, data: updatedTransactions} = useMutation({
+        mutationFn: (data: EditTransaction) => updateMany<Transaction[], EditTransaction>('/transactions', data),
+        onMutate: async (data) => {
+            console.log(data, 'data in onMutate')
+        },
+        onSuccess: (data, variables, context) => {
+            console.log(data, 'data in onSuccess')
+        }
+    })
   return {
         userTransactions: transactions,
         userTransactionsLoading,
-        userTransactionsSuccess
+        userTransactionsSuccess,
+        updateTransactions,
+        updateTransactionsSuccess,
+        updateTransactionsPending,
+        updatedTransactions
   }
 }
 

@@ -9,13 +9,14 @@ import { Calendar, ChevronRight, CreditCard, DollarSign, Lock, TrendingDown, Tre
 import { Progress } from '@/components/ui/progress'
 import { useUserContext } from '@/contexts/UserContext'
 import { useBankContext } from '@/contexts/BankContext'
-import { PRIMARY_BANK_KEY } from '@/utils/constants'
-import { Bank } from '@/types'
+import { PRIMARY_BANK_KEY, QUERY_STALE_TIME } from '@/utils/constants'
+import { Bank, Category } from '@/types'
 import HomeHeader from '@/components/custom/HomeHeader'
 import HomeAnalytics from '@/components/custom/HomeAnalytics'
-import { useQueries, useQueryClient } from '@tanstack/react-query'
+import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
 import useFilters from '@/hooks/useFilters'
 import useTransactions from '@/hooks/useTransactions'
+import { getManyWithoutParams } from '@/utils/api'
 
 function Home() {
   
@@ -23,12 +24,13 @@ function Home() {
   const {bankSeedData} = useBankContext()
   const {selectedDate, setSelectedDate}= useFilters()
   const {userTransactions,  userTransactionsLoading, userTransactionsSuccess} = useTransactions(userData?.id, primaryUserBank, selectedDate)
-  const queryClient = useQueryClient()
+  
   
   function handleSelectDate(val:Date){
     setSelectedDate(val)
   }
 
+  
 
   
   

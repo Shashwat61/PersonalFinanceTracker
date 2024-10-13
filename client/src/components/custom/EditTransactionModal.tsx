@@ -3,28 +3,37 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
 import { Label } from '../ui/label'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
-import { Transaction } from '@/types'
+import { Category, Transaction } from '@/types'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
+import { QueryCache } from '@tanstack/react-query'
 
 interface TransactionModelProps{
-    transaction: Transaction
-    onSave: (transaction: Transaction) => void
+    transaction: Transaction | null
+    onSave: (transaction: Transaction, categoryId?: string, vpaNickName?: string) => void
     open: boolean
     onOpenChange: (open: boolean) => void
     placeholder: string
+    categories: Category[] | undefined
 }
 
-function EditTransactionModal({ transaction, onSave, open, onOpenChange, placeholder }: TransactionModelProps){
-    const [editedTransaction, setEditedTransaction] = useState(transaction || null)
-  
-    React.useEffect(() => {
-      if (transaction) {
-        setEditedTransaction(transaction)
-      }
-    }, [transaction])
+function EditTransactionModal({ transaction, onSave, open, onOpenChange, placeholder, categories }: TransactionModelProps){
+    const transactionMetaData = transaction?.userUpiCategoryNameMapping
+    const transactionCategory = transactionMetaData?.category
+    const [editedTransaction, setEditedTransaction] = useState(transaction || {})
+    const [selectedCategory, setSelectedCategory] = useState<string>('')
+    const [nickName, setNickName] = useState<string>(transactionMetaData?.upi_name || '')
+    
+    console.log(selectedCategory, nickName, 'nickname', transactionMetaData, transactionCategory)
+    // React.useEffect(() => {
+    //   if (transaction) {
+    //     setEditedTransaction(transaction)
+    //   }
+    // }, [transaction])
   
     const handleSave = () => {
-      onSave(editedTransaction)
-      onOpenChange(false)
+        if (!transaction) return;
+        onSave(transaction, selectedCategory, nickName)
+        onOpenChange(false)
     }
   
     if (!transaction) return null
@@ -40,8 +49,8 @@ function EditTransactionModal({ transaction, onSave, open, onOpenChange, placeho
               <Label htmlFor="type">Type</Label>
               <Input 
                 id="type" 
-                value={editedTransaction.transaction_type} 
-                onChange={(e) => setEditedTransaction({...editedTransaction, transaction_type: e.target.value})}
+                value={transaction.transaction_type} 
+                onChange={(e) => setEditedTransaction({...transaction, transaction_type: e.target.value})}
               />
             </div>
             <div>
@@ -49,8 +58,8 @@ function EditTransactionModal({ transaction, onSave, open, onOpenChange, placeho
               <Input 
                 id="date" 
                 type="date" 
-                value={editedTransaction.transacted_at} 
-                onChange={(e) => setEditedTransaction({...editedTransaction, transacted_at: e.target.value})}
+                value={transaction.transacted_at} 
+                onChange={(e) => setEditedTransaction({...transaction, transacted_at: e.target.value})}
               />
             </div>
             <div>
@@ -58,24 +67,38 @@ function EditTransactionModal({ transaction, onSave, open, onOpenChange, placeho
               <Input 
                 id="amount" 
                 type="number" 
-                value={editedTransaction.amount} 
-                onChange={(e) => setEditedTransaction({...editedTransaction, amount: parseFloat(e.target.value)})}
+                value={transaction.amount} 
+                onChange={(e) => setEditedTransaction({...transaction, amount: parseFloat(e.target.value)})}
               />
             </div>
             <div>
               <Label htmlFor="category">Category</Label>
-              <Input 
-                id="category" 
-                value={editedTransaction.category_id} 
-                onChange={(e) => setEditedTransaction({...editedTransaction, category_id: e.target.value})}
-              />
+              <Select onValueChange={setSelectedCategory}>
+      <SelectTrigger className="w-full sm:w-[200px]">
+        <SelectValue placeholder={transactionCategory?.name ?? "None"} />
+      </SelectTrigger>
+      <SelectContent>
+        {categories?.map(category => (
+            <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+    
             </div>
+            <div>
+              <Label htmlFor="description">Nickname for {transaction.payee_upi_id || transaction.receiver_upi_id}</Label>
+              <Input
+                id="description" 
+                value={nickName} 
+                onChange={(e) => setNickName(e.target.value)}
+              />
+              </div>
             <div>
               <Label htmlFor="description">Description</Label>
               <Input 
                 id="description" 
-                value={editedTransaction.transaction_metadata_id} 
-                onChange={(e) => setEditedTransaction({...editedTransaction, transaction_metadata_id: e.target.value})}
+                value={transaction.transaction_metadata_id} 
+                onChange={(e) => setEditedTransaction({...transaction, transaction_metadata_id: e.target.value})}
               />
             </div>
             <Button onClick={handleSave}>Save Changes</Button>

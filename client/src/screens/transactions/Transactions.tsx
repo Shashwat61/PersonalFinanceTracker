@@ -17,49 +17,43 @@ import { useUserContext } from '@/contexts/UserContext'
 import useFilters from '@/hooks/useFilters'
 import { useQuery } from '@tanstack/react-query'
 import { getMany, getManyWithoutParams } from '@/utils/api'
-import { Category } from '@/types'
+import { Category, Transaction } from '@/types'
 import { QUERY_STALE_TIME } from '@/utils/constants'
-
-const initialTransactions = [
-  { id: 1, type: 'Online Payment', date: '2023-06-30', amount: -1500, category: 'Shopping', description: 'Amazon.com', balance: 3500 },
-  { id: 2, type: 'Grocery Shopping', date: '2023-06-29', amount: -850, category: 'Food', description: 'Whole Foods Market', balance: 5000 },
-  { id: 3, type: 'Salary Deposit', date: '2023-06-28', amount: 5000, category: 'Income', description: 'Monthly Salary', balance: 5850 },
-  { id: 4, type: 'Utility Bill', date: '2023-06-27', amount: -200, category: 'Bills', description: 'Electricity Bill', balance: 850 },
-  { id: 5, type: 'Restaurant', date: '2023-06-26', amount: -750, category: 'Food', description: 'Dinner with friends', balance: 1050 },
-]
-
-
-
 
 
  function Transactions() {
   const {userData, primaryUserBank} = useUserContext()
-  const [editingTransaction, setEditingTransaction] = useState(null)
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false)
   const [search, setSearch] = useState<string>('')
   const [debouncedSearch] = useDebounce(search, 500)
   const {selectedDate, setSelectedDate} = useFilters()
-  const {userTransactions} = useTransactions(userData?.id, primaryUserBank, selectedDate)
-
-  const handleEditTransaction = (transaction) => {
+  const {userTransactions, updateTransactions, updateTransactionsPending,updateTransactionsSuccess, userTransactionsLoading, userTransactionsSuccess, updatedTransactions} = useTransactions(userData?.id, primaryUserBank, selectedDate)
+  console.log(selectedDate, 'selectedDate')
+  console.log(updatedTransactions, 'updatedTrasnctions')
+  
+  function handleEditTransaction(transaction: Transaction){
     setEditingTransaction(transaction)
     setIsEditDialogOpen(true)
   }
 
-  const handleSaveTransaction = (editedTransaction) => {
-    setTransactions(transactions.map(t => t.id === editedTransaction.id ? editedTransaction : t))
+  function handleSaveTransaction(transaction: Transaction, categoryId?:string, vpaNickName?: string){
+    const vpaId = transaction.payee_upi_id || transaction.receiver_upi_id
+    const similarTransactionsIds = userTransactions.filter(txn => (txn.payee_upi_id == vpaId || txn.receiver_upi_id == vpaId)).map(txn => txn.id)
+    updateTransactions({transactionIds: similarTransactionsIds, categoryId, vpaName: vpaNickName})
+    setIsEditDialogOpen(false)
   }
 
-  const {data} = useQuery({
+  const {data: categories} = useQuery({
     queryKey: ['categories'],
     queryFn: ()=> getManyWithoutParams<Category[]>('/categories'),
     enabled: true,
     staleTime: QUERY_STALE_TIME
   })
-  console.log(data,'categories')
+
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-4 overflow-hidden">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Transactions</h1>
           <Button>
@@ -67,12 +61,13 @@ const initialTransactions = [
           </Button>
         </div>
 
-        <Card>
+        <Card className='min-h-screen'>
           <CardContent className="p-6">
             <TransactionHeader 
             search = {search}
             setSearch = {setSearch}
             setSelectedDate={setSelectedDate}
+            selectedDate={selectedDate}
             />
 
             <div className="space-y-4">
@@ -87,13 +82,15 @@ const initialTransactions = [
           </CardContent>
         </Card>
       </div>
-
-      <EditTransactionModal 
+                    
+      {isEditDialogOpen ? <EditTransactionModal
+        placeholder='Edit Transaction'
         transaction={editingTransaction}
         onSave={handleSaveTransaction}
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
-      />
+        categories = {categories}
+      />: null}
     </>
   )
 }

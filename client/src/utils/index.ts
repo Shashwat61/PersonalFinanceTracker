@@ -44,3 +44,10 @@ export function appendParamsInUrl(...args: Record<string, any>[]){
   })
   return urlSearchParams
 }
+
+export function getDates(selectedDate: Date){
+  const after = `${selectedDate.getFullYear()}-${selectedDate.getMonth()+1}-${selectedDate.getDate()}`
+  const beforeDateTime = new Date(selectedDate.getTime() + 24 * 60 * 60 * 1000)
+  const before = `${beforeDateTime.getFullYear()}-${beforeDateTime.getMonth()+1}-${beforeDateTime.getDate()}`
+  return {after, before}
+}

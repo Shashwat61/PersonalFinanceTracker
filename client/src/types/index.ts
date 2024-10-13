@@ -30,6 +30,9 @@ export interface Transaction{
     created_at: string
     updated_at: string
     message_id: string
+    sequence: number
+    user_upi_category_name_mapping_id?: string
+    userUpiCategoryNameMapping?: UserUpiCategoryNameMapping
 }
 export interface TransactionResponse{
     transactions: Transaction[]
@@ -57,4 +60,21 @@ export type Category = {
     name: string
     created_at: Date
     updated_at: Date
+}
+
+export type EditTransaction = {
+    transactionIds: string[]
+    categoryId?: string
+    vpaName?: string
+}
+
+export interface UserUpiCategoryNameMapping {
+    id: string
+    user_id: string
+    upi_id: string
+    category_id: string
+    upi_name: string
+    created_at: Date
+    updated_at: Date
+    category?: Category
 }

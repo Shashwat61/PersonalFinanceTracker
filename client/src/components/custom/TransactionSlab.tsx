@@ -12,7 +12,8 @@ interface TransactionSlabProps{
 function TransactionSlab({ transaction, onEdit }: TransactionSlabProps) {
     const [expanded, setExpanded] = useState(false)
     const isTransactionDebit = transaction.transaction_type === TRANSACTION_TYPES.DEBIT
-  
+    const transactionMetaData = transaction?.userUpiCategoryNameMapping
+    const transactionCategory = transactionMetaData?.category
     return (
       <Card className="mb-4">
         <CardContent className="p-4">
@@ -29,7 +30,8 @@ function TransactionSlab({ transaction, onEdit }: TransactionSlabProps) {
                 )}
               </div>
               <div>
-                <h3 className="font-medium">{isTransactionDebit ? transaction.receiver_upi_id : transaction.payee_upi_id}</h3>
+                <h3 className="font-medium">{transactionMetaData? transactionMetaData.upi_name :
+                isTransactionDebit ? transaction.receiver_upi_id : transaction.payee_upi_id}</h3>
                 <p className="text-sm text-gray-500">{transaction.transacted_at}</p>
               </div>
             </div>
@@ -38,7 +40,7 @@ function TransactionSlab({ transaction, onEdit }: TransactionSlabProps) {
                 {!isTransactionDebit ? '+' : ''}₹{Math.abs(transaction.amount).toFixed(2)}
               </span>
               <Badge variant="outline" className="mt-1">
-                {"Category"}
+                {transactionCategory ? transactionCategory.name : "Category"}
               </Badge>
             </div>
           </div>
