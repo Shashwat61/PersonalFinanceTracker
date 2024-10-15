@@ -96,16 +96,9 @@ function modifyQuery(query: {[key:string]: string}){
     const vpaMatch = message.snippet.match(/VPA ([^\s]+)/);
     if (vpaMatch){
         // change this, this should not be here
-         userUpiDetails.push(vpaMatch[1])
-
-        if(transactionInstance.transaction_type === "credit"){
-            transactionInstance.payee_upi_id = vpaMatch[1]
-            transactionInstance.user_id = userBankMapping.user_id
-        }
-        else{
-            transactionInstance.receiver_upi_id = vpaMatch[1]
-            transactionInstance.user_id = userBankMapping.user_id
-        }
+        if(!userUpiDetails.includes(vpaMatch[1])) userUpiDetails.push(vpaMatch[1])
+        transactionInstance.upi_id = vpaMatch[1]
+        transactionInstance.user_id = userBankMapping.user_id
     }
 
     const dateMatch = message.snippet.match(/on (\d{2}-\d{2}-\d{2})/);

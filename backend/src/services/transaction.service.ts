@@ -31,16 +31,26 @@ const getTransactionsVersionTwo = async(
         currentDayLastTransaction = await Transaction.findOneBy({message_id: userBankLastCachedTransactionId})
     }
     else {
-        currentDayLastTransaction = await dbSource.manager
-        .createQueryBuilder(Transaction, "t")
-        .leftJoinAndSelect('t.userBankMapping', 'ubm')
-        .where('ubm.user_id = :userId', { userId: user.id })
-        .andWhere('ubm.bank_id = :bankId', { bankId })
-        .andWhere('t.transacted_at = :after', {after: apiQuery.after})
-        // .andWhere('t.created_at >= :after', { after: apiQuery.after })
-        // .andWhere('t.created_at <= :before', { before: apiQuery.before })
-        .orderBy('t.sequence', 'DESC')
-        .getOne();
+        // currentDayLastTransaction = await dbSource.manager
+        // .createQueryBuilder(Transaction, "t")
+        // .leftJoinAndSelect('t.userBankMapping', 'ubm')
+        // .where('ubm.user_id = :userId', { userId: user.id })
+        // .andWhere('ubm.bank_id = :bankId', { bankId })
+        // .andWhere('t.transacted_at = :after', {after: apiQuery.after})
+        // // .andWhere('t.created_at >= :after', { after: apiQuery.after })
+        // // .andWhere('t.created_at <= :before', { before: apiQuery.before })
+        // .orderBy('t.sequence', 'DESC')
+        // .getOne();
+        currentDayLastTransaction = await Transaction.findOne({
+            where:{
+                transacted_at: new Date(apiQuery.after),
+                user_bank_mapping_id: userBankMapping.id
+            },
+            relations: ["userBankMapping"],
+            order:{
+                sequence: "DESC"
+            }
+        })
     }
     const transactions =  await setGmailMessages(modifiedQuery, access_token, userBankMapping, currentDayLastTransaction, trackedId, Number(limit), apiQuery)
     return {transactions, cursor: transactions[transactions.length-1]}
@@ -108,7 +118,7 @@ async function modifyAndSaveTransactions(messages: GmailMessage[], access_token:
         messages?.reverse().forEach(msg => {
             const foundTransaction = modifiedResponse.find(t => t.message_id === msg.id)
             if (foundTransaction){
-                foundTransaction.sequence=++lastTransactionSequence
+                foundTransaction.sequence = ++lastTransactionSequence
                 sortedOrder.push(foundTransaction)
             }
         })
@@ -120,6 +130,9 @@ async function modifyAndSaveTransactions(messages: GmailMessage[], access_token:
             select: ['upi_id']
         })
         
+        const savedUserUpiCategoryNameWithUpiId = await UserUpiCategoryNameMapping.find({where: {user_id: userBankMapping.user_id}})
+        let savedUserUpiCategoryNameMappingList: UserUpiCategoryNameMapping[] = []
+
          const toSaveUpiIds = userUpiDetails
          .filter(upiId => !dbUserUpiDetails.some(dbUpiId => dbUpiId.upi_id === upiId))
          .map(upiId => ({ upi_id: upiId! }));
@@ -127,15 +140,22 @@ async function modifyAndSaveTransactions(messages: GmailMessage[], access_token:
         // whenever a new upi id comes, it will be saved
         if (toSaveUpiIds.length > 0) {
             await UserUpiDetails.insert(toSaveUpiIds);
-            // const userUpiCategoryNameMappingList = toSaveUpiIds.map((upiId)=> {
-            //     const userUpiCategoryNameMappingInstance = new UserUpiCategoryNameMapping()
-            //     userUpiCategoryNameMappingInstance.upi_id = upiId.upi_id
-            //     userUpiCategoryNameMappingInstance.user_id = userBankMapping.user_id
-            //     return userUpiCategoryNameMappingInstance
-            // }
-            // )
-            // await UserUpiCategoryNameMapping.save(userUpiCategoryNameMappingList)
+            const userUpiCategoryNameMappingList = toSaveUpiIds.map((upiId)=> {
+                const userUpiCategoryNameMappingInstance = new UserUpiCategoryNameMapping()
+                userUpiCategoryNameMappingInstance.upi_id = upiId.upi_id
+                userUpiCategoryNameMappingInstance.user_id = userBankMapping.user_id
+                return userUpiCategoryNameMappingInstance
+            }
+            )
+             savedUserUpiCategoryNameMappingList = await UserUpiCategoryNameMapping.save(userUpiCategoryNameMappingList)
         }
+        sortedOrder.forEach((tx)=> {
+            const foundUserUpiCategoryNameWithUpiId = savedUserUpiCategoryNameMappingList.find(item => item.upi_id === tx.upi_id) || 
+            savedUserUpiCategoryNameWithUpiId.find(item => item.upi_id === tx.upi_id)
+            if (foundUserUpiCategoryNameWithUpiId){
+                tx.user_upi_category_name_mapping_id=foundUserUpiCategoryNameWithUpiId.id
+            }
+        })
 
 
         // save the last transaction in redis
@@ -185,7 +205,7 @@ const updateTransactions = async(requestBody: UpdateTransactionRequestBody, curr
             where: {
                 id: In(transactionIds)
             },
-            relations: ["userUpiDetails", "userBankMapping"]
+            relations: ["userBankMapping"],
         }
     )
     if (!transactions.length) throw new Error('No transactions found')
@@ -201,7 +221,7 @@ const updateTransactions = async(requestBody: UpdateTransactionRequestBody, curr
             if (!userUpiCategoryNameMapping && userUpiDetails){
                 const userUpiCategoryNameMappingInstance = new UserUpiCategoryNameMapping()
                 userUpiCategoryNameMappingInstance.user_id = currentUser.id
-                userUpiCategoryNameMappingInstance.upi_id = userUpiDetails?.upi_id
+                userUpiCategoryNameMappingInstance.upi_id = userUpiDetails?.id
                 await UserUpiCategoryNameMapping.save(userUpiCategoryNameMappingInstance)
                 userUpiCategoryNameMapping = userUpiCategoryNameMappingInstance
             }
@@ -215,7 +235,6 @@ const updateTransactions = async(requestBody: UpdateTransactionRequestBody, curr
                 userUpiCategoryNameMapping.upi_name = vpaName
             }
             const reloadedInstance = await UserUpiCategoryNameMapping.save(userUpiCategoryNameMapping!)
-            transactions.forEach(txn=> txn.user_upi_category_name_mapping_id = reloadedInstance.id)
             const reloadedTransactions = await Transaction.save(transactions, {
                 reload: true,
             })

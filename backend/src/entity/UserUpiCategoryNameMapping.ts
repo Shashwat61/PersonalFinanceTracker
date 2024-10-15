@@ -16,7 +16,6 @@ export class UserUpiCategoryNameMapping extends BaseEntity{
     
     @Column({
         type: "varchar",
-        length: 255,
         nullable: false
     })
     upi_id!: string
