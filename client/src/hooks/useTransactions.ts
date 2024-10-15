@@ -2,11 +2,12 @@ import { Bank, DefaultGetManyParams, EditTransaction, Transaction, TransactionRe
 import { getDates } from '@/utils'
 import { getMany, updateMany } from '@/utils/api'
 import { QUERY_STALE_TIME, TRANSACTION_RESPONSE_LIMIT } from '@/utils/constants'
-import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 
 function useTransactions(userId:string | undefined, primaryUserBank: Bank | null, selectedDate:Date) {
     console.log(selectedDate, 'in usetransaction')
+    const queryClient = useQueryClient()
 
     const {data: userTransactions, isLoading: userTransactionsLoading, isSuccess: userTransactionsSuccess, } = useInfiniteQuery({
         queryKey: ["transactions", userId, primaryUserBank?.id, selectedDate],
@@ -38,13 +39,17 @@ function useTransactions(userId:string | undefined, primaryUserBank: Bank | null
     console.log(transactions, 'transactions... ')
 
 
-    const {mutate: updateTransactions, isSuccess: updateTransactionsSuccess, isPending: updateTransactionsPending, data: updatedTransactions} = useMutation({
+    const {mutate: updateTransactions, isSuccess: updateTransactionsSuccess, isPending: updateTransactionsPending, data: updatedTransactions, variables} = useMutation({
         mutationFn: (data: EditTransaction) => updateMany<Transaction[], EditTransaction>('/transactions', data),
         onMutate: async (data) => {
             console.log(data, 'data in onMutate')
         },
-        onSuccess: (data, variables, context) => {
+        onSettled: async(data, variables, context) => {
             console.log(data, 'data in onSuccess')
+            return await queryClient.invalidateQueries({
+                queryKey: ["transactions", userId, primaryUserBank?.id, selectedDate]
+            })
+            
         }
     })
   return {
@@ -54,7 +59,8 @@ function useTransactions(userId:string | undefined, primaryUserBank: Bank | null
         updateTransactions,
         updateTransactionsSuccess,
         updateTransactionsPending,
-        updatedTransactions
+        updatedTransactions,
+        variables
   }
 }
 

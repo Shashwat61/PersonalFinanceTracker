@@ -24,12 +24,7 @@ function EditTransactionModal({ transaction, onSave, open, onOpenChange, placeho
     const [nickName, setNickName] = useState<string>(transactionMetaData?.upi_name || '')
     
     console.log(selectedCategory, nickName, 'nickname', transactionMetaData, transactionCategory)
-    // React.useEffect(() => {
-    //   if (transaction) {
-    //     setEditedTransaction(transaction)
-    //   }
-    // }, [transaction])
-  
+
     const handleSave = () => {
         if (!transaction) return;
         onSave(transaction, selectedCategory, nickName)
@@ -86,7 +81,7 @@ function EditTransactionModal({ transaction, onSave, open, onOpenChange, placeho
     
             </div>
             <div>
-              <Label htmlFor="description">Nickname for {transaction.payee_upi_id || transaction.receiver_upi_id}</Label>
+              <Label htmlFor="description">Nickname for {transaction.upi_id}</Label>
               <Input
                 id="description" 
                 value={nickName} 

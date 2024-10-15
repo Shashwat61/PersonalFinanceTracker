@@ -30,8 +30,8 @@ function TransactionSlab({ transaction, onEdit }: TransactionSlabProps) {
                 )}
               </div>
               <div>
-                <h3 className="font-medium">{transactionMetaData? transactionMetaData.upi_name :
-                isTransactionDebit ? transaction.receiver_upi_id : transaction.payee_upi_id}</h3>
+                <h3 className="font-medium">{transactionMetaData?.upi_name ? transactionMetaData.upi_name :
+                transaction.upi_id}</h3>
                 <p className="text-sm text-gray-500">{transaction.transacted_at}</p>
               </div>
             </div>

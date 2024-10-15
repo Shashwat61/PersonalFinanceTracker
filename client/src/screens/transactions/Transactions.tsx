@@ -28,7 +28,7 @@ import { QUERY_STALE_TIME } from '@/utils/constants'
   const [search, setSearch] = useState<string>('')
   const [debouncedSearch] = useDebounce(search, 500)
   const {selectedDate, setSelectedDate} = useFilters()
-  const {userTransactions, updateTransactions, updateTransactionsPending,updateTransactionsSuccess, userTransactionsLoading, userTransactionsSuccess, updatedTransactions} = useTransactions(userData?.id, primaryUserBank, selectedDate)
+  const {userTransactions, updateTransactions, updateTransactionsPending,updateTransactionsSuccess, userTransactionsLoading, userTransactionsSuccess, updatedTransactions, variables} = useTransactions(userData?.id, primaryUserBank, selectedDate)
   console.log(selectedDate, 'selectedDate')
   console.log(updatedTransactions, 'updatedTrasnctions')
   
@@ -38,8 +38,8 @@ import { QUERY_STALE_TIME } from '@/utils/constants'
   }
 
   function handleSaveTransaction(transaction: Transaction, categoryId?:string, vpaNickName?: string){
-    const vpaId = transaction.payee_upi_id || transaction.receiver_upi_id
-    const similarTransactionsIds = userTransactions.filter(txn => (txn.payee_upi_id == vpaId || txn.receiver_upi_id == vpaId)).map(txn => txn.id)
+    const vpaId = transaction.upi_id
+    const similarTransactionsIds = userTransactions.filter(txn => (txn.upi_id == vpaId)).map(txn => txn.id)
     updateTransactions({transactionIds: similarTransactionsIds, categoryId, vpaName: vpaNickName})
     setIsEditDialogOpen(false)
   }

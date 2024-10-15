@@ -18,8 +18,7 @@ export interface Bank{
 export interface Transaction{
     id: string
     amount: number
-    payee_upi_id?: string
-    receiver_upi_id?: string
+    upi_id: string
     category_id?: string
     bank_account_number?: number
     transaction_metadata_id?: string
@@ -31,7 +30,7 @@ export interface Transaction{
     updated_at: string
     message_id: string
     sequence: number
-    user_upi_category_name_mapping_id?: string
+    user_upi_category_name_mapping_id: string
     userUpiCategoryNameMapping?: UserUpiCategoryNameMapping
 }
 export interface TransactionResponse{
