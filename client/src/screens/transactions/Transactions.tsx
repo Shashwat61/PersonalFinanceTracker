@@ -38,8 +38,8 @@ import { QUERY_STALE_TIME } from '@/utils/constants'
   }
 
   function handleSaveTransaction(transaction: Transaction, categoryId?:string, vpaNickName?: string){
-    const vpaId = transaction.upi_id
-    const similarTransactionsIds = userTransactions.filter(txn => (txn.upi_id == vpaId)).map(txn => txn.id)
+    const userUpiCategoryNameMappingId = transaction.user_upi_category_name_mapping_id
+    const similarTransactionsIds = userTransactions.filter(txn => (txn.user_upi_category_name_mapping_id == userUpiCategoryNameMappingId)).map(txn => txn.id)
     updateTransactions({transactionIds: similarTransactionsIds, categoryId, vpaName: vpaNickName})
     setIsEditDialogOpen(false)
   }
@@ -61,7 +61,7 @@ import { QUERY_STALE_TIME } from '@/utils/constants'
           </Button>
         </div>
 
-        <Card className='min-h-screen'>
+        <Card className='h-[80vh] overflow-scroll'>
           <CardContent className="p-6">
             <TransactionHeader 
             search = {search}
@@ -70,15 +70,17 @@ import { QUERY_STALE_TIME } from '@/utils/constants'
             selectedDate={selectedDate}
             />
 
-            <div className="space-y-4">
-              {userTransactions.map((transaction) => (
-                <TransactionSlab 
+            <div className="space-y-4 overflow-scroll">
+              {
+                userTransactions?.map((transaction) => (
+                  <TransactionSlab 
                   key={transaction.id} 
                   transaction={transaction} 
                   onEdit={handleEditTransaction}
-                />
-              ))}
+                  />
+                ))}
             </div>
+            {!userTransactions.length ? <div className=" justify-self-center text-muted-foreground">No new transactions</div> : null}
           </CardContent>
         </Card>
       </div>

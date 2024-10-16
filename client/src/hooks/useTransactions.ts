@@ -49,7 +49,6 @@ function useTransactions(userId:string | undefined, primaryUserBank: Bank | null
             return await queryClient.invalidateQueries({
                 queryKey: ["transactions", userId, primaryUserBank?.id, selectedDate]
             })
-            
         }
     })
   return {

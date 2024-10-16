@@ -81,7 +81,7 @@ function EditTransactionModal({ transaction, onSave, open, onOpenChange, placeho
     
             </div>
             <div>
-              <Label htmlFor="description">Nickname for {transaction.upi_id}</Label>
+              <Label htmlFor="description">Nickname for {transactionMetaData?.upi_id}</Label>
               <Input
                 id="description" 
                 value={nickName} 

@@ -18,20 +18,18 @@ export interface Bank{
 export interface Transaction{
     id: string
     amount: number
-    upi_id: string
-    category_id?: string
     bank_account_number?: number
     transaction_metadata_id?: string
     transaction_type: string
-    user_id?: string
-    user_bank_mapping_id?: string
+    user_id: string
+    user_bank_mapping_id: string
     transacted_at: string
     created_at: string
     updated_at: string
     message_id: string
     sequence: number
     user_upi_category_name_mapping_id: string
-    userUpiCategoryNameMapping?: UserUpiCategoryNameMapping
+    userUpiCategoryNameMapping: UserUpiCategoryNameMapping
 }
 export interface TransactionResponse{
     transactions: Transaction[]
