@@ -8,7 +8,8 @@ const dataSource = new DataSource({
   "password": "",
   "database": "financetracker",
   "logging": true,
-  "migrations": ["./src/migration/data/*.ts"],
+  "migrations": ["./src/migrations/data/*.ts"],
+  "migrationsTableName": "data_migrations"
 })
 
 

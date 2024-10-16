@@ -1,6 +1,13 @@
 import { Request, Response } from "express"
 import services from "../services"
+import authController from "./auth.controller"
+import transactionController from "./transaction.controller"
+import watchEmailController from "./watch-email.controller"
+import bankController from "./bank.controller"
+import userBankController from "./user-bank.controller"
 import userController from "./user.controller"
+import categoryController from "./category.controller"
+
 
 
 const rootRouteController = (req: Request, res: Response)=> {
@@ -13,6 +20,12 @@ const rootRouteController = (req: Request, res: Response)=> {
 
 export default {
     rootRouteController,
-    userController
+    authController,
+    transactionController,
+    watchEmailController,
+    bankController,
+    userBankController,
+    userController,
+    categoryController
 
 }

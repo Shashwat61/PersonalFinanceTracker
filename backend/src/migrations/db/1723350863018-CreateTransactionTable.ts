@@ -16,7 +16,7 @@ export class CreateTransactionTable1723350863018 implements MigrationInterface {
                     },
                     {
                         name: "amount",
-                        type: "decimal",
+                        type: "numeric",
                         default: null,
                         precision: 10,
                         scale: 2
@@ -45,7 +45,8 @@ export class CreateTransactionTable1723350863018 implements MigrationInterface {
                     {
                         name: "transaction_metadata_id",
                         type: "uuid",
-                        isNullable: false,
+                        isNullable: true,
+                        default: null
                     },
                     {
                         name: "transaction_type",
@@ -130,6 +131,12 @@ export class CreateTransactionTable1723350863018 implements MigrationInterface {
                     {
                         columnNames: ["transaction_metadata_id"],
                         referencedTableName: "transaction_metadata",
+                        referencedColumnNames: ["id"],
+                        onDelete: "CASCADE"
+                    },
+                    {
+                        columnNames: ["user_id"],
+                        referencedTableName: "user",
                         referencedColumnNames: ["id"],
                         onDelete: "CASCADE"
                     }

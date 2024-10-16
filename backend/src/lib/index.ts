@@ -1,5 +1,6 @@
-import {redisClient} from "./redis.lib";
-
+import {redisClient} from "./redis.client";
+import { gmailClient } from "./gmail.client";
 export {
-    redisClient
+    redisClient,
+    gmailClient
 }

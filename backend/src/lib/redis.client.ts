@@ -13,10 +13,10 @@ class RedisClient {
     }
 
     async getKey(key: string){
-        await this.client.get(key)
+        return await this.client.get(key)
     }
     async setKey(key: string, value: string, expiry: number){
-        await this.client.set(key, value, {EX: expiry})
+        return await this.client.set(key, value, {EX: expiry})
     }
     async deleteKey(key: string){
         await this.client.del(key)
