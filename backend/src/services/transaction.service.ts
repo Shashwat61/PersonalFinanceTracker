@@ -101,7 +101,7 @@ async function setGmailMessages(modifiedQuery: string, access_token: string, use
     // which means get all the messages and iterate over all of'em.
     const savedTransactions = await modifyAndSaveTransactions(messages, access_token, userBankMapping, lastTransaction)
     // save and implement tracker
-    const lastSavedTransaction = savedTransactions[savedTransactions.length - 1]
+    const lastSavedTransaction = savedTransactions[0]
     await redisClient.setKey(`${userBankMapping.user_id}_${userBankMapping.bank_id}${query.after}${query.before}_last_transaction`, lastSavedTransaction.message_id.toString(), 86400)
     // if trackedId is present then return the transactions 10 conditions
 
@@ -163,6 +163,7 @@ async function modifyAndSaveTransactions(messages: GmailMessage[], access_token:
 
         // save the last transaction in redis
         const savedTransactions = await Transaction.save(sortedOrder, {
+            reload: true
         })
         // const loadedTransactions = await Transaction.find({
         //     relations: ["userUpiDetails"],
@@ -215,33 +216,29 @@ const updateTransactions = async(requestBody: UpdateTransactionRequestBody, curr
     // only run this logic if either of them is present in request body
     if (categoryId || vpaName){
         const userBankMapping = transactions[0].userBankMapping
-        const userUpiDetails = transactions[0].userUpiDetails
-        // at this point of flow, there cannot be a transaction without a userUpiDetails relation
-        // would always get a single mapping for a user id and upi id both when selected together
-        let userUpiCategoryNameMapping = transactions[0]?.userUpiCategoryNameMapping
-        if (userBankMapping.user_id !== currentUser.id) throw new Error('Unauthorized')
-            if (!userUpiCategoryNameMapping && userUpiDetails){
-                const userUpiCategoryNameMappingInstance = new UserUpiCategoryNameMapping()
-                userUpiCategoryNameMappingInstance.user_id = currentUser.id
-                userUpiCategoryNameMappingInstance.upi_id = userUpiDetails?.id
-                await UserUpiCategoryNameMapping.save(userUpiCategoryNameMappingInstance)
-                userUpiCategoryNameMapping = userUpiCategoryNameMappingInstance
+        const userUpiDetails = transactions[0].userUpiCategoryNameMapping?.userUpiDetails
+        // at this point of flow, there cannot be a transaction without a userupicategorynamemapping relation.
+        // would always get a single mapping for a user id and upi id both when selected together and in this case for similar transactions with same upi id userUpiCategoryNameMapping will remain same.
+        let userUpiCategoryNameMapping = transactions[0].userUpiCategoryNameMapping
+        if (userBankMapping.user_id !== userUpiCategoryNameMapping?.user_id || userBankMapping.user_id !== currentUser.id) throw new Error('Unauthorized')
+        if (!userUpiCategoryNameMapping) throw new Error("No UserUpiCategoryNameMapping relation found")
+        if (categoryId){
+            // transactions.forEach((txn)=>{
+            //     txn.category_id = categoryId
+            // })
+            userUpiCategoryNameMapping.category_id = categoryId
+        }
+        if (vpaName){
+            userUpiCategoryNameMapping.upi_name = vpaName
+        }
+        await UserUpiCategoryNameMapping.save(userUpiCategoryNameMapping)
+        // why find because we just have to save userupicategorynamemapping table instance and when we write find query for tranasction, userupicategorynamemapping will eagerly load with updated data.
+        const reloadedTransactions = Transaction.find({
+            where: {
+                id: In(transactionIds)
             }
-            if (categoryId && userUpiCategoryNameMapping){
-                transactions.forEach((txn)=>{
-                    txn.category_id = categoryId
-                })
-                userUpiCategoryNameMapping.category_id= categoryId
-            }
-            if (vpaName && userUpiCategoryNameMapping){
-                userUpiCategoryNameMapping.upi_name = vpaName
-            }
-            const reloadedInstance = await UserUpiCategoryNameMapping.save(userUpiCategoryNameMapping!)
-            const reloadedTransactions = await Transaction.save(transactions, {
-                reload: true,
-            })
-            reloadedTransactions.forEach(txn => txn.userUpiCategoryNameMapping = reloadedInstance)
-            return reloadedTransactions
+        })
+        return reloadedTransactions
         }
 }
 

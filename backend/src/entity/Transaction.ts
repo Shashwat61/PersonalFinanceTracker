@@ -18,12 +18,6 @@ export class Transaction extends BaseEntity{
     })
     amount!: number
 
-    @Column({
-        type: 'uuid',
-        nullable: true,
-        default: null
-    })
-    category_id!: string
 
     @Column({
         type: 'integer',
@@ -110,7 +104,7 @@ export class Transaction extends BaseEntity{
     @ManyToOne(()=> UserUpiCategoryNameMapping, (
         userUpiCategoryNameMapping) => userUpiCategoryNameMapping.transactions, {
         eager: true,
-        nullable: true
+        nullable: false
     })
     @JoinColumn({name: "user_upi_category_name_mapping_id"})
     userUpiCategoryNameMapping?: UserUpiCategoryNameMapping
