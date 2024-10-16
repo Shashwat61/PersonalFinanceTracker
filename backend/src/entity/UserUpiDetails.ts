@@ -36,9 +36,6 @@ export class UserUpiDetails extends BaseEntity{
     })
     updated_at!: Date
 
-    @OneToMany(()=>Transaction, (transaction) => transaction.userUpiDetails)
-    transactions!: Transaction[]
-
     @ManyToOne(()=> User, (user) => user.userUpiDetails)
     @JoinColumn({
         name: "user_id",

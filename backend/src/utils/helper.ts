@@ -8,6 +8,7 @@ import { UserUpiDetails } from "../entity/UserUpiDetails";
 import services from "../services";
 import { UserBankMapping } from "../entity/UserBankMapping";
 import { Between } from "typeorm";
+import { UserUpiCategoryNameMapping } from "../entity/UserUpiCategoryNameMapping";
 
 function oAuth2ClientInstance(){
     return new OAuth2Client(
@@ -75,10 +76,11 @@ function modifyQuery(query: {[key:string]: string}){
 
 
 
- function parseTransactionMessage(message: Message, userBankMapping: UserBankMapping, userUpiDetails: string[]){
+ function parseTransactionMessage(message: Message, userBankMapping: UserBankMapping, userUpiDetails: string[], userUpiCategoryNameMappingList: UserUpiCategoryNameMapping[], messageUpiIdMap: {[key: string]: string}){
     // Dear Customer, Rs. 1.00 is successfully credited to your account **8730 by VPA 8802135135@ptaxis on 25-08-24. Your UPI transaction reference number is 4238593610416. Thank you for banking with us. Warm
 
     // Dear Customer, Rs.1.00 has been debited from account **8730 to VPA 8802135135@ptaxis on 25-08-24. Your UPI transaction reference number is 460404752423. If you did not authorize this transaction,
+
     const transactionInstance = new Transaction()
     if (message.snippet.includes("credited"))
         transactionInstance.transaction_type = "credit"
@@ -97,7 +99,6 @@ function modifyQuery(query: {[key:string]: string}){
     if (vpaMatch){
         // change this, this should not be here
         if(!userUpiDetails.includes(vpaMatch[1])) userUpiDetails.push(vpaMatch[1])
-        transactionInstance.upi_id = vpaMatch[1]
         transactionInstance.user_id = userBankMapping.user_id
     }
 
@@ -105,20 +106,33 @@ function modifyQuery(query: {[key:string]: string}){
     if (dateMatch) transactionInstance.transacted_at = getDate(dateMatch[1])
     transactionInstance.message_id = message.id
     transactionInstance.user_bank_mapping_id = userBankMapping.id
+    if (vpaMatch && userUpiCategoryNameMappingList.length > 0) setUserUpiCategoryNameMappingId(transactionInstance, vpaMatch[1], userUpiCategoryNameMappingList, messageUpiIdMap)
     return transactionInstance;
 }
 
- function modifyTransactionDataVersionTwo(transactionData: GmailThreadMessages[], userBankMapping: UserBankMapping): [Transaction[], string[]]{
+function setUserUpiCategoryNameMappingId(transaction: Transaction, upiId: string, userUpiCategoryNameMappingList: UserUpiCategoryNameMapping[], messageUpiIdMap: {[key:string]: string}){
+    const foundUserUpiCategoryNameWithUpiId = userUpiCategoryNameMappingList.find(item => item.upi_id === upiId)
+    if(foundUserUpiCategoryNameWithUpiId){
+        transaction.user_upi_category_name_mapping_id = foundUserUpiCategoryNameWithUpiId.id
+        transaction.userUpiCategoryNameMapping = foundUserUpiCategoryNameWithUpiId
+    }
+    else{
+        messageUpiIdMap[transaction.message_id] = upiId
+    }
+}
+
+ function modifyTransactionDataVersionTwo(transactionData: GmailThreadMessages[], userBankMapping: UserBankMapping, userUpiCategoryNameMappingList: UserUpiCategoryNameMapping[]): [Transaction[], string[], {[key: string]: string}]{
     const transactions: Transaction[] = []
     const userUpiDetails: string[] = []
+    const messageUpiIdMap = {}
     transactionData.map(t=> {
         for(const message of t.messages){
             if(message.snippet && (message.snippet.includes("credited") || message.snippet.includes("debited"))){
-                transactions.push(parseTransactionMessage(message, userBankMapping, userUpiDetails))
+                transactions.push(parseTransactionMessage(message, userBankMapping, userUpiDetails, userUpiCategoryNameMappingList, messageUpiIdMap))
             }
         }
     })
-    return [transactions, [...new Set(userUpiDetails)]]
+    return [transactions, [...new Set(userUpiDetails)], messageUpiIdMap]
 }
 
 function getDate(date:string){

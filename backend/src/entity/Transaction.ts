@@ -19,12 +19,6 @@ export class Transaction extends BaseEntity{
     amount!: number
 
     @Column({
-        type: 'varchar',
-        length: 255
-    })
-    upi_id!: string
-
-    @Column({
         type: 'uuid',
         nullable: true,
         default: null
@@ -108,12 +102,6 @@ export class Transaction extends BaseEntity{
     @ManyToOne(()=> User, (user) => user.transactions, {cascade: true})
     @JoinColumn({name: "user_id"})
     user!: User
-
-    @ManyToOne(()=> UserUpiDetails, (userUpiDetails) => userUpiDetails.transactions, {
-        // eager: true,
-    })
-    @JoinColumn({name: "upi_id", referencedColumnName: "upi_id"})
-    userUpiDetails!: UserUpiDetails
 
     @ManyToOne(() => UserBankMapping, (userBankMapping) => userBankMapping.transactions, { cascade: true})
     @JoinColumn({ name: "user_bank_mapping_id" })

@@ -113,13 +113,14 @@ async function modifyAndSaveTransactions(messages: GmailMessage[], access_token:
     const uniqueThreadIds = [...new Set(messages?.map(msg => msg.threadId))]
         const gmailThreadMessages = uniqueThreadIds.map(threadId => gmailClient.getEmailsFromThreads(threadId, access_token))
         const transactionData = await Promise.all(gmailThreadMessages)
-        const [modifiedResponse, userUpiDetails] = modifyTransactionDataVersionTwo(transactionData, userBankMapping)
+        const savedUserUpiCategoryNameWithUpiId = await UserUpiCategoryNameMapping.find({where: {user_id: userBankMapping.user_id}}) // problem here is it will fetch n results, if user has 1000 upi related payments, then this is a disaster. find a way to optimize this. !IMPORTANT
+        const [modifiedResponse, userUpiDetails, messageUpiMap] = modifyTransactionDataVersionTwo(transactionData, userBankMapping, savedUserUpiCategoryNameWithUpiId)
         // sort modifiedresponse with reverse order of messages 
         messages?.reverse().forEach(msg => {
             const foundTransaction = modifiedResponse.find(t => t.message_id === msg.id)
             if (foundTransaction){
                 foundTransaction.sequence = ++lastTransactionSequence
-                sortedOrder.push(foundTransaction)
+                sortedOrder.unshift(foundTransaction)
             }
         })
         // findorcreate  userupidetails bulk
@@ -130,7 +131,6 @@ async function modifyAndSaveTransactions(messages: GmailMessage[], access_token:
             select: ['upi_id']
         })
         
-        const savedUserUpiCategoryNameWithUpiId = await UserUpiCategoryNameMapping.find({where: {user_id: userBankMapping.user_id}})
         let savedUserUpiCategoryNameMappingList: UserUpiCategoryNameMapping[] = []
 
          const toSaveUpiIds = userUpiDetails
@@ -149,18 +149,20 @@ async function modifyAndSaveTransactions(messages: GmailMessage[], access_token:
             )
              savedUserUpiCategoryNameMappingList = await UserUpiCategoryNameMapping.save(userUpiCategoryNameMappingList)
         }
+        // for new user upi ids and will skip the already saved upi ids related transactions
         sortedOrder.forEach((tx)=> {
-            const foundUserUpiCategoryNameWithUpiId = savedUserUpiCategoryNameMappingList.find(item => item.upi_id === tx.upi_id) || 
-            savedUserUpiCategoryNameWithUpiId.find(item => item.upi_id === tx.upi_id)
-            if (foundUserUpiCategoryNameWithUpiId){
-                tx.user_upi_category_name_mapping_id=foundUserUpiCategoryNameWithUpiId.id
+            if (!tx.user_upi_category_name_mapping_id){
+                const foundUserUpiCategoryNameWithUpiId =     savedUserUpiCategoryNameMappingList.find(item => item.upi_id === messageUpiMap[tx.message_id])
+                if (foundUserUpiCategoryNameWithUpiId){
+                    tx.user_upi_category_name_mapping_id=foundUserUpiCategoryNameWithUpiId.id
+                    tx.userUpiCategoryNameMapping = foundUserUpiCategoryNameWithUpiId
+                }
             }
         })
 
 
         // save the last transaction in redis
         const savedTransactions = await Transaction.save(sortedOrder, {
-            reload: true,
         })
         // const loadedTransactions = await Transaction.find({
         //     relations: ["userUpiDetails"],
