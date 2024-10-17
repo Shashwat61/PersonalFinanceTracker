@@ -1,21 +1,39 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Card, CardContent } from '../ui/card';
-import { ArrowDownRight, ArrowUpRight, Edit2 } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, Edit2, Loader2 } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Transaction } from '@/types';
 import { TRANSACTION_TYPES } from '@/utils/constants';
+import { cn } from '@/utils';
 interface TransactionSlabProps{
     transaction: Transaction
     onEdit: (transaction: Transaction) => void
+    updateMutationPending: boolean
+    similarTransactionsIds: string[]
+    updateMutationSuccess: boolean
 }
-function TransactionSlab({ transaction, onEdit }: TransactionSlabProps) {
+function TransactionSlab({ transaction, onEdit, similarTransactionsIds, updateMutationPending, updateMutationSuccess }: TransactionSlabProps) {
     const [expanded, setExpanded] = useState(false)
     const isTransactionDebit = transaction.transaction_type === TRANSACTION_TYPES.DEBIT
     const transactionMetaData = transaction?.userUpiCategoryNameMapping
     const transactionCategory = transactionMetaData?.category
+    const isTransactionBeingUpdated = similarTransactionsIds.includes(transaction.id) && updateMutationPending
+    useEffect(()=>{
+       if(expanded && updateMutationSuccess){
+              setExpanded(false)
+       }
+    },[updateMutationSuccess])
+    
     return (
-      <Card className="mb-4">
+      <Card className={cn("mb-4 relative", isTransactionBeingUpdated && 'pointer-events-none opacity-50')} >
+        {
+            isTransactionBeingUpdated ? (
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-black rounded-lg bg-opacity-10">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+        ) :null
+        }
         <CardContent className="p-4">
           <div 
             className="flex items-center justify-between cursor-pointer" 

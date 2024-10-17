@@ -29,7 +29,8 @@ import { QUERY_STALE_TIME } from '@/utils/constants'
   const [debouncedSearch] = useDebounce(search, 500)
   const {selectedDate, setSelectedDate} = useFilters()
   const {userTransactions, updateTransactions, updateTransactionsPending,updateTransactionsSuccess, userTransactionsLoading, userTransactionsSuccess, updatedTransactions, variables} = useTransactions(userData?.id, primaryUserBank, selectedDate)
-  console.log(selectedDate, 'selectedDate')
+  const [similarTransactionsIds, setSimilarTransactionIds] = useState<string[]>([])
+  
   console.log(updatedTransactions, 'updatedTrasnctions')
   
   function handleEditTransaction(transaction: Transaction){
@@ -40,6 +41,7 @@ import { QUERY_STALE_TIME } from '@/utils/constants'
   function handleSaveTransaction(transaction: Transaction, categoryId?:string, vpaNickName?: string){
     const userUpiCategoryNameMappingId = transaction.user_upi_category_name_mapping_id
     const similarTransactionsIds = userTransactions.filter(txn => (txn.user_upi_category_name_mapping_id == userUpiCategoryNameMappingId)).map(txn => txn.id)
+    setSimilarTransactionIds(similarTransactionsIds)
     updateTransactions({transactionIds: similarTransactionsIds, categoryId, vpaName: vpaNickName})
     setIsEditDialogOpen(false)
   }
@@ -61,7 +63,7 @@ import { QUERY_STALE_TIME } from '@/utils/constants'
           </Button>
         </div>
 
-        <Card className='h-[80vh] overflow-scroll'>
+        <Card className='h-[80vh] overflow-scroll no-scrollbar'>
           <CardContent className="p-6">
             <TransactionHeader 
             search = {search}
@@ -77,6 +79,10 @@ import { QUERY_STALE_TIME } from '@/utils/constants'
                   key={transaction.id} 
                   transaction={transaction} 
                   onEdit={handleEditTransaction}
+                  updateMutationPending={updateTransactionsPending}
+                  similarTransactionsIds = {similarTransactionsIds}
+                  updateMutationSuccess = {updateTransactionsSuccess}
+                  
                   />
                 ))}
             </div>

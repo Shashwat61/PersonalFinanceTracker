@@ -20,7 +20,7 @@ function EditTransactionModal({ transaction, onSave, open, onOpenChange, placeho
     const transactionMetaData = transaction?.userUpiCategoryNameMapping
     const transactionCategory = transactionMetaData?.category
     const [editedTransaction, setEditedTransaction] = useState(transaction || {})
-    const [selectedCategory, setSelectedCategory] = useState<string>('')
+    const [selectedCategory, setSelectedCategory] = useState<string>(transactionCategory?.id || '')
     const [nickName, setNickName] = useState<string>(transactionMetaData?.upi_name || '')
     
     console.log(selectedCategory, nickName, 'nickname', transactionMetaData, transactionCategory)
