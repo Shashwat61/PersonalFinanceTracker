@@ -9,10 +9,10 @@ type LayoutProps = {
 function Layout(props: LayoutProps) {
   return (
       <div className="flex h-screen bg-gray-100">
-        <Sidebar activePage={"dashboard"} />
+        <Sidebar />
         <main className="flex-1 overflow-y-auto">
           <Header title={""} />
-          <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+          <div className="py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
             {props.children}
           </div>
         </main>
@@ -20,4 +20,4 @@ function Layout(props: LayoutProps) {
   )
 }
 
-export default Layout
+export default React.memo(Layout)

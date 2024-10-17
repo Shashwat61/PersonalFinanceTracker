@@ -1,3 +1,5 @@
+import { LucideProps } from "lucide-react"
+
 export interface User{
     id: string
     name: string
@@ -74,4 +76,11 @@ export interface UserUpiCategoryNameMapping {
     created_at: Date
     updated_at: Date
     category?: Category
+}
+
+export type SideBarItem = {
+    id: number
+    redirectLink: string
+    name: string
+    icon: React.ForwardRefExoticComponent<Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>
 }

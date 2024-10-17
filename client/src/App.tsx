@@ -7,6 +7,7 @@ import Router from './components/Router'
 import { UserContextProvider } from './contexts/UserContext'
 import { BankContextProvider } from './contexts/BankContext'
 import toast, { Toaster } from 'react-hot-toast'
+import { PersistentStorageProvider } from './contexts/PersistentStorageContext'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,7 +30,9 @@ function App() {
     <QueryClientProvider client = {queryClient}>
       <UserContextProvider>
         <BankContextProvider>
-      <Router/>
+          <PersistentStorageProvider>
+            <Router/>
+          </PersistentStorageProvider>
         </BankContextProvider>
       </UserContextProvider>
       <ReactQueryDevtools buttonPosition="top-right" />
