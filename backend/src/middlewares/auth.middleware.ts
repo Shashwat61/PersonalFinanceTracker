@@ -14,7 +14,7 @@ const checkForUserSession: RequestHandler = async(req: Request, res: Response, n
                 const tokenIdInfo = await getTokenIdInfo(jwt_token_value)
                 if (!tokenIdInfo) throw Error('wrong token')
                 console.log(tokenIdInfo, 'tokenidinfo')
-                const user = await User.findOneBy({email: tokenIdInfo?.getPayload()?.email})
+                const user = await User.findOneBy({email: tokenIdInfo?.getPayload()?.email?.toLowerCase()})
                 if(!user) throw Error('User not found')
                 res.locals.user = user
                 console.log("user found")

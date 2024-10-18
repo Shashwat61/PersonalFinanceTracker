@@ -56,7 +56,7 @@ export interface Message{
     after: string,
     before: string,
     from: string,
-    trackedId?: string | undefined,
+    cursor?: string | undefined,
     limit: string
   }
 

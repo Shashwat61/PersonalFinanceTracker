@@ -21,7 +21,7 @@ const signIn = async(code: string, res: Response)=> {
         if (tokenIdInfo && id_token && id_token.length > 0){
           const userFound = await User.findOne({
             where: {
-              email: tokenIdInfo.email
+              email: tokenIdInfo.email?.toLowerCase()
             }
           })
           if(userFound){

@@ -16,7 +16,7 @@ const checkApiAutheticated = async (req: Request, res: Response, next: NextFunct
         const accessToken = await redisClient.getKey(email);
         console.log(accessToken, 'accesstoken')
         if (!accessToken) throw new Error('Access token not found, Please sign in again');
-        const user = await User.findOneBy({email: tokenIdInfo?.getPayload()?.email})
+        const user = await User.findOneBy({email: tokenIdInfo?.getPayload()?.email?.toLowerCase()})
         if(!user) throw Error('User not found')
         res.locals.userInfo = {currentUser:user, accessToken}
         console.log("user found")

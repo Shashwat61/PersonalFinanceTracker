@@ -1,4 +1,4 @@
-import { Equal, In, LessThan, MoreThan, MoreThanOrEqual } from "typeorm";
+import { Equal, In, LessThan, LessThanOrEqual, MoreThan, MoreThanOrEqual } from "typeorm";
 import { dbSource } from "../config/dbSource";
 import { Bank } from "../entity/Bank";
 import { Transaction } from "../entity/Transaction";
@@ -15,7 +15,7 @@ import { UserUpiCategoryNameMapping } from "../entity/UserUpiCategoryNameMapping
 const getTransactionsVersionTwo = async(
     access_token: string, apiQuery: TransactionParams, bankId:string, user: User
 ) => {
-    const {trackedId, limit} = apiQuery // TODO: take it as hashed value and unhash it here
+    const {cursor, limit} = apiQuery // TODO: take it as hashed value and unhash it here
     
     const query = Object.assign({},{
         from: apiQuery.from,
@@ -31,16 +31,6 @@ const getTransactionsVersionTwo = async(
         currentDayLastTransaction = await Transaction.findOneBy({message_id: userBankLastCachedTransactionId})
     }
     else {
-        // currentDayLastTransaction = await dbSource.manager
-        // .createQueryBuilder(Transaction, "t")
-        // .leftJoinAndSelect('t.userBankMapping', 'ubm')
-        // .where('ubm.user_id = :userId', { userId: user.id })
-        // .andWhere('ubm.bank_id = :bankId', { bankId })
-        // .andWhere('t.transacted_at = :after', {after: apiQuery.after})
-        // // .andWhere('t.created_at >= :after', { after: apiQuery.after })
-        // // .andWhere('t.created_at <= :before', { before: apiQuery.before })
-        // .orderBy('t.sequence', 'DESC')
-        // .getOne();
         currentDayLastTransaction = await Transaction.findOne({
             where:{
                 transacted_at: new Date(apiQuery.after),
@@ -52,20 +42,21 @@ const getTransactionsVersionTwo = async(
             }
         })
     }
-    const transactions =  await setGmailMessages(modifiedQuery, access_token, userBankMapping, currentDayLastTransaction, trackedId, Number(limit), apiQuery)
-    return {transactions, cursor: transactions[transactions.length-1]}
+    const [transactions, calculatedCursor] =  await setGmailMessages(modifiedQuery, access_token, userBankMapping, currentDayLastTransaction, cursor, Number(limit), apiQuery)
+    return {transactions, cursor: calculatedCursor}
 }
 
-async function setGmailMessages(modifiedQuery: string, access_token: string, userBankMapping: UserBankMapping, lastTransaction: Transaction | null, trackedId: string | undefined, limit: number, query: TransactionParams){
+async function setGmailMessages(modifiedQuery: string, access_token: string, userBankMapping: UserBankMapping, lastTransaction: Transaction | null, cursor: string | undefined, limit: number, query: TransactionParams){
     const messages = await getGmailMessages(access_token, modifiedQuery, lastTransaction)
     if (!messages.length && !lastTransaction) return []
     if (lastTransaction && !messages.length){
 
        // messages [] -> no new messages
-       // if trackedId -> user is loading for more
-       // if no trackedId -> user is loading for first time
+       // if cursor -> user is loading for more
+       // if no cursor -> user is loading for first time
         let transactions: Transaction[] = []
-        if (!trackedId){
+        if (!Number(cursor)){
+            // handle if the cache is available then where : sequence else this only
              transactions = await Transaction.find({
                 // relations: ["userUpiDetails"],
                 where: {
@@ -82,20 +73,18 @@ async function setGmailMessages(modifiedQuery: string, access_token: string, use
              transactions = await Transaction.find({
                 where:{
                     user_bank_mapping_id: userBankMapping.id,
-                    sequence: LessThan(lastTransaction.sequence)
-                },
-                loadRelationIds: {
-                    relations: ['category'],
+                    sequence: LessThan(Number(cursor))
                 },
                 take: limit
             })
-            await redisClient.setKey(
-                `${userBankMapping.user_id}_${userBankMapping.bank_id}${query.after}${query.before}_last_transaction`,
-                transactions[transactions.length - 1].message_id.toString(),
-                86400
-            )
+            // setting cache for all transactions if found, handle that/
+            // await redisClient.setKey(
+            //     `${userBankMapping.user_id}_${userBankMapping.bank_id}${query.after}${query.before}_last_transaction`,
+            //     transactions[transactions.length - 1].message_id.toString(),
+            //     86400
+            // )
         }
-        return transactions
+        return [transactions, transactions.at(limit-1)?.sequence]
     }
     // which means either cache value was not found or there is no transaction done for the current day
     // which means get all the messages and iterate over all of'em.
@@ -103,9 +92,9 @@ async function setGmailMessages(modifiedQuery: string, access_token: string, use
     // save and implement tracker
     const lastSavedTransaction = savedTransactions[0]
     await redisClient.setKey(`${userBankMapping.user_id}_${userBankMapping.bank_id}${query.after}${query.before}_last_transaction`, lastSavedTransaction.message_id.toString(), 86400)
-    // if trackedId is present then return the transactions 10 conditions
+    // if cursor is present then return the transactions 10 conditions
 
-    return savedTransactions
+    return [savedTransactions.slice(0,limit), savedTransactions.at(limit-1)?.sequence]
 }
 
 async function modifyAndSaveTransactions(messages: GmailMessage[], access_token: string, userBankMapping: UserBankMapping, lastTransaction: Transaction | null){
@@ -119,7 +108,8 @@ async function modifyAndSaveTransactions(messages: GmailMessage[], access_token:
         messages?.reverse().forEach(msg => {
             const foundTransaction = modifiedResponse.find(t => t.message_id === msg.id)
             if (foundTransaction){
-                foundTransaction.sequence = ++lastTransactionSequence
+                lastTransactionSequence+=1
+                foundTransaction.sequence = lastTransactionSequence
                 sortedOrder.unshift(foundTransaction)
             }
         })
