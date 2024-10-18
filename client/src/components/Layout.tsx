@@ -12,7 +12,7 @@ function Layout(props: LayoutProps) {
         <Sidebar />
         <main className="flex-1 overflow-y-auto">
           <Header title={""} />
-          <div className="py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="h-[90vh] py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
             {props.children}
           </div>
         </main>

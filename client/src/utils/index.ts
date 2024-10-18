@@ -51,3 +51,8 @@ export function getDates(selectedDate: Date){
   const before = `${beforeDateTime.getFullYear()}-${beforeDateTime.getMonth()+1}-${beforeDateTime.getDate()}`
   return {after, before}
 }
+
+export function getActivePage(location: string){
+  const activePage = sideBarList.find(item => item.redirectLink === location)
+  return activePage || sideBarList[0]
+}

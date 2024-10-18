@@ -6,11 +6,11 @@ import { InfiniteData, useInfiniteQuery, useMutation, useQuery, useQueryClient }
 import toast from 'react-hot-toast'
 
 
-function useTransactions(userId:string | undefined, primaryUserBank: Bank | null, selectedDate:Date) {
+function useTransactions(userId:string | undefined, primaryUserBank: Bank | null, selectedDate:Date, sequence: number) {
     console.log(selectedDate, 'in usetransaction')
     const queryClient = useQueryClient()
 
-    const {data: userTransactions, isLoading: userTransactionsLoading, isSuccess: userTransactionsSuccess, } = useInfiniteQuery({
+    const {data: userTransactions, isLoading: userTransactionsLoading, isSuccess: userTransactionsSuccess, isFetchingNextPage: fetchingMoreUserTransactions, hasNextPage:  userTransactionHasMore, fetchNextPage: fetchMoreUserTransactions} = useInfiniteQuery({
         queryKey: ["transactions", userId, primaryUserBank?.id, selectedDate],
         queryFn: () => getMany<TransactionResponse, DefaultGetManyParams>(`/transactions/v2`, {
             filters: {
@@ -21,19 +21,24 @@ function useTransactions(userId:string | undefined, primaryUserBank: Bank | null
                 ...getDates(selectedDate)
             },
             id: primaryUserBank!.id,
+            cursor: sequence || 0
         }),
         enabled: !!userId && !!primaryUserBank?.listener_email,
         retry: false,
         staleTime: QUERY_STALE_TIME,
-        initialPageParam: '0',
-        getNextPageParam: (lastPage, pages) => lastPage.nextCursor
-    })
+        initialPageParam: sequence,
+        getNextPageParam: (lastPage, pages) => lastPage.cursor,
+        
+    }
+)
+    // do this work in select callback in useinfinitequery
     const transactions: Transaction[] = []
     if (userTransactions){
-        console.log(userTransactions, 'userTransactions')
+        // console.log(userTransactions, 'userTransactions')
         userTransactions.pages.forEach((item: TransactionResponse,i)=>{
             if (item.transactions){
                 transactions.push(...item.transactions)
+                sequence = item.cursor ?? 0
             }
         })
     }
@@ -105,7 +110,10 @@ function useTransactions(userId:string | undefined, primaryUserBank: Bank | null
         updateTransactionsSuccess,
         updateTransactionsPending,
         updatedTransactions,
-        variables
+        variables,
+        fetchingMoreUserTransactions,
+        userTransactionHasMore,
+        fetchMoreUserTransactions
   }
 }
 

@@ -19,6 +19,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getMany, getManyWithoutParams } from '@/utils/api'
 import { Category, Transaction } from '@/types'
 import { QUERY_STALE_TIME } from '@/utils/constants'
+import TransactionSlabsContainer from '@/components/custom/TransactionSlabsContainer'
 
 
  function Transactions() {
@@ -28,10 +29,10 @@ import { QUERY_STALE_TIME } from '@/utils/constants'
   const [search, setSearch] = useState<string>('')
   const [debouncedSearch] = useDebounce(search, 500)
   const {selectedDate, setSelectedDate} = useFilters()
-  const {userTransactions, updateTransactions, updateTransactionsPending,updateTransactionsSuccess, userTransactionsLoading, userTransactionsSuccess, updatedTransactions, variables} = useTransactions(userData?.id, primaryUserBank, selectedDate)
+  let sequence = 0
+  const {userTransactions, updateTransactions, updateTransactionsPending,updateTransactionsSuccess, userTransactionsLoading, userTransactionsSuccess, updatedTransactions, variables, fetchMoreUserTransactions, fetchingMoreUserTransactions, userTransactionHasMore} = useTransactions(userData?.id, primaryUserBank, selectedDate, sequence)
   const [similarTransactionsIds, setSimilarTransactionIds] = useState<string[]>([])
-  
-  console.log(updatedTransactions, 'updatedTrasnctions')
+
   
   function handleEditTransaction(transaction: Transaction){
     setEditingTransaction(transaction)
@@ -55,7 +56,7 @@ import { QUERY_STALE_TIME } from '@/utils/constants'
 
   return (
     <>
-      <div className="space-y-4 overflow-hidden">
+      <div className="space-y-4 overflow-hidden ">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Transactions</h1>
           <Button>
@@ -63,7 +64,7 @@ import { QUERY_STALE_TIME } from '@/utils/constants'
           </Button>
         </div>
 
-        <Card className='h-[80vh] overflow-scroll no-scrollbar'>
+        <Card className='overflow-hidden'>
           <CardContent className="p-6">
             <TransactionHeader 
             search = {search}
@@ -72,21 +73,16 @@ import { QUERY_STALE_TIME } from '@/utils/constants'
             selectedDate={selectedDate}
             />
 
-            <div className="space-y-4 overflow-scroll">
-              {
-                userTransactions?.map((transaction) => (
-                  <TransactionSlab 
-                  key={transaction.id} 
-                  transaction={transaction} 
-                  onEdit={handleEditTransaction}
-                  updateMutationPending={updateTransactionsPending}
-                  similarTransactionsIds = {similarTransactionsIds}
-                  updateMutationSuccess = {updateTransactionsSuccess}
-                  
-                  />
-                ))}
-            </div>
-            {!userTransactions.length ? <div className=" justify-self-center text-muted-foreground">No new transactions</div> : null}
+            <TransactionSlabsContainer 
+            transactions = {userTransactions} 
+            handleEditTransaction = {handleEditTransaction}
+            updateTransactionsPending = {updateTransactionsPending}
+            similarTransactionsIds={similarTransactionsIds}
+            updateTransactionsSuccess = {updateTransactionsSuccess}
+            fetchingMoreTransactions = {fetchingMoreUserTransactions}
+            fetchMoreTransactions = {fetchMoreUserTransactions}
+            hasMore = {userTransactionHasMore}
+            />
           </CardContent>
         </Card>
       </div>

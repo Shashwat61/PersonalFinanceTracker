@@ -38,6 +38,7 @@ function useUserData(){
             // store the first bank in local storage as the primary bank
             if (!localStorage.getItem(PRIMARY_BANK_KEY)){
                 localStorage.setItem(PRIMARY_BANK_KEY, userData.banks[0].id)
+                setPrimaryUserBank(userData.banks[0])
             }else{
                 const primaryBankId = localStorage.getItem(PRIMARY_BANK_KEY)
                 const primaryBank = userData.banks.find(bank => bank.id === primaryBankId)

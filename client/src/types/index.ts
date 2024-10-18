@@ -35,13 +35,14 @@ export interface Transaction{
 }
 export interface TransactionResponse{
     transactions: Transaction[]
-    nextCursor: string
+    cursor: number | null
 }
 export type DefaultGetManyParams = {
     filters?: Filter;
     // sort?: Sort;
     dates?: DateRangeValue;
     id?: string;
+    cursor?: number
   };
 
 export type Filter = {

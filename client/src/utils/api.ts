@@ -10,7 +10,7 @@ export function getMany<R, D extends DefaultGetManyParams>(path:string, params: 
     const pathString = params?.id ? `${path}/${params.id}` : path
     // after=2024-10-06&before=2024-10-07&bankId=${primaryUserBank?.id}&from=${primaryUserBank?.listener_email}&limit=${10}
     if (params?.filters && params?.dates){
-        const queryParams = appendParamsInUrl(params.filters, params.dates)
+        const queryParams = appendParamsInUrl(params.filters, params.dates, {cursor:params.cursor})
         return apiManager.client.get<R>(`${pathString}?${queryParams.toString()}`)
     }
     return apiManager.client.get<R>(pathString)

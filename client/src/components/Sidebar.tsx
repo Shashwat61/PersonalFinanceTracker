@@ -1,16 +1,20 @@
 import React, { Dispatch, SetStateAction, useState } from 'react'
-import { sideBarList } from '@/utils'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { getActivePage, sideBarList } from '@/utils'
+import { NavLink, useLocation, useNavigate, useRoutes } from 'react-router-dom'
 import { LucideProps } from 'lucide-react'
 import { SideBarItem } from '@/types'
 import usePersistentStorage from '@/hooks/usePersistentStorage'
 
 function Sidebar() {
-  const [activePage, setActivePage] = usePersistentStorage<SideBarItem>({keyName: 'activePage', getFromLocalStorage: false, initialValue: sideBarList[0]})
+  const {pathname} = useLocation()
+  const findActivePage = getActivePage(pathname)
+  const [activePage, setActivePage] = usePersistentStorage<SideBarItem>({keyName: 'activePage', getFromLocalStorage: false, initialValue: findActivePage})
   const navigate = useNavigate()
   function handleActivePage(sideBarItem: SideBarItem){
-    setActivePage(sideBarItem)
-    navigate(sideBarItem.redirectLink)
+    if(activePage.name !== sideBarItem.name){
+      setActivePage(sideBarItem)
+      navigate(sideBarItem.redirectLink)
+    }
   }
   console.log('in sidebar')
   return (

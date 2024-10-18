@@ -5,7 +5,6 @@ import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import { Category, Transaction } from '@/types'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
-import { QueryCache } from '@tanstack/react-query'
 
 interface TransactionModelProps{
     transaction: Transaction | null
@@ -81,7 +80,11 @@ function EditTransactionModal({ transaction, onSave, open, onOpenChange, placeho
     
             </div>
             <div>
-              <Label htmlFor="description">Nickname for {transactionMetaData?.upi_id}</Label>
+              <Label htmlFor="description">Nickname for 
+                <span className="pl-1">
+                    {transactionMetaData?.upi_id}
+                    </span>
+                </Label>
               <Input
                 id="description" 
                 value={nickName} 
