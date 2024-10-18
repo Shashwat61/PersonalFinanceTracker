@@ -73,7 +73,11 @@ async function setGmailMessages(modifiedQuery: string, access_token: string, use
              transactions = await Transaction.find({
                 where:{
                     user_bank_mapping_id: userBankMapping.id,
+                    transacted_at: Equal(new Date(query.after)),
                     sequence: LessThan(Number(cursor))
+                },
+                order: {
+                    sequence: 'DESC'
                 },
                 take: limit
             })
