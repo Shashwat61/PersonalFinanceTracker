@@ -4,7 +4,7 @@ import services from "../services";
  const getUserDetails = async(req: Request, res: Response) => {
     try{
         const {currentUser} = res.locals.userInfo
-
+        
         const user = await services.userService.getUserDetails(currentUser.id)
         res.json(user).status(200)
     }catch(err){

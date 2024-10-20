@@ -13,7 +13,7 @@ import { UserUpiCategoryNameMapping } from "../entity/UserUpiCategoryNameMapping
 
 
 const getTransactionsVersionTwo = async(
-    access_token: string, apiQuery: TransactionParams, bankId:string, user: User
+    access_token: string, apiQuery: TransactionParams, userBankMappingId:string, user: User
 ) => {
     const {cursor, limit} = apiQuery // TODO: take it as hashed value and unhash it here
     
@@ -24,9 +24,9 @@ const getTransactionsVersionTwo = async(
     })
     const modifiedQuery = modifyQuery(query)
     let currentDayLastTransaction = null
-    const userBankLastCachedTransactionId = await redisClient.getKey(`${user.id}_${bankId}${apiQuery.after}${apiQuery.before}_last_transaction`)
-    const userBankMapping = await UserBankMapping.findOneBy({user_id: user.id, bank_id: bankId})
+    const userBankMapping = await UserBankMapping.findOneBy({user_id: user.id, id: userBankMappingId})
     if (!userBankMapping) throw new Error('User bank mapping not found')
+    const userBankLastCachedTransactionId = await redisClient.getKey(`${user.id}_${userBankMappingId}${apiQuery.after}${apiQuery.before}_last_transaction`)
     if (userBankLastCachedTransactionId){
         currentDayLastTransaction = await Transaction.findOneBy({message_id: userBankLastCachedTransactionId})
     }
@@ -61,7 +61,7 @@ async function setGmailMessages(modifiedQuery: string, access_token: string, use
                 // relations: ["userUpiDetails"],
                 where: {
                     user_bank_mapping_id: userBankMapping.id,
-                    transacted_at: MoreThanOrEqual(new Date(query.after))                    
+                    transacted_at: Equal(new Date(query.after))                    
                 },
                 order: {
                     sequence: 'DESC'

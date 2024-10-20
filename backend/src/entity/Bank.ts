@@ -1,5 +1,6 @@
-import { BaseEntity, Column, Entity, ManyToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
+import { BaseEntity, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
 import { User } from "./User"
+import { UserBankMapping } from "./UserBankMapping"
 
 @Entity("bank")
 export class Bank extends BaseEntity{
@@ -38,6 +39,20 @@ export class Bank extends BaseEntity{
     updated_at!: Date
 
     @ManyToMany(type => User, user => user.banks)
+    @JoinTable({
+        name: "user_bank_mapping",
+        joinColumn: {
+            name: "bank_id",
+            referencedColumnName: "id"
+        },
+        inverseJoinColumn: {
+            name: "user_id",
+            referencedColumnName: "id"
+        }
+    })
     users!: User[]
+
+    @OneToMany(type => UserBankMapping, userBankMapping => userBankMapping.bank)
+    userBankMappings!: UserBankMapping[]
     
 }

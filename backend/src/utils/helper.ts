@@ -81,37 +81,40 @@ function modifyQuery(query: {[key:string]: string}){
 
     // Dear Customer, Rs.1.00 has been debited from account **8730 to VPA 8802135135@ptaxis on 25-08-24. Your UPI transaction reference number is 460404752423. If you did not authorize this transaction,
 
-    const transactionInstance = new Transaction()
-    if (message.snippet.includes("credited"))
-        transactionInstance.transaction_type = "credit"
-    else
-        transactionInstance.transaction_type = "debit"
+    const accountMatch = message.snippet.match(/account \*\*(\d{4})/);
+    if (accountMatch && parseInt(accountMatch[1]) === userBankMapping.account_number){
 
+        const transactionInstance = new Transaction()
+        if (message.snippet.includes("credited"))
+            transactionInstance.transaction_type = "credit"
+        else
+        transactionInstance.transaction_type = "debit"
+    
     const amountMatch = message.snippet.match(/Rs\.\s*(\d+(\.\d{1,2})?)/);
     if (amountMatch)
-    transactionInstance.amount = parseFloat(amountMatch[1]);
-
-    const accountMatch = message.snippet.match(/account \*\*(\d{4})/);
-    if (accountMatch)
-    transactionInstance.bank_account_number = parseInt(accountMatch[1])
-
+        transactionInstance.amount = parseFloat(amountMatch[1]);
+    
+    transactionInstance.bank_account_number = accountMatch[1]
+    
     const vpaMatch = message.snippet.match(/VPA ([^\s]+)/);
     if (vpaMatch){
         // change this, this should not be here
         if(!userUpiDetails.includes(vpaMatch[1])) userUpiDetails.push(vpaMatch[1])
-        transactionInstance.user_id = userBankMapping.user_id
+            transactionInstance.user_id = userBankMapping.user_id
     }
-
+    
     const dateMatch = message.snippet.match(/on (\d{2}-\d{2}-\d{2})/);
     if (dateMatch) transactionInstance.transacted_at = getDate(dateMatch[1])
-    transactionInstance.message_id = message.id
+        transactionInstance.message_id = message.id
     transactionInstance.user_bank_mapping_id = userBankMapping.id
-    if (vpaMatch && userUpiCategoryNameMappingList.length > 0) setUserUpiCategoryNameMappingId(transactionInstance, vpaMatch[1], userUpiCategoryNameMappingList, messageUpiIdMap)
-    return transactionInstance;
+    if (vpaMatch) setUserUpiCategoryNameMappingId(transactionInstance, vpaMatch[1], userUpiCategoryNameMappingList, messageUpiIdMap)
+        return transactionInstance;
+}
+// set other account number for this user through kafka/rabbit 
 }
 
 function setUserUpiCategoryNameMappingId(transaction: Transaction, upiId: string, userUpiCategoryNameMappingList: UserUpiCategoryNameMapping[], messageUpiIdMap: {[key:string]: string}){
-    const foundUserUpiCategoryNameWithUpiId = userUpiCategoryNameMappingList.find(item => item.upi_id === upiId)
+    const foundUserUpiCategoryNameWithUpiId = userUpiCategoryNameMappingList?.find(item => item.upi_id === upiId)
     if(foundUserUpiCategoryNameWithUpiId){
         transaction.user_upi_category_name_mapping_id = foundUserUpiCategoryNameWithUpiId.id
         transaction.userUpiCategoryNameMapping = foundUserUpiCategoryNameWithUpiId
@@ -128,7 +131,8 @@ function setUserUpiCategoryNameMappingId(transaction: Transaction, upiId: string
     transactionData.map(t=> {
         for(const message of t.messages){
             if(message.snippet && (message.snippet.includes("credited") || message.snippet.includes("debited"))){
-                transactions.push(parseTransactionMessage(message, userBankMapping, userUpiDetails, userUpiCategoryNameMappingList, messageUpiIdMap))
+                const parsedTransaction = parseTransactionMessage(message, userBankMapping, userUpiDetails, userUpiCategoryNameMappingList, messageUpiIdMap)
+                if(parsedTransaction) transactions.push(parsedTransaction)
             }
         }
     })

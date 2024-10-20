@@ -20,11 +20,12 @@ export class Transaction extends BaseEntity{
 
 
     @Column({
-        type: 'integer',
+        type: 'varchar',
+        length: '4',
         nullable: true,
         default: null
     })
-    bank_account_number!: number
+    bank_account_number!: string
 
     @Column({
         type: 'uuid',

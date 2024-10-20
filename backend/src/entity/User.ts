@@ -62,4 +62,7 @@ export class User extends BaseEntity{
         }
     })
     banks!: Bank[]
+
+    @OneToMany(()=> UserBankMapping, userBankMapping => userBankMapping.user)
+    userBankMappings!: UserBankMapping[]
 }

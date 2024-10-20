@@ -12,7 +12,7 @@ const getUserBanks = async (id: string)=> {
     return userBankList?.banks
 }
 
-const createUserBank = async (userId: string, bankId: string) => {
+const createUserBank = async (userId: string, bankId: string, accountNumber: number) => {
     console.log(bankId, userId, 'create user bank')
     const bank = await Bank.findOneBy({id: bankId})
     if (!bank) {
@@ -25,6 +25,7 @@ const createUserBank = async (userId: string, bankId: string) => {
     let userBankMapping = new UserBankMapping()
     userBankMapping.user_id = userId
     userBankMapping.bank_id = bankId
+    userBankMapping.account_number = accountNumber
     await userBankMapping.save()
 }
 

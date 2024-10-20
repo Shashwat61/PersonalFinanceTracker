@@ -14,8 +14,8 @@ const getUserBanks = async (req: Request, res: Response) => {
 
 const createUserBank = async (req: Request, res: Response) => {
     try {
-        const {bankId, userId} = req.body
-        await services.userBankService.createUserBank(userId, bankId)
+        const {bankId, userId, accountNumber} = req.body
+        await services.userBankService.createUserBank(userId, bankId, accountNumber)
         res.sendStatus(204)
     } catch (error) {
         console.log((error as Error).message, 'error')

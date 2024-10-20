@@ -20,8 +20,8 @@ const saveTransactions = async (req: Request, res: Response)=>{
 const getTransactionsVersionTwo = async(req: Request, res:Response)=>{
     try {
         const {currentUser, accessToken}: {currentUser: User, accessToken: string} = res.locals.userInfo
-        const {query, params:{id:bankId}} = indexValidation.transactionValidation.getTransactionsVersionOne.parse(req)
-        const response = await transactionService.getTransactionsVersionTwo(accessToken, query, bankId, currentUser)
+        const {query, params:{id:userBankMappingId}} = indexValidation.transactionValidation.getTransactionsVersionOne.parse(req)
+        const response = await transactionService.getTransactionsVersionTwo(accessToken, query, userBankMappingId, currentUser)
         res.status(200).json(response)
     } catch (error) {
         console.log(error)

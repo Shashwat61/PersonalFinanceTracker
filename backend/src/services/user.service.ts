@@ -6,7 +6,7 @@ const getUserDetails = async(userId: string) => {
             id: userId
         },
         relations: {
-            banks: true,
+            userBankMappings: true
         },
     })
     if (!user) throw new Error('user not found')
