@@ -9,7 +9,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label"
 import WithLayout from '@/components/WithLayout'
 import TransactionSlab from '@/components/custom/TransactionSlab'
-import EditTransactionModal from '@/components/custom/EditTransactionModal'
 import TransactionHeader from '@/components/custom/TransactionHeader'
 import useDebounce from '@/hooks/useDebounce'
 import useTransactions from '@/hooks/useTransactions'
@@ -20,18 +19,21 @@ import { getMany, getManyWithoutParams } from '@/utils/api'
 import { Category, Transaction } from '@/types'
 import { QUERY_STALE_TIME } from '@/utils/constants'
 import TransactionSlabsContainer from '@/components/custom/TransactionSlabsContainer'
+import TransactionModal from '@/components/custom/TransactionModal'
 
 
  function Transactions() {
-  const {userData, primaryUserBank} = useUserContext()
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
+  const {userData, primaryUserBank, primaryUserBankMapping} = useUserContext()
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null
+  )
   const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false)
   const [search, setSearch] = useState<string>('')
   const [debouncedSearch] = useDebounce(search, 500)
   const {selectedDate, setSelectedDate} = useFilters()
   let sequence = 0
-  const {userTransactions, updateTransactions, updateTransactionsPending,updateTransactionsSuccess, userTransactionsLoading, userTransactionsSuccess, updatedTransactions, variables, fetchMoreUserTransactions, fetchingMoreUserTransactions, userTransactionHasMore} = useTransactions(userData?.id, primaryUserBank, selectedDate, sequence)
+  const {userTransactions, updateTransactions, updateTransactionsPending,updateTransactionsSuccess, userTransactionsLoading, userTransactionsSuccess, updatedTransactions, variables, fetchMoreUserTransactions, fetchingMoreUserTransactions, userTransactionHasMore} = useTransactions(userData?.id, primaryUserBankMapping, selectedDate, sequence)
   const [similarTransactionsIds, setSimilarTransactionIds] = useState<string[]>([])
+  const [isNewTransaction, setIsNewTransaction] = useState<boolean>(false)
 
   
   function handleEditTransaction(transaction: Transaction){
@@ -39,11 +41,11 @@ import TransactionSlabsContainer from '@/components/custom/TransactionSlabsConta
     setIsEditDialogOpen(true)
   }
 
-  function handleSaveTransaction(transaction: Transaction, categoryId?:string, vpaNickName?: string){
-    const userUpiCategoryNameMappingId = transaction.user_upi_category_name_mapping_id
-    const similarTransactionsIds = userTransactions.filter(txn => (txn.user_upi_category_name_mapping_id == userUpiCategoryNameMappingId)).map(txn => txn.id)
+  function handleSaveTransaction(transaction: Transaction){
+    const userUpiCategoryNameMapping = transaction.userUpiCategoryNameMapping
+    const similarTransactionsIds = userTransactions.filter(txn => (txn.user_upi_category_name_mapping_id == userUpiCategoryNameMapping.id)).map(txn => txn.id)
     setSimilarTransactionIds(similarTransactionsIds)
-    updateTransactions({transactionIds: similarTransactionsIds, categoryId, vpaName: vpaNickName})
+    updateTransactions({transactionIds: similarTransactionsIds, categoryId: userUpiCategoryNameMapping.category_id || "", vpaName: userUpiCategoryNameMapping.upi_name || ""})
     setIsEditDialogOpen(false)
   }
 
@@ -53,13 +55,19 @@ import TransactionSlabsContainer from '@/components/custom/TransactionSlabsConta
     enabled: true,
     staleTime: QUERY_STALE_TIME
   })
-
+  function handleAddTransaction(){
+    setIsNewTransaction(true)
+    setEditingTransaction({
+      
+    })
+    setIsEditDialogOpen(true)
+  }
   return (
     <>
       <div className="space-y-4 overflow-hidden ">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Transactions</h1>
-          <Button>
+          <Button onClick={handleAddTransaction}>
             <Plus className="w-4 h-4 mr-2" /> Add Transaction
           </Button>
         </div>
@@ -87,13 +95,14 @@ import TransactionSlabsContainer from '@/components/custom/TransactionSlabsConta
         </Card>
       </div>
                     
-      {isEditDialogOpen ? <EditTransactionModal
+      {isEditDialogOpen ? <TransactionModal
         placeholder='Edit Transaction'
         transaction={editingTransaction}
         onSave={handleSaveTransaction}
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
         categories = {categories}
+        isEditing = {!isNewTransaction}
       />: null}
     </>
   )

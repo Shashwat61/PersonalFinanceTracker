@@ -1,4 +1,4 @@
-import { Bank, Category, DefaultGetManyParams, EditTransaction, Transaction, TransactionResponse } from '@/types'
+import { Bank, Category, DefaultGetManyParams, EditTransaction, Transaction, TransactionResponse, UserBankMapping } from '@/types'
 import { getDates } from '@/utils'
 import { getMany, updateMany } from '@/utils/api'
 import { QUERY_STALE_TIME, TRANSACTION_RESPONSE_LIMIT } from '@/utils/constants'
@@ -6,24 +6,24 @@ import { InfiniteData, useInfiniteQuery, useMutation, useQuery, useQueryClient }
 import toast from 'react-hot-toast'
 
 
-function useTransactions(userId:string | undefined, primaryUserBank: Bank | null, selectedDate:Date, sequence: number) {
+function useTransactions(userId:string | undefined, primaryUserBankMapping: UserBankMapping | null, selectedDate:Date, sequence?: number) {
     console.log(selectedDate, 'in usetransaction')
     const queryClient = useQueryClient()
 
     const {data: userTransactions, isLoading: userTransactionsLoading, isSuccess: userTransactionsSuccess, isFetchingNextPage: fetchingMoreUserTransactions, hasNextPage:  userTransactionHasMore, fetchNextPage: fetchMoreUserTransactions} = useInfiniteQuery({
-        queryKey: ["transactions", userId, primaryUserBank?.id, selectedDate],
+        queryKey: ["transactions", userId, primaryUserBankMapping?.id, selectedDate],
         queryFn: () => getMany<TransactionResponse, DefaultGetManyParams>(`/transactions/v2`, {
             filters: {
-                from: primaryUserBank!.listener_email!,
+                from: primaryUserBankMapping?.bank?.listener_email || '',
                 limit: TRANSACTION_RESPONSE_LIMIT
             },
             dates: {
                 ...getDates(selectedDate)
             },
-            id: primaryUserBank!.id,
+            id: primaryUserBankMapping?.id,
             cursor: sequence || 0
         }),
-        enabled: !!userId && !!primaryUserBank?.listener_email,
+        enabled: !!userId && !!primaryUserBankMapping?.bank?.listener_email,
         retry: false,
         staleTime: QUERY_STALE_TIME,
         initialPageParam: sequence,
@@ -49,8 +49,8 @@ function useTransactions(userId:string | undefined, primaryUserBank: Bank | null
         mutationFn: (data: EditTransaction) => updateMany<Transaction[], EditTransaction>('/transactions', data),
         onMutate: async (data) => {
             // console.log(data, 'data in onMutate')
-            await queryClient.cancelQueries({queryKey: ["transactions", userId, primaryUserBank?.id, selectedDate]})
-            const previousTransactionsData= queryClient.getQueryData<InfiniteData<TransactionResponse>>(["transactions", userId, primaryUserBank?.id, selectedDate])
+            await queryClient.cancelQueries({queryKey: ["transactions", userId, primaryUserBankMapping?.id, selectedDate]})
+            const previousTransactionsData= queryClient.getQueryData<InfiniteData<TransactionResponse>>(["transactions", userId, primaryUserBankMapping?.id, selectedDate])
             const categories:Category[] | undefined = queryClient.getQueryData(["categories"])
             // console.log(previousTransactionsData, "previoustransactions")
             // console.log(categories, "categories")
@@ -77,7 +77,7 @@ function useTransactions(userId:string | undefined, primaryUserBank: Bank | null
                 }
             }) as InfiniteData<TransactionResponse>['pages']
             // console.log(previousTransactionsData, 'previousudpatedtranascitons')
-            queryClient.setQueryData<InfiniteData<TransactionResponse>>(["transactions", userId, primaryUserBank?.id, selectedDate], (oldData) => {
+            queryClient.setQueryData<InfiniteData<TransactionResponse>>(["transactions", userId, primaryUserBankMapping?.id, selectedDate], (oldData) => {
                 if (!oldData) return oldData;
                 return {
                     ...oldData,
@@ -88,13 +88,13 @@ function useTransactions(userId:string | undefined, primaryUserBank: Bank | null
         },
         onError(error, variables, context) {
             console.log(error, 'error in onError')
-            queryClient.setQueryData(["transactions", userId, primaryUserBank?.id, selectedDate], context?.previousTransactionsData)
+            queryClient.setQueryData(["transactions", userId, primaryUserBankMapping?.id, selectedDate], context?.previousTransactionsData)
             toast.error("Error updating transactions")
         },
         onSettled: (data, variables, context) => {
             // console.log(data, 'data in onSuccess')
             queryClient.invalidateQueries({
-                queryKey: ["transactions", userId, primaryUserBank?.id, selectedDate]
+                queryKey: ["transactions", userId, primaryUserBankMapping?.id, selectedDate]
             })
         },
         onSuccess(data, variables, context) {

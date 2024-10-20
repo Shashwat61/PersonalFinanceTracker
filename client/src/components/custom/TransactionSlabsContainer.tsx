@@ -36,7 +36,7 @@ function TransactionSlabsContainer({transactions, handleEditTransaction, updateT
         return
     }
   return (
-    <div className="overflow-scroll h-[50vh]  space-y-4" ref={transactionContainerRef}>
+    <div className="overflow-scroll h-[65vh]  space-y-4" ref={transactionContainerRef}>
               {
                 transactions && transactions?.length > 0 && (
 

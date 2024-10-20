@@ -56,3 +56,18 @@ export function getActivePage(location: string){
   const activePage = sideBarList.find(item => item.redirectLink === location)
   return activePage || sideBarList[0]
 }
+
+export function deepEqualsObject<T,R>(a: T,b: R){
+  console.log(a,b)
+  if (typeof a !== typeof b) return false
+  if ((a === null && b !== null) || (a!==null && b===null)) return false
+  if (typeof a === 'object' && typeof b === 'object' && a && b){
+    if(Object.keys(a).length !== Object.keys(b).length) return false
+    for(const key in a){
+      if (!(key in b))return false
+      if (!deepEqualsObject(a[key], (b as any)[key])) return false
+    }
+    return true
+  }
+  return a === b as unknown
+}

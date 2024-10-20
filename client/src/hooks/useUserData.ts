@@ -1,15 +1,17 @@
-import { Bank, DefaultGetManyParams, Transaction, User } from "@/types";
-import { createSingle, getMany, getSingle } from "@/utils/api";
-import { PRIMARY_BANK_KEY, QUERY_STALE_TIME } from "@/utils/constants";
+import { AddUserBank, Bank, User, UserBankMapping } from "@/types";
+import { createSingle, getSingle } from "@/utils/api";
+import { PRIMARY_USER_BANK_MAPPING_KEY, QUERY_STALE_TIME } from "@/utils/constants";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import useFilters from "./useFilters";
 
 function useUserData(){
     const [primaryUserBank, setPrimaryUserBank] = useState<Bank | null>(null)
+    const [primaryUserBankMapping, setPrimaryUserBankMapping] = useState<UserBankMapping | null>(null)
+
     const queryClient = useQueryClient()
     let userBanks: Bank[] = []
+    let userBankMapping: UserBankMapping[] = []
     console.log(primaryUserBank, 'primaryuserbank')
     
     const {data: userData, isLoading: userDataLoading, isSuccess: userDataSuccess, error: userError, isError: isUserError } = useQuery({
@@ -19,12 +21,17 @@ function useUserData(){
         retry: false,
         staleTime: QUERY_STALE_TIME
     })
-    if (userDataSuccess) userBanks = userData.banks ?? []
+    if (userDataSuccess){
+        userBankMapping = userData.userBankMappings
+        if(userBankMapping.length > 0){
+            userBanks = userBankMapping.map((mapping) => mapping.bank)
+        }
+    }
     console.log(!!userData?.id && !!primaryUserBank?.listener_email)
     
 
     const {mutate: addUserBank, isSuccess: addUserBankSuccess, isPending: addUserBankPending} = useMutation({
-        mutationFn: (data: {userId: string, bankId: string}) => createSingle<Bank, {userId: string, bankId: string}>('/banks/user', data),
+        mutationFn: (data: AddUserBank) => createSingle<Bank, AddUserBank>('/banks/user', data),
         onSuccess: (data, variables, context) => {
             queryClient.invalidateQueries({queryKey: ['user']})
             toast.success("Added Bank Successfully")
@@ -34,17 +41,16 @@ function useUserData(){
     
 
     useEffect(()=>{
-        if (userData?.banks?.length){
+        if (userBankMapping.length > 0){
             // store the first bank in local storage as the primary bank
-            if (!localStorage.getItem(PRIMARY_BANK_KEY)){
-                localStorage.setItem(PRIMARY_BANK_KEY, userData.banks[0].id)
-                setPrimaryUserBank(userData.banks[0])
+            if (!localStorage.getItem(PRIMARY_USER_BANK_MAPPING_KEY)){
+                localStorage.setItem(PRIMARY_USER_BANK_MAPPING_KEY, userBankMapping[0].id)
+                setPrimaryUserBankMapping(userBankMapping[0])
             }else{
-                const primaryBankId = localStorage.getItem(PRIMARY_BANK_KEY)
-                const primaryBank = userData.banks.find(bank => bank.id === primaryBankId)
-                setPrimaryUserBank(primaryBank ?? null)
+                const primaryBankId = localStorage.getItem(PRIMARY_USER_BANK_MAPPING_KEY)
+                const primaryuserBankMapping = userBankMapping.find(ubm => ubm.id === primaryBankId)
+                setPrimaryUserBankMapping(primaryuserBankMapping ?? null)
             }
-            
         }
     },[userData])
 
@@ -59,6 +65,9 @@ function useUserData(){
         setPrimaryUserBank,
         addUserBankSuccess,
         addUserBankPending,
+        primaryUserBankMapping,
+        setPrimaryUserBankMapping,
+        userBankMapping
     }
 }
 export default useUserData;

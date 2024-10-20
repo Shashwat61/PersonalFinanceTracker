@@ -20,7 +20,7 @@ import { getManyWithoutParams } from '@/utils/api'
 
 function Home() {
   
-  const {userData, primaryUserBank, userDataLoading, userBanks, addUserBank, addUserBankSuccess ,isUserError, userError, addUserBankPending, setPrimaryUserBank} = useUserContext()
+  const {userData, primaryUserBank, userDataLoading, userBanks, addUserBank, addUserBankSuccess ,isUserError, userError, addUserBankPending, setPrimaryUserBank, primaryUserBankMapping, setPrimaryUserBankMapping, userBankMapping} = useUserContext()
   const {bankSeedData} = useBankContext()
   const {selectedDate, setSelectedDate}= useFilters()
   const {userTransactions,  userTransactionsLoading, userTransactionsSuccess} = useTransactions(userData?.id, primaryUserBank, selectedDate)
@@ -62,6 +62,9 @@ function Home() {
           bankSeedData={bankSeedData}
           setSelectedDate= {handleSelectDate}
           selectedDate = {selectedDate}
+          addBankSuccess={addUserBankSuccess}
+          primaryUserBankMapping = {primaryUserBankMapping}
+          userBankMapping = {userBankMapping}
      />
      <HomeAnalytics recentTransactions={userTransactions} userTransactionsLoading = {userTransactionsLoading}/>
       

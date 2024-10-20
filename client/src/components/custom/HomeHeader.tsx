@@ -1,15 +1,15 @@
-import React, { Dispatch, SetStateAction, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Card, CardContent } from '../ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { Button } from '../ui/button'
-import { PRIMARY_BANK_KEY } from '@/utils/constants'
-import { Bank, User } from '@/types'
+import { AddUserBank, Bank, User, UserBankMapping } from '@/types'
 import { UseMutateFunction } from '@tanstack/react-query'
 import DatePicker from './DatePicker'
 import BankSelect from './BankSelector'
+import BankModal from './BankModal'
 
 interface HomeHeaderProps {
-  addUserBank: UseMutateFunction<unknown, Error, { userId: string; bankId: string }, unknown>;
+  addUserBank: UseMutateFunction<unknown, Error, AddUserBank, unknown>;
   userBanks: Bank[] | undefined
   addUserBankPending: boolean
   userData: User | undefined
@@ -18,19 +18,32 @@ interface HomeHeaderProps {
   bankSeedData: Bank[] | undefined
   setSelectedDate: (date: Date) => void
   selectedDate: Date
+  addBankSuccess: boolean
+  primaryUserBankMapping: UserBankMapping | null
+  userBankMapping: UserBankMapping[]
 }
 
-function HomeHeader({ addUserBank, userBanks, bankSeedData, addUserBankPending, userData, userDataLoading, primaryUserBank, setSelectedDate, selectedDate }: HomeHeaderProps) {
-  const [selectedBankId, setSelectedBankId] = useState<string | null>(null)
+function HomeHeader({ addUserBank, userBanks, bankSeedData, addUserBankPending, userData, userDataLoading, primaryUserBank, setSelectedDate, selectedDate, addBankSuccess, primaryUserBankMapping, userBankMapping }: HomeHeaderProps) {
+  const [openBankModal, setOpenBankModal] = useState<boolean>(false)
 
-  function handleAddUserBank() {
-    if (userData && selectedBankId) {
-      addUserBank({ userId: userData.id, bankId: selectedBankId })
-      localStorage.setItem(PRIMARY_BANK_KEY, selectedBankId)
+  function handleOpenBankModal(){
+    setOpenBankModal(true)
+  }
+  function handleAddUserBank(selectedBankId: string, bankAccountNumber: string) {
+    console.log(selectedBankId, bankAccountNumber)
+    if (userData && selectedBankId && bankAccountNumber) {
+      addUserBank({ userId: userData.id, bankId: selectedBankId, accountNumber: bankAccountNumber })
     }
   }
 
+  useEffect(()=> {
+    if(addBankSuccess){
+      setOpenBankModal(false)
+    }
+  },[addBankSuccess])
+
   return (
+    <>
     <Card className="mb-6">
       <CardContent className="pt-6">
         {userDataLoading ? (
@@ -41,12 +54,11 @@ function HomeHeader({ addUserBank, userBanks, bankSeedData, addUserBankPending, 
         ) : !userBanks?.length ? (
           <>
             <h1 className="mb-2 text-3xl font-bold">
-              Welcome Boss <span className="wave">👋</span>
+              Welcome {userData?.name} <span className="wave">👋</span>
             </h1>
             <p className="mb-4 text-muted-foreground">You haven't added any banks yet. Add a bank to get started.</p>
             <div className='flex gap-6 -p-6'>
-              <BankSelect banks={bankSeedData} onChange={setSelectedBankId} placeholder="All Bank Branches" />
-              <Button disabled={addUserBankPending} onClick={handleAddUserBank} variant="outline">
+              <Button disabled={addUserBankPending} onClick={handleOpenBankModal} variant="outline">
                 {addUserBankPending ? 'Adding Bank...' : "Add Bank"}
               </Button>
             </div>
@@ -55,10 +67,10 @@ function HomeHeader({ addUserBank, userBanks, bankSeedData, addUserBankPending, 
         ) : (
           <>
             <h1 className="mb-2 text-3xl font-bold">
-              Welcome Boss <span className="wave">👋</span>
+              Welcome {userData?.name} <span className="wave">👋</span>
             </h1>
             <div className="flex flex-col gap-4 sm:flex-row">
-              <BankSelect banks={userBanks} onChange={() => { }} placeholder={primaryUserBank?.name || "Select Bank"} />
+              <BankSelect userBankMappings={userBankMapping} onChange={() => { }} placeholder={primaryUserBankMapping?.bank?.name || "Select Bank"} />
               <div className="flex flex-1 gap-2">
                 <DatePicker date={selectedDate} setDate={setSelectedDate} />
                 <Select>
@@ -78,6 +90,18 @@ function HomeHeader({ addUserBank, userBanks, bankSeedData, addUserBankPending, 
         )}
       </CardContent>
     </Card>
+    {openBankModal ? 
+    <BankModal
+      open={openBankModal}
+      setOpen={setOpenBankModal}
+      onSave={handleAddUserBank}
+      userBankMappings={userBankMapping}
+      addingBankPending = {addUserBankPending}
+      title={"Add Bank"}
+      subTitle = {"Add a new bank account to your FinTrack profile."}
+    /> : null}
+    </>
+    
   )
 }
 

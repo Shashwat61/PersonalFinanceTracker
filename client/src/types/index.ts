@@ -6,7 +6,17 @@ export interface User{
     email: string
     created_at: Date
     updated_at: Date
-    banks?: Bank[]
+    userBankMappings: UserBankMapping[] | []
+}
+
+export interface UserBankMapping{
+    id: string
+    user_id: string
+    bank_id: string
+    created_at: Date
+    updated_at: Date
+    account_number: string
+    bank: Bank
 }
 
 export interface Bank{
@@ -16,6 +26,10 @@ export interface Bank{
     created_at: Date
     updated_at: Date
 }
+
+// partial transaction omitting id
+
+
 
 export interface Transaction{
     id: string
@@ -84,4 +98,11 @@ export type SideBarItem = {
     redirectLink: string
     name: string
     icon: React.ForwardRefExoticComponent<Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>
+}
+
+
+export type AddUserBank = {
+    userId: string;
+    bankId: string
+    accountNumber: string
 }

@@ -1,6 +1,5 @@
 import useBankData from "@/hooks/useBankData";
 import {Dispatch, Context, ContextType, createContext, SetStateAction, useContext, useState } from "react";
-import { useUserContext } from "./UserContext";
 import usePersistentStorage from "@/hooks/usePersistentStorage";
 
 type PersistentStorageValue<T = any> = {
