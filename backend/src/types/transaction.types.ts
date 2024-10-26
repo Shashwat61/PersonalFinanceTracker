@@ -65,3 +65,18 @@ export interface Message{
     categoryId?: string,
     vpaName?: string
   }
+
+  export type AddTransaction = {
+    amount: string
+        transaction_type: string
+        user_bank_mapping_id: string
+        transacted_at: string
+        bank_account_number: string
+        mode: string
+        category_id: string
+  }
+
+  export enum TRANSACTION_MODE_TYPES {
+    ONLINE = 'online',
+    CASH = 'cash'
+  }

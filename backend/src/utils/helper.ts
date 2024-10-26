@@ -108,7 +108,8 @@ function modifyQuery(query: {[key:string]: string}){
         transactionInstance.message_id = message.id
     transactionInstance.user_bank_mapping_id = userBankMapping.id
     if (vpaMatch) setUserUpiCategoryNameMappingId(transactionInstance, vpaMatch[1], userUpiCategoryNameMappingList, messageUpiIdMap)
-        return transactionInstance;
+    transactionInstance.mode = TRANSACTION_MODE_TYPES.ONLINE
+    return transactionInstance;
 }
 // set other account number for this user through kafka/rabbit 
 }
@@ -120,7 +121,9 @@ function setUserUpiCategoryNameMappingId(transaction: Transaction, upiId: string
         transaction.userUpiCategoryNameMapping = foundUserUpiCategoryNameWithUpiId
     }
     else{
-        messageUpiIdMap[transaction.message_id] = upiId
+        if (transaction?.message_id) {
+            messageUpiIdMap[transaction.message_id] = upiId;
+        }
     }
 }
 
@@ -137,6 +140,11 @@ function setUserUpiCategoryNameMappingId(transaction: Transaction, upiId: string
         }
     })
     return [transactions, [...new Set(userUpiDetails)], messageUpiIdMap]
+}
+
+export const TRANSACTION_MODE_TYPES = {
+    CASH: "cash",
+    ONLINE: "online"
 }
 
 function getDate(date:string){
@@ -156,5 +164,6 @@ export {
     modifyQuery,
     // modifyTransactionData,
     // modifyTransactionDataVersionOne,
-    modifyTransactionDataVersionTwo
+    modifyTransactionDataVersionTwo,
+    getDate
 }

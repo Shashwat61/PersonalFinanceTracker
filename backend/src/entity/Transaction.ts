@@ -13,8 +13,7 @@ export class Transaction extends BaseEntity{
         type: 'numeric',
         precision: 10,
         scale: 2,
-        nullable: true,
-        default: null
+        nullable: false
     })
     amount!: number
 
@@ -22,8 +21,7 @@ export class Transaction extends BaseEntity{
     @Column({
         type: 'varchar',
         length: '4',
-        nullable: true,
-        default: null
+        nullable: false,
     })
     bank_account_number!: string
 
@@ -32,7 +30,7 @@ export class Transaction extends BaseEntity{
         nullable: true,
         default: null
     })
-    transaction_metadata_id!: string
+    transaction_metadata_id?: string | null
 
     @Column({
         type: 'enum',
@@ -77,9 +75,10 @@ export class Transaction extends BaseEntity{
 
     @Column({
         type: 'varchar',
-        nullable: false,
+        nullable: true,
+        default: null
     })
-    message_id!: string
+    message_id?: string | null
 
     @Column({
         type: 'integer',
@@ -92,7 +91,14 @@ export class Transaction extends BaseEntity{
         nullable: true,
         default: null
     })
-    user_upi_category_name_mapping_id!: string
+    user_upi_category_name_mapping_id?: string | null
+
+    @Column({
+        type: 'enum',
+        enum: ['online', 'cash'],
+        nullable: false
+    })
+    mode!: string
 
     @ManyToOne(()=> User, (user) => user.transactions, {cascade: true})
     @JoinColumn({name: "user_id"})

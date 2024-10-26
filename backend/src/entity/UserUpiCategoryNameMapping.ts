@@ -16,22 +16,25 @@ export class UserUpiCategoryNameMapping extends BaseEntity{
     
     @Column({
         type: "varchar",
-        nullable: false
+        nullable: true,
+        default: null
     })
-    upi_id!: string
+    upi_id!: string | null
 
     @Column({
         type: "varchar",
         length: 255,
-        nullable: true
+        nullable: true,
+        default: null
     })
-    upi_name!: string
+    upi_name!: string | null
 
     @Column({
         type: "uuid",
-        nullable: true
+        nullable: true,
+        default: null
     })
-    category_id!: string
+    category_id!: string | null
 
     @Column({
         type: 'timestamp',

@@ -1,12 +1,10 @@
 import { Equal, In, LessThan, LessThanOrEqual, MoreThan, MoreThanOrEqual } from "typeorm";
-import { dbSource } from "../config/dbSource";
-import { Bank } from "../entity/Bank";
 import { Transaction } from "../entity/Transaction";
 import { User } from "../entity/User";
 import { UserBankMapping } from "../entity/UserBankMapping";
 import { gmailClient, redisClient } from "../lib"
-import { GmailMessage, GmailMessages, GmailThreadMessages, Message, TransactionParams, UpdateTransactionRequestBody } from "../types/transaction.types";
-import { modifyQuery, modifyTransactionDataVersionTwo } from "../utils/helper";
+import { AddTransaction, GmailMessage, GmailMessages, GmailThreadMessages, Message, TransactionParams, UpdateTransactionRequestBody } from "../types/transaction.types";
+import { getDate, modifyQuery, modifyTransactionDataVersionTwo } from "../utils/helper";
 import { UserUpiDetails } from "../entity/UserUpiDetails";
 import { UserUpiCategoryNameMapping } from "../entity/UserUpiCategoryNameMapping";
 
@@ -32,10 +30,13 @@ const getTransactionsVersionTwo = async(
     }
     else {
         currentDayLastTransaction = await Transaction.findOne({
+            // add condition for mode online
             where:{
+                mode: "online",
                 transacted_at: new Date(apiQuery.after),
                 user_bank_mapping_id: userBankMapping.id
             },
+
             relations: ["userBankMapping"],
             order:{
                 sequence: "DESC"
@@ -93,10 +94,11 @@ async function setGmailMessages(modifiedQuery: string, access_token: string, use
     // which means either cache value was not found or there is no transaction done for the current day
     // which means get all the messages and iterate over all of'em.
     const savedTransactions = await modifyAndSaveTransactions(messages, access_token, userBankMapping, lastTransaction)
-    // save and implement tracker
+
     const lastSavedTransaction = savedTransactions[0]
-    await redisClient.setKey(`${userBankMapping.user_id}_${userBankMapping.bank_id}${query.after}${query.before}_last_transaction`, lastSavedTransaction.message_id.toString(), 86400)
-    // if cursor is present then return the transactions 10 conditions
+    if (lastSavedTransaction.message_id){
+        const resp = await redisClient.setKey(`${userBankMapping.user_id}_${userBankMapping.id}${query.after}${query.before}_last_transaction`, lastSavedTransaction.message_id.toString(), 86400)
+    }
 
     return [savedTransactions.slice(0,limit), savedTransactions.at(limit-1)?.sequence]
 }
@@ -146,7 +148,7 @@ async function modifyAndSaveTransactions(messages: GmailMessage[], access_token:
         // for new user upi ids and will skip the already saved upi ids related transactions
         sortedOrder.forEach((tx)=> {
             if (!tx.user_upi_category_name_mapping_id){
-                const foundUserUpiCategoryNameWithUpiId =     savedUserUpiCategoryNameMappingList.find(item => item.upi_id === messageUpiMap[tx.message_id])
+                const foundUserUpiCategoryNameWithUpiId =     savedUserUpiCategoryNameMappingList.find(item => item.upi_id === messageUpiMap[tx.message_id as string]) // in online payments,  will always get message id
                 if (foundUserUpiCategoryNameWithUpiId){
                     tx.user_upi_category_name_mapping_id=foundUserUpiCategoryNameWithUpiId.id
                     tx.userUpiCategoryNameMapping = foundUserUpiCategoryNameWithUpiId
@@ -159,12 +161,6 @@ async function modifyAndSaveTransactions(messages: GmailMessage[], access_token:
         const savedTransactions = await Transaction.save(sortedOrder, {
             reload: true
         })
-        // const loadedTransactions = await Transaction.find({
-        //     relations: ["userUpiDetails"],
-        //     where:{
-        //         id: In(savedTransactions.map(item => item.id))
-        //     }
-        // })
         return savedTransactions
 }
 
@@ -191,12 +187,7 @@ const updateTransactions = async(requestBody: UpdateTransactionRequestBody, curr
     // else update the transactions
     // return the updated transactions
     const {transactionIds, categoryId, vpaName} = requestBody
-    // const transactions = await dbSource.manager
-    //         .createQueryBuilder(Transaction, "t")
-    //         .leftJoinAndSelect("t.userUpiDetails", "userUpiDetails")
-    //         .leftJoinAndSelect("t.userBankMapping", "userBankMapping")
-    //         .where("t.id IN (:...transactionIds)", { transactionIds })
-    //         .getMany();
+    
     const transactions = await Transaction.find(
         {
             where: {
@@ -236,8 +227,42 @@ const updateTransactions = async(requestBody: UpdateTransactionRequestBody, curr
         }
 }
 
+const saveTransaction = async(transaction: AddTransaction, user: User) => {
+    const user_bank_mapping_id = transaction.user_bank_mapping_id
+    const userBankMapping = await UserBankMapping.findOneBy({id: user_bank_mapping_id, user_id: user.id})
+    if (!userBankMapping) throw new Error('User bank mapping not found, Not authorized')
+    const lastSavedTransaction = await Transaction.findOne({
+        where: {
+            user_bank_mapping_id: user_bank_mapping_id,
+            transacted_at: new Date(transaction.transacted_at)
+        },
+        order: {
+            sequence: "DESC"
+        }
+    })
 
+    // make userupinamecategorymapping for this transaction
+    const userUpiCategoryNameMapping = new UserUpiCategoryNameMapping()
+    userUpiCategoryNameMapping.category_id = transaction.category_id;
+    userUpiCategoryNameMapping.user_id = user.id;
+    (await userUpiCategoryNameMapping.save()).reload()
+    const transactionInstance = new Transaction()
+    transactionInstance.amount = Number(transaction.amount)
+    transactionInstance.transaction_type = transaction.transaction_type
+    transactionInstance.user_id = user.id
+    transactionInstance.user_bank_mapping_id = user_bank_mapping_id
+    transactionInstance.transacted_at = new Date(transaction.transacted_at)
+    transactionInstance.sequence = lastSavedTransaction?.sequence ? lastSavedTransaction.sequence + 1 : 0
+    transactionInstance.mode = transaction.mode
+    transactionInstance.bank_account_number = transaction.bank_account_number
+    transactionInstance.user_upi_category_name_mapping_id= userUpiCategoryNameMapping.id
+    await transactionInstance.save()
+    return transactionInstance
+
+
+}
 export default {
     getTransactionsVersionTwo,
-    updateTransactions
+    updateTransactions,
+    saveTransaction
 }
