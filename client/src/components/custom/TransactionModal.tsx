@@ -9,7 +9,7 @@ import { deepEqualsObject } from '@/utils'
 
 interface TransactionModelProps{
     transaction: Transaction | null
-    onSave: (transaction: Transaction | AddTransaction) => void
+    onSave: (transaction: Transaction) => void
     open: boolean
     onOpenChange: (open: boolean) => void
     placeholder: string
@@ -101,7 +101,7 @@ function TransactionModal({ transaction, onSave, open, onOpenChange, placeholder
               <Input 
                 id="transacted_at" 
                 type="date" 
-                value={editedTransaction?.transacted_at} 
+                value={editedTransaction?.transacted_at?.toString()} 
                 onChange={handleEditTransaction}
                 disabled={isEditing}
               />
@@ -172,7 +172,7 @@ function TransactionModal({ transaction, onSave, open, onOpenChange, placeholder
               <Label htmlFor="description">Description</Label>
               <Input 
                 id="transaction_metadata_id" 
-                value={editedTransaction?.transaction_metadata_id} 
+                value={editedTransaction?.transaction_metadata_id ?? ""} 
                 onChange={handleEditTransaction}
               />
             </div>

@@ -33,35 +33,30 @@ export interface Bank{
 export interface Transaction{
     id: string
     amount: number
-    bank_account_number?: string
-    transaction_metadata_id?: string
+    bank_account_number: string
+    transaction_metadata_id: string | null
     transaction_type: string
     user_id: string
     user_bank_mapping_id: string
     transacted_at: string
-    created_at: Date
-    updated_at: Date
-    message_id: string
+    created_at: string
+    updated_at: string
+    message_id: string | null
     sequence: number
-    user_upi_category_name_mapping_id: string
-    userUpiCategoryNameMapping: UserUpiCategoryNameMapping
+    user_upi_category_name_mapping_id: string | null
+    userUpiCategoryNameMapping?: UserUpiCategoryNameMapping
+    mode: string
 }
 
 export interface AddTransaction extends Omit<Partial<Transaction>, 'userUpiCategoryNameMapping'>{
-    id: string
     bank_account_number: string
+    mode: string
     transaction_metadata_id?: string
     transacted_at: string
-    created_at: Date
-    updated_at: Date
-    message_id: string
-    sequence: number
-    user_upi_category_name_mapping_id: string
     amount: number
-    user_id: string
     transaction_type: string
-    userUpiCategoryNameMapping: Partial<Pick<UserUpiCategoryNameMapping, 'upi_id' | 'upi_name'>> & Omit<UserUpiCategoryNameMapping, 'upi_id' | 'upi_name'>
     user_bank_mapping_id: string
+    category_id: string
 }
 export interface TransactionResponse{
     transactions: Transaction[]
@@ -104,8 +99,8 @@ export interface UserUpiCategoryNameMapping {
     upi_id?: string
     category_id?: string
     upi_name?: string
-    created_at: Date
-    updated_at: Date
+    created_at: string
+    updated_at: string
     category?: Category
 }
 

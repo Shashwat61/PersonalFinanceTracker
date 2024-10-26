@@ -104,20 +104,32 @@ function useTransactions(userId:string | undefined, primaryUserBankMapping: User
     })
 
     const {mutate: addTransaction, isPending: addTransactionPending, isSuccess: addTransactionSuccess} = useMutation({
-        mutationFn: (data: Transaction) => createSingle<Transaction, Transaction>("/add", data),
+        mutationFn: (data: AddTransaction) => createSingle<Transaction, AddTransaction>("/transactions/add", data),
         onMutate: async(variables) => {
             await queryClient.cancelQueries({queryKey: ["transactions", userId, primaryUserBankMapping?.id, selectedDate]})
             const previousTransactionsData= queryClient.getQueryData<InfiniteData<TransactionResponse>>(["transactions", userId, primaryUserBankMapping?.id, selectedDate])
             const optimisticTransactionId = "1"
             const optimisticUserUpiCategoryNameMappingId = "1"
+            const categories:Category[] | undefined = queryClient.getQueryData(["categories"])
+            const foundCategory = categories?.find(category => category.id === variables.category_id)
             const optimisticTransaction: Transaction = {
                 ...variables,
+                user_id: userId!,
+                created_at: new Date().toLocaleDateString(),
+                updated_at: new Date().toLocaleDateString(),
+                sequence: 0,
                 id: optimisticTransactionId,
                 bank_account_number: primaryUserBankMapping!.account_number,
                 userUpiCategoryNameMapping: {
-                    ...variables.userUpiCategoryNameMapping,
-                    id: optimisticUserUpiCategoryNameMappingId
+                    id: optimisticUserUpiCategoryNameMappingId,
+                    category_id: variables.category_id,
+                    created_at: new Date().toLocaleDateString(),
+                    updated_at: new Date().toLocaleDateString(),
+                    user_id: userId!,
+                    category: foundCategory
                 },
+                transaction_metadata_id: null,
+                message_id: null,
                 user_upi_category_name_mapping_id: optimisticUserUpiCategoryNameMappingId
             }
             const previousUpdatedTransactions = (previousTransactionsData?.pages || []).map((page, index)=>{

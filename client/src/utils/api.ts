@@ -28,6 +28,6 @@ export const updateSingle = <R, D extends { id: string }>(path: string, data: D)
 export function updateMany<R, D>(path: string, data:D){
     return apiManager.client.put<R>(path, data)
 }
-export function createSingle<R, D>(path: string, params: D){
-    return apiManager.client.post<R>(path, params)
+export function createSingle<R, D>(path: string, data: D){
+    return apiManager.client.post<R>(path, data)
 }

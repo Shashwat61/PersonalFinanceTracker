@@ -1,21 +1,15 @@
-import React, { useState } from 'react'
-import { CreditCard, Search, Filter, ChevronDown, ChevronUp, Plus, ArrowUpRight, ArrowDownRight, Edit2 } from 'lucide-react'
+import  { useState } from 'react'
+import { Plus } from 'lucide-react'
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
 import WithLayout from '@/components/WithLayout'
-import TransactionSlab from '@/components/custom/TransactionSlab'
 import TransactionHeader from '@/components/custom/TransactionHeader'
 import useDebounce from '@/hooks/useDebounce'
 import useTransactions from '@/hooks/useTransactions'
 import { useUserContext } from '@/contexts/UserContext'
 import useFilters from '@/hooks/useFilters'
 import { useQuery } from '@tanstack/react-query'
-import { getMany, getManyWithoutParams } from '@/utils/api'
+import { getManyWithoutParams } from '@/utils/api'
 import { AddTransaction, Category, Transaction } from '@/types'
 import { QUERY_STALE_TIME } from '@/utils/constants'
 import TransactionSlabsContainer from '@/components/custom/TransactionSlabsContainer'
@@ -43,9 +37,9 @@ import TransactionModal from '@/components/custom/TransactionModal'
 
   function handleSaveTransaction(transaction: Transaction){
     const userUpiCategoryNameMapping = transaction.userUpiCategoryNameMapping
-    const similarTransactionsIds = userTransactions.filter(txn => (txn.user_upi_category_name_mapping_id == userUpiCategoryNameMapping.id)).map(txn => txn.id)
+    const similarTransactionsIds = userTransactions.filter(txn => (txn.user_upi_category_name_mapping_id == userUpiCategoryNameMapping?.id)).map(txn => txn.id)
     setSimilarTransactionIds(similarTransactionsIds)
-    updateTransactions({transactionIds: similarTransactionsIds, categoryId: userUpiCategoryNameMapping.category_id || "", vpaName: userUpiCategoryNameMapping.upi_name || ""})
+    updateTransactions({transactionIds: similarTransactionsIds, categoryId: userUpiCategoryNameMapping?.category_id || "", vpaName: userUpiCategoryNameMapping?.upi_name || ""})
     setIsEditDialogOpen(false)
   }
 
@@ -59,30 +53,42 @@ import TransactionModal from '@/components/custom/TransactionModal'
     setIsNewTransaction(true)
     setMutableTransaction({id: '',
       amount: 0,
+      bank_account_number: primaryUserBankMapping!.account_number,
       transaction_metadata_id: '',
       transaction_type: '',
       user_id: userData!.id,
       user_bank_mapping_id: primaryUserBankMapping!.id,
-      transacted_at: '',
-      created_at: new Date(),
-      updated_at: new Date(),
-      message_id: '',
+      transacted_at: new Date(),
+      created_at: new Date().toLocaleDateString(),
+      updated_at: new Date().toLocaleDateString(),
       sequence: 0,
       user_upi_category_name_mapping_id: '',
+      mode: 'cash',
       userUpiCategoryNameMapping: {
         id: '',
         category_id: '',
         upi_name: '',
         user_id: userData!.id,
-        created_at: new Date(),
-        updated_at: new Date(),
+        created_at: new Date().toLocaleDateString(),
+        updated_at: new Date().toLocaleDateString(),
         upi_id: ''
-      } 
+      },
+      message_id: null
       })
   }
 
   function saveNewTransaction(transaction: Transaction){
-    addTransaction(transaction)
+    // handle description
+    const requestPayload: AddTransaction = {
+      bank_account_number: transaction!.bank_account_number.toString(),
+      amount: transaction.amount,
+      transaction_type: transaction.transaction_type,
+      mode: transaction.mode,
+      transacted_at: new Date().getFullYear() +"/" + (Number(new Date().getMonth() + 1)) + "/" + new Date().getDate(),
+      user_bank_mapping_id: transaction.user_bank_mapping_id,
+      category_id: transaction!.userUpiCategoryNameMapping!.category_id! // always available as without selecting the category id this function will not be called
+    }
+    addTransaction(requestPayload)
     setIsNewTransaction(false)
   }
 
