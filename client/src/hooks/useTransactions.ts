@@ -1,6 +1,6 @@
-import { Bank, Category, DefaultGetManyParams, EditTransaction, Transaction, TransactionResponse, UserBankMapping } from '@/types'
+import { AddTransaction, Bank, Category, DefaultGetManyParams, EditTransaction, Transaction, TransactionResponse, UserBankMapping } from '@/types'
 import { getDates } from '@/utils'
-import { getMany, updateMany } from '@/utils/api'
+import { createSingle, getMany, updateMany } from '@/utils/api'
 import { QUERY_STALE_TIME, TRANSACTION_RESPONSE_LIMIT } from '@/utils/constants'
 import { InfiniteData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
@@ -102,6 +102,63 @@ function useTransactions(userId:string | undefined, primaryUserBankMapping: User
             toast.success("Updated Transactions Successfully")
         },
     })
+
+    const {mutate: addTransaction, isPending: addTransactionPending, isSuccess: addTransactionSuccess} = useMutation({
+        mutationFn: (data: Transaction) => createSingle<Transaction, Transaction>("/add", data),
+        onMutate: async(variables) => {
+            await queryClient.cancelQueries({queryKey: ["transactions", userId, primaryUserBankMapping?.id, selectedDate]})
+            const previousTransactionsData= queryClient.getQueryData<InfiniteData<TransactionResponse>>(["transactions", userId, primaryUserBankMapping?.id, selectedDate])
+            const optimisticTransactionId = "1"
+            const optimisticUserUpiCategoryNameMappingId = "1"
+            const optimisticTransaction: Transaction = {
+                ...variables,
+                id: optimisticTransactionId,
+                bank_account_number: primaryUserBankMapping!.account_number,
+                userUpiCategoryNameMapping: {
+                    ...variables.userUpiCategoryNameMapping,
+                    id: optimisticUserUpiCategoryNameMappingId
+                },
+                user_upi_category_name_mapping_id: optimisticUserUpiCategoryNameMappingId
+            }
+            const previousUpdatedTransactions = (previousTransactionsData?.pages || []).map((page, index)=>{
+                if(index==0 && (!page || Object.keys(page).length === 0)){
+
+                    return {
+                        ...page,
+                        transactions: [optimisticTransaction]
+                    }
+                }
+                return {
+                    ...page,
+                    transactions: [...page.transactions, optimisticTransaction]
+                }
+            }) as InfiniteData<TransactionResponse>['pages']
+            console.log(previousUpdatedTransactions)
+            queryClient.setQueryData<InfiniteData<TransactionResponse>>(["transactions", userId, primaryUserBankMapping?.id, selectedDate], (oldData) => {
+                if(!oldData) return oldData
+                return {
+                    ...oldData,
+                    pages: previousUpdatedTransactions ?? []
+                }
+            })
+            return {previousTransactionsData}
+        },
+        onError: (error, variables, context) => {
+            console.log(error, 'error in onError')
+            queryClient.setQueryData(["transactions", userId, primaryUserBankMapping?.id, selectedDate], context?.previousTransactionsData)
+            toast.error("Error adding transaction")
+        },
+        onSettled: (data, variables, context) => {
+            // console.log(data, 'data in onSuccess')
+            queryClient.invalidateQueries({
+                queryKey: ["transactions", userId, primaryUserBankMapping?.id, selectedDate]
+            })
+        },
+        onSuccess(data, variables, context) {
+            // console.log(data, 'data in onSuccess')
+            toast.success("Updated Transactions Successfully")
+        },
+    })
   return {
         userTransactions: transactions,
         userTransactionsLoading,
@@ -113,7 +170,10 @@ function useTransactions(userId:string | undefined, primaryUserBankMapping: User
         variables,
         fetchingMoreUserTransactions,
         userTransactionHasMore,
-        fetchMoreUserTransactions
+        fetchMoreUserTransactions,
+        addTransaction,
+        addTransactionSuccess,
+        addTransactionPending,
   }
 }
 

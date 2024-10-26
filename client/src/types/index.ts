@@ -1,3 +1,4 @@
+
 import { LucideProps } from "lucide-react"
 
 export interface User{
@@ -27,25 +28,40 @@ export interface Bank{
     updated_at: Date
 }
 
-// partial transaction omitting id
-
 
 
 export interface Transaction{
     id: string
     amount: number
-    bank_account_number?: number
+    bank_account_number?: string
     transaction_metadata_id?: string
     transaction_type: string
     user_id: string
     user_bank_mapping_id: string
     transacted_at: string
-    created_at: string
-    updated_at: string
+    created_at: Date
+    updated_at: Date
     message_id: string
     sequence: number
     user_upi_category_name_mapping_id: string
     userUpiCategoryNameMapping: UserUpiCategoryNameMapping
+}
+
+export interface AddTransaction extends Omit<Partial<Transaction>, 'userUpiCategoryNameMapping'>{
+    id: string
+    bank_account_number: string
+    transaction_metadata_id?: string
+    transacted_at: string
+    created_at: Date
+    updated_at: Date
+    message_id: string
+    sequence: number
+    user_upi_category_name_mapping_id: string
+    amount: number
+    user_id: string
+    transaction_type: string
+    userUpiCategoryNameMapping: Partial<Pick<UserUpiCategoryNameMapping, 'upi_id' | 'upi_name'>> & Omit<UserUpiCategoryNameMapping, 'upi_id' | 'upi_name'>
+    user_bank_mapping_id: string
 }
 export interface TransactionResponse{
     transactions: Transaction[]
@@ -85,9 +101,9 @@ export type EditTransaction = {
 export interface UserUpiCategoryNameMapping {
     id: string
     user_id: string
-    upi_id: string
-    category_id: string
-    upi_name: string
+    upi_id?: string
+    category_id?: string
+    upi_name?: string
     created_at: Date
     updated_at: Date
     category?: Category

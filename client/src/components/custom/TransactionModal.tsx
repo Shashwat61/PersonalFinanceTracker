@@ -3,13 +3,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
 import { Label } from '../ui/label'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
-import { Category, Transaction, User, UserUpiCategoryNameMapping } from '@/types'
+import { AddTransaction, Category, Transaction } from '@/types'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { deepEqualsObject } from '@/utils'
 
 interface TransactionModelProps{
     transaction: Transaction | null
-    onSave: (transaction: Transaction, categoryId?: string, vpaNickName?: string) => void
+    onSave: (transaction: Transaction | AddTransaction) => void
     open: boolean
     onOpenChange: (open: boolean) => void
     placeholder: string
@@ -20,34 +20,39 @@ interface TransactionModelProps{
 function TransactionModal({ transaction, onSave, open, onOpenChange, placeholder, categories, isEditing }: TransactionModelProps){
   const [editedTransaction, setEditedTransaction] = useState<Transaction | null>(transaction || null)
   const [isTransactionChanged, setIsTransactionChanged] = useState<boolean>(false)
-  const transactionMetaData = transaction?.userUpiCategoryNameMapping
+  const transactionMetaData = editedTransaction?.userUpiCategoryNameMapping
   const transactionCategory = transactionMetaData?.category
-  
-    console.log(editedTransaction, 'editedtransaction')
-    // console.log(selectedCategory, nickName, 'nickname', transactionMetaData, transactionCategory)
 
     useEffect(()=>{
       if(editedTransaction){ 
         const message = deepEqualsObject(editedTransaction, transaction)
-        console.log(message, 'deepequals')
         setIsTransactionChanged(message)
       }
     },[editedTransaction])
 
-    const handleSave = () => {
+    function handleSave(){
         if (!editedTransaction || isTransactionChanged) return;
         onSave(editedTransaction)
         onOpenChange(false)
     }
-    // wrap this in usecallback
     
     function handleEditTransaction(e: React.ChangeEvent<HTMLInputElement> | string){
       setEditedTransaction((prev)=> {
-        if(typeof e !== "string" && e.target?.id !== "upi_name"){
+        console.log(prev, 'previous value')
+        if(typeof e !== "string" && e.target.id === "upi_id"){
+          return {
+            ...prev,
+            userUpiCategoryNameMapping: {
+              ...prev?.userUpiCategoryNameMapping,
+              upi_id: e.target.value
+            }
+          }
+        }
+        else if(typeof e !== "string" && e.target?.id !== "upi_name"){
           console.log('hello from block', e.target.value)
           return {
             ...prev,
-            [e.target.value]: e.target.value
+            [e.target.id]: e.target.value
           }
         }
         else if(typeof e !== "string" && e.target.id === "upi_name"){
@@ -72,6 +77,7 @@ function TransactionModal({ transaction, onSave, open, onOpenChange, placeholder
       })
   }
     console.log(editedTransaction, 'editedtransaciton')
+    console.log(!!transactionMetaData?.upi_id, 'boolean')
     if (!transaction) return null
   
     return (
@@ -83,9 +89,9 @@ function TransactionModal({ transaction, onSave, open, onOpenChange, placeholder
           <div className="space-y-4">
             <div>
               <Label htmlFor="type">Type</Label>
-              <Input 
-                id="transaction_type" 
-                value={editedTransaction?.transaction_type} 
+              <Input
+                id="transaction_type"
+                value={editedTransaction?.transaction_type}
                 onChange={handleEditTransaction}
                 disabled={isEditing}
               />
@@ -111,8 +117,8 @@ function TransactionModal({ transaction, onSave, open, onOpenChange, placeholder
               />
             </div>
             <div>
-              <Label htmlFor="category">Category</Label>
-              <Select onValueChange={handleEditTransaction}>
+              <Label aria-required={true}  htmlFor="category">Category</Label>
+              <Select required={true} onValueChange={handleEditTransaction}>
       <SelectTrigger className="w-full sm:w-[200px]">
         <SelectValue placeholder={transactionCategory?.name ?? "None"} />
       </SelectTrigger>
@@ -123,7 +129,8 @@ function TransactionModal({ transaction, onSave, open, onOpenChange, placeholder
       </SelectContent>
     </Select>
             </div>
-            <div>
+            { isEditing ?
+              (<div>
               <Label htmlFor="upi_name">Nickname for 
                 <span className="pl-1">
                     {transactionMetaData?.upi_id}
@@ -134,7 +141,33 @@ function TransactionModal({ transaction, onSave, open, onOpenChange, placeholder
                 value={editedTransaction?.userUpiCategoryNameMapping?.upi_name}
                 onChange={handleEditTransaction}
               />
-              </div>
+              </div>)
+              : (
+                <>
+                <div>
+                  <Label htmlFor='upi_id'>UPI Id</Label>
+                  <Input
+                  id="upi_id"
+                  value={editedTransaction?.userUpiCategoryNameMapping?.upi_id}
+                  onChange={handleEditTransaction}
+                  />
+                  </div>
+                  <div>
+                  <Label htmlFor="upi_name">Nickname for 
+                <span  className="pl-1">
+                    {transactionMetaData?.upi_id}
+                    </span>
+                </Label>
+              <Input
+                disabled={!transactionMetaData?.upi_id}
+                id="upi_name" 
+                value={editedTransaction?.userUpiCategoryNameMapping?.upi_name}
+                onChange={handleEditTransaction}
+              />
+                  </div>
+                  </>
+              )
+            }
             <div>
               <Label htmlFor="description">Description</Label>
               <Input 

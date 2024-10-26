@@ -16,7 +16,7 @@ import { useUserContext } from '@/contexts/UserContext'
 import useFilters from '@/hooks/useFilters'
 import { useQuery } from '@tanstack/react-query'
 import { getMany, getManyWithoutParams } from '@/utils/api'
-import { Category, Transaction } from '@/types'
+import { AddTransaction, Category, Transaction } from '@/types'
 import { QUERY_STALE_TIME } from '@/utils/constants'
 import TransactionSlabsContainer from '@/components/custom/TransactionSlabsContainer'
 import TransactionModal from '@/components/custom/TransactionModal'
@@ -24,20 +24,20 @@ import TransactionModal from '@/components/custom/TransactionModal'
 
  function Transactions() {
   const {userData, primaryUserBank, primaryUserBankMapping} = useUserContext()
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null
+  const [mutableTransaction, setMutableTransaction] = useState<Transaction | null>(null
   )
   const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false)
   const [search, setSearch] = useState<string>('')
   const [debouncedSearch] = useDebounce(search, 500)
   const {selectedDate, setSelectedDate} = useFilters()
   let sequence = 0
-  const {userTransactions, updateTransactions, updateTransactionsPending,updateTransactionsSuccess, userTransactionsLoading, userTransactionsSuccess, updatedTransactions, variables, fetchMoreUserTransactions, fetchingMoreUserTransactions, userTransactionHasMore} = useTransactions(userData?.id, primaryUserBankMapping, selectedDate, sequence)
+  const {userTransactions, updateTransactions, updateTransactionsPending,updateTransactionsSuccess, userTransactionsLoading, userTransactionsSuccess, updatedTransactions, variables, fetchMoreUserTransactions, fetchingMoreUserTransactions, userTransactionHasMore, addTransaction, addTransactionPending, addTransactionSuccess} = useTransactions(userData?.id, primaryUserBankMapping, selectedDate, sequence)
   const [similarTransactionsIds, setSimilarTransactionIds] = useState<string[]>([])
   const [isNewTransaction, setIsNewTransaction] = useState<boolean>(false)
 
   
   function handleEditTransaction(transaction: Transaction){
-    setEditingTransaction(transaction)
+    setMutableTransaction(transaction)
     setIsEditDialogOpen(true)
   }
 
@@ -57,11 +57,35 @@ import TransactionModal from '@/components/custom/TransactionModal'
   })
   function handleAddTransaction(){
     setIsNewTransaction(true)
-    setEditingTransaction({
-      
-    })
-    setIsEditDialogOpen(true)
+    setMutableTransaction({id: '',
+      amount: 0,
+      transaction_metadata_id: '',
+      transaction_type: '',
+      user_id: userData!.id,
+      user_bank_mapping_id: primaryUserBankMapping!.id,
+      transacted_at: '',
+      created_at: new Date(),
+      updated_at: new Date(),
+      message_id: '',
+      sequence: 0,
+      user_upi_category_name_mapping_id: '',
+      userUpiCategoryNameMapping: {
+        id: '',
+        category_id: '',
+        upi_name: '',
+        user_id: userData!.id,
+        created_at: new Date(),
+        updated_at: new Date(),
+        upi_id: ''
+      } 
+      })
   }
+
+  function saveNewTransaction(transaction: Transaction){
+    addTransaction(transaction)
+    setIsNewTransaction(false)
+  }
+
   return (
     <>
       <div className="space-y-4 overflow-hidden ">
@@ -97,13 +121,24 @@ import TransactionModal from '@/components/custom/TransactionModal'
                     
       {isEditDialogOpen ? <TransactionModal
         placeholder='Edit Transaction'
-        transaction={editingTransaction}
+        transaction={mutableTransaction}
         onSave={handleSaveTransaction}
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
         categories = {categories}
         isEditing = {!isNewTransaction}
       />: null}
+      {
+        isNewTransaction ? <TransactionModal
+        placeholder='Add Transaction'
+        transaction={mutableTransaction}
+        onSave={saveNewTransaction}
+        open={isNewTransaction}
+        onOpenChange={setIsNewTransaction}
+        categories = {categories}
+        isEditing = {false}
+        /> : null
+      }
     </>
   )
 }

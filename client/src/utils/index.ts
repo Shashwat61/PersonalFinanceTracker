@@ -58,7 +58,6 @@ export function getActivePage(location: string){
 }
 
 export function deepEqualsObject<T,R>(a: T,b: R){
-  console.log(a,b)
   if (typeof a !== typeof b) return false
   if ((a === null && b !== null) || (a!==null && b===null)) return false
   if (typeof a === 'object' && typeof b === 'object' && a && b){
