@@ -70,3 +70,11 @@ export function deepEqualsObject<T,R>(a: T,b: R){
   }
   return a === b as unknown
 }
+
+function generateIncrementId(){
+  let count = "0"
+  return function(){
+    return count+=1
+  }
+}
+export const getIncrementId = generateIncrementId()

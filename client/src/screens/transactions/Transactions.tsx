@@ -25,6 +25,7 @@ import TransactionModal from '@/components/custom/TransactionModal'
   const [debouncedSearch] = useDebounce(search, 500)
   const {selectedDate, setSelectedDate} = useFilters()
   let sequence = 0
+  console.log(sequence, '=======render=======')
   const {userTransactions, updateTransactions, updateTransactionsPending,updateTransactionsSuccess, userTransactionsLoading, userTransactionsSuccess, updatedTransactions, variables, fetchMoreUserTransactions, fetchingMoreUserTransactions, userTransactionHasMore, addTransaction, addTransactionPending, addTransactionSuccess} = useTransactions(userData?.id, primaryUserBankMapping, selectedDate, sequence)
   const [similarTransactionsIds, setSimilarTransactionIds] = useState<string[]>([])
   const [isNewTransaction, setIsNewTransaction] = useState<boolean>(false)
@@ -37,10 +38,12 @@ import TransactionModal from '@/components/custom/TransactionModal'
 
   function handleSaveTransaction(transaction: Transaction){
     const userUpiCategoryNameMapping = transaction.userUpiCategoryNameMapping
-    const similarTransactionsIds = userTransactions.filter(txn => (txn.user_upi_category_name_mapping_id == userUpiCategoryNameMapping?.id)).map(txn => txn.id)
-    setSimilarTransactionIds(similarTransactionsIds)
-    updateTransactions({transactionIds: similarTransactionsIds, categoryId: userUpiCategoryNameMapping?.category_id || "", vpaName: userUpiCategoryNameMapping?.upi_name || ""})
+    const similarFoundTransactionIds = userTransactions.filter(txn => (txn.user_upi_category_name_mapping_id == userUpiCategoryNameMapping?.id)).map(txn => txn.id)
+    console.log(similarFoundTransactionIds, 'similarfoundtransacitonids')
+    setSimilarTransactionIds(similarFoundTransactionIds)
+    updateTransactions({transactionIds: similarFoundTransactionIds, categoryId: userUpiCategoryNameMapping?.category_id || "", vpaName: userUpiCategoryNameMapping?.upi_name || ""})
     setIsEditDialogOpen(false)
+    setSimilarTransactionIds([])
   }
 
   const {data: categories} = useQuery({
@@ -58,7 +61,7 @@ import TransactionModal from '@/components/custom/TransactionModal'
       transaction_type: '',
       user_id: userData!.id,
       user_bank_mapping_id: primaryUserBankMapping!.id,
-      transacted_at: new Date(),
+      transacted_at: '',
       created_at: new Date().toLocaleDateString(),
       updated_at: new Date().toLocaleDateString(),
       sequence: 0,
@@ -84,7 +87,7 @@ import TransactionModal from '@/components/custom/TransactionModal'
       amount: transaction.amount,
       transaction_type: transaction.transaction_type,
       mode: transaction.mode,
-      transacted_at: new Date().getFullYear() +"/" + (Number(new Date().getMonth() + 1)) + "/" + new Date().getDate(),
+      transacted_at: transaction.transacted_at,
       user_bank_mapping_id: transaction.user_bank_mapping_id,
       category_id: transaction!.userUpiCategoryNameMapping!.category_id! // always available as without selecting the category id this function will not be called
     }

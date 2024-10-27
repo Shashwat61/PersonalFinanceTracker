@@ -1,18 +1,20 @@
-import { AddTransaction, Bank, Category, DefaultGetManyParams, EditTransaction, Transaction, TransactionResponse, UserBankMapping } from '@/types'
-import { getDates } from '@/utils'
+import { AddTransaction, Category, DefaultGetManyParams, EditTransaction, Transaction, TransactionResponse, UserBankMapping } from '@/types'
+import { getDates, getIncrementId } from '@/utils'
 import { createSingle, getMany, updateMany } from '@/utils/api'
 import { QUERY_STALE_TIME, TRANSACTION_RESPONSE_LIMIT } from '@/utils/constants'
-import { InfiniteData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { InfiniteData, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 
 
-function useTransactions(userId:string | undefined, primaryUserBankMapping: UserBankMapping | null, selectedDate:Date, sequence?: number) {
-    console.log(selectedDate, 'in usetransaction')
+function useTransactions(userId:string | undefined, primaryUserBankMapping: UserBankMapping | null, selectedDate:Date, sequence?: number | null) {
+    console.log(selectedDate, '=========in usetransaction hook========', sequence)
     const queryClient = useQueryClient()
 
     const {data: userTransactions, isLoading: userTransactionsLoading, isSuccess: userTransactionsSuccess, isFetchingNextPage: fetchingMoreUserTransactions, hasNextPage:  userTransactionHasMore, fetchNextPage: fetchMoreUserTransactions} = useInfiniteQuery({
         queryKey: ["transactions", userId, primaryUserBankMapping?.id, selectedDate],
-        queryFn: () => getMany<TransactionResponse, DefaultGetManyParams>(`/transactions/v2`, {
+        queryFn: () => {
+            console.log("calling transactions api=============")
+            return getMany<TransactionResponse, DefaultGetManyParams>(`/transactions/v2`, {
             filters: {
                 from: primaryUserBankMapping?.bank?.listener_email || '',
                 limit: TRANSACTION_RESPONSE_LIMIT
@@ -22,15 +24,15 @@ function useTransactions(userId:string | undefined, primaryUserBankMapping: User
             },
             id: primaryUserBankMapping?.id,
             cursor: sequence || 0
-        }),
+        })},
         enabled: !!userId && !!primaryUserBankMapping?.bank?.listener_email,
         retry: false,
         staleTime: QUERY_STALE_TIME,
         initialPageParam: sequence,
-        getNextPageParam: (lastPage, pages) => lastPage.cursor,
-        
+        getNextPageParam: (lastPage, pages) => lastPage.cursor ?? null,
     }
 )
+console.log(sequence, '=======sequence in use transaction=======')
     // do this work in select callback in useinfinitequery
     const transactions: Transaction[] = []
     if (userTransactions){
@@ -38,11 +40,11 @@ function useTransactions(userId:string | undefined, primaryUserBankMapping: User
         userTransactions.pages.forEach((item: TransactionResponse,i)=>{
             if (item.transactions){
                 transactions.push(...item.transactions)
-                sequence = item.cursor ?? 0
+                sequence = item.cursor ?? null
             }
         })
     }
-    console.log(transactions, 'transactions... ')
+    console.log(transactions, 'transactions... ', sequence)
 
 
     const {mutate: updateTransactions, isSuccess: updateTransactionsSuccess, isPending: updateTransactionsPending, data: updatedTransactions, variables} = useMutation({
@@ -93,9 +95,10 @@ function useTransactions(userId:string | undefined, primaryUserBankMapping: User
         },
         onSettled: (data, variables, context) => {
             // console.log(data, 'data in onSuccess')
-            queryClient.invalidateQueries({
-                queryKey: ["transactions", userId, primaryUserBankMapping?.id, selectedDate]
-            })
+            // sequence = 0
+            // queryClient.invalidateQueries({
+            //     queryKey: ["transactions", userId, primaryUserBankMapping?.id, selectedDate]
+            // })
         },
         onSuccess(data, variables, context) {
             // console.log(data, 'data in onSuccess')
@@ -108,8 +111,8 @@ function useTransactions(userId:string | undefined, primaryUserBankMapping: User
         onMutate: async(variables) => {
             await queryClient.cancelQueries({queryKey: ["transactions", userId, primaryUserBankMapping?.id, selectedDate]})
             const previousTransactionsData= queryClient.getQueryData<InfiniteData<TransactionResponse>>(["transactions", userId, primaryUserBankMapping?.id, selectedDate])
-            const optimisticTransactionId = "1"
-            const optimisticUserUpiCategoryNameMappingId = "1"
+            const optimisticTransactionId = getIncrementId()
+            const optimisticUserUpiCategoryNameMappingId = getIncrementId()
             const categories:Category[] | undefined = queryClient.getQueryData(["categories"])
             const foundCategory = categories?.find(category => category.id === variables.category_id)
             const optimisticTransaction: Transaction = {
@@ -142,10 +145,9 @@ function useTransactions(userId:string | undefined, primaryUserBankMapping: User
                 }
                 return {
                     ...page,
-                    transactions: [...page.transactions, optimisticTransaction]
+                    transactions: [optimisticTransaction, ...page.transactions]
                 }
             }) as InfiniteData<TransactionResponse>['pages']
-            console.log(previousUpdatedTransactions)
             queryClient.setQueryData<InfiniteData<TransactionResponse>>(["transactions", userId, primaryUserBankMapping?.id, selectedDate], (oldData) => {
                 if(!oldData) return oldData
                 return {
@@ -162,9 +164,9 @@ function useTransactions(userId:string | undefined, primaryUserBankMapping: User
         },
         onSettled: (data, variables, context) => {
             // console.log(data, 'data in onSuccess')
-            queryClient.invalidateQueries({
-                queryKey: ["transactions", userId, primaryUserBankMapping?.id, selectedDate]
-            })
+            // queryClient.invalidateQueries({
+            //     queryKey: ["transactions", userId, primaryUserBankMapping?.id, selectedDate]
+            // })
         },
         onSuccess(data, variables, context) {
             // console.log(data, 'data in onSuccess')

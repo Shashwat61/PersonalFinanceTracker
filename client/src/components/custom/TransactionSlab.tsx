@@ -69,6 +69,9 @@ function TransactionSlab({ transaction, onEdit, similarTransactionsIds, updateMu
               <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); onEdit(transaction); }}>
                 <Edit2 className="w-4 h-4 mr-2" /> Edit Transaction
               </Button>
+              <Badge variant="outline" className="mt-1">
+                {transaction.mode}
+              </Badge>
             </div>
           )}
         </CardContent>
