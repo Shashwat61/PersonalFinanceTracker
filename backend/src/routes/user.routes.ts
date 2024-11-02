@@ -1,9 +1,9 @@
-import userController from "../controllers/user.controller"
+import userController from '@controllers/user.controller';
 
-const express = require('express')
+const express = require('express');
 
-const router = express.Router()
+const router = express.Router();
 
-router.get('/me', userController.getUserDetails)
+router.get('/me', userController.getUserDetails);
 
-export default router
+export default router;

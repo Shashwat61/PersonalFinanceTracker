@@ -1,44 +1,41 @@
-import { z } from "zod";
-import { TRANSACTION_MODE_TYPES } from "../utils/helper";
+import { z } from 'zod';
+import { TRANSACTION_MODE_TYPES } from '../utils/helper';
 
 const getTransactions = z.object({
-    query: z.object({
-        from: z.string(),
-        after: z.string(),
-        before: z.string()
-    })
-})
+  query: z.object({
+    from: z.string(),
+    after: z.string(),
+    before: z.string(),
+  }),
+});
 
 const getTransactionsVersionOne = z.object({
-    query: z.object({
-        after: z.string(),
-        before: z.string(),
-        from: z.string(),
-        cursor: z.string().optional(),
-        limit: z.string().refine(
-            (val: string) => {
-                if (Number(val) > 100) {
-                    throw new Error('Limit should be less than 100')
-                }
-                else if(Number(val) < 5){
-                    throw new Error('Limit should be greater than 10')
-                }
-                return true
-            },
-        )
+  query: z.object({
+    after: z.string(),
+    before: z.string(),
+    from: z.string(),
+    cursor: z.string().optional(),
+    limit: z.string().refine((val: string) => {
+      if (Number(val) > 100) {
+        throw new Error('Limit should be less than 100');
+      } else if (Number(val) < 5) {
+        throw new Error('Limit should be greater than 10');
+      }
+      return true;
     }),
-    params: z.object({
-        id: z.string()
-    })
-})
+  }),
+  params: z.object({
+    id: z.string(),
+  }),
+});
 
 const updateTransactions = z.object({
-    body: z.object({
-        transactionIds: z.string().array(),
-        categoryId: z.string().optional(),
-        vpaName: z.string().optional()
-    })
-})
+  body: z.object({
+    transactionIds: z.string().array(),
+    categoryId: z.string().optional(),
+    vpaName: z.string().optional(),
+  }),
+});
 
 // {
 //     "id": "",
@@ -70,19 +67,19 @@ const updateTransactions = z.object({
 //     }
 // }
 const saveTransaction = z.object({
-    body: z.object({
-        amount: z.string(),
-        transaction_type: z.string(),
-        user_bank_mapping_id: z.string(),
-        transacted_at: z.string(),
-        bank_account_number: z.string(),
-        mode: z.string(),
-        category_id: z.string()
-    })
-})
+  body: z.object({
+    amount: z.string(),
+    transaction_type: z.string(),
+    user_bank_mapping_id: z.string(),
+    transacted_at: z.string(),
+    bank_account_number: z.string(),
+    mode: z.string(),
+    category_id: z.string(),
+  }),
+});
 export default {
-    getTransactions,
-    saveTransaction,
-    getTransactionsVersionOne,
-    updateTransactions
-}
+  getTransactions,
+  saveTransaction,
+  getTransactionsVersionOne,
+  updateTransactions,
+};

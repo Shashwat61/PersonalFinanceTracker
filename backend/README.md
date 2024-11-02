@@ -37,14 +37,14 @@
 - **Request Method:** `POST`
 - **Request Body:**
 
-     ```json
-     {
-       "bank_emails": [
-         "abc@mail.com",
-         ...
-       ]
-     }
-     ```
+  ```json
+  {
+    "bank_emails": [
+      "abc@mail.com",
+      ...
+    ]
+  }
+  ```
 
 - **Description:** This endpoint allows the user to add one or more email addresses to monitor in the frontend.
 - **Response:** Returns a `200 OK` status if successful, with appropriate error handling if an issue occurs.
@@ -97,12 +97,12 @@
 - **Request Params:** `/transaction_id`
 - **Request Body:**
 
-     ```json
-     { 
-       "category": { "category updated" },
-       "upi": { "Upi updated" } 
-     }
-     ```
+  ```json
+  {
+    "category": { "category updated" },
+    "upi": { "Upi updated" }
+  }
+  ```
 
 - **Description:** This endpoint updates the category, UPI details, or both for a specific transaction.
 - **Response:** Returns a success response if the transaction details are successfully updated.
@@ -111,36 +111,36 @@
 
 1. DB Table Migration
 
-    ```bash
-    npm run run_db_migration
-    ```
+   ```bash
+   npm run run_db_migration
+   ```
 
 2. Data Migrations
 
-    ```bash
-    npm run run_data_migration
-    ```
+   ```bash
+   npm run run_data_migration
+   ```
 
 3. Rollback DB Migrations
 
-    ```bash
-    npm run revert_db_migration
-    ```
+   ```bash
+   npm run revert_db_migration
+   ```
 
 4. Rollback Data Migrations
 
-    ```bash
-    npm run revert_data_migration
-    ```
+   ```bash
+   npm run revert_data_migration
+   ```
 
 5. Create DB Migration
 
    ```bash
     npm run create_migration db tablename
-    ```
+   ```
 
 6. Create Data Migration
 
-    ```bash
-     npm run create_migration data tablename
-     ```
+   ```bash
+    npm run create_migration data tablename
+   ```

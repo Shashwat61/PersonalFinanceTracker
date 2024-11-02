@@ -1,9 +1,9 @@
-import controllers from "../controllers"
+import controllers from '@controllers';
 
-const express = require('express')
-const router = express.Router()
+const express = require('express');
+const router = express.Router();
 
-router.get('/', controllers.bankController.getBanksList)
-router.get('/user', controllers.bankController.getBanksList)
+router.get('/', controllers.bankController.getBanksList);
+router.get('/user', controllers.bankController.getBanksList);
 
-export default router
+export default router;
