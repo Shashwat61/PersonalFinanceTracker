@@ -1,19 +1,42 @@
 {
-   "compilerOptions": {
-     "module": "CommonJS",
-     "esModuleInterop": true,
-     "target": "ES6",
-     "outDir": "./dist",
-     "rootDir": "./src",
-     "strict": true,
-     "moduleResolution": "node",
-     "resolveJsonModule": true,
-     "skipLibCheck": true,
-     "allowSyntheticDefaultImports": true,
-     "emitDecoratorMetadata": true,
-     "experimentalDecorators": true,
-     "sourceMap": true
-   },
-   "include": ["src/**/*"],
-   "exclude": ["node_modules", "**/*.spec.ts"]
- }
+  "compilerOptions": {
+    "module": "CommonJS",
+    "esModuleInterop": true,
+    "target": "ESNext",
+    "baseUrl": "src",
+    "outDir": "dist",
+    "rootDir": "src",
+    "strict": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowJs": true,
+    "sourceMap": true,
+    "paths": {
+      "@api/*": ["api/*"],
+      "@config/*": ["config/*"],
+      "@controllers": ["controllers/index"],
+      "@controllers/*": ["controllers/*"],
+      "@middlewares": ["middlewares/index"],
+      "@middlewares/*": ["middlewares/*"],
+      "@entity/*": ["entity/*"],
+      "@lib": ["lib/index"],
+      "@lib/*": ["lib/*"],
+      "@migrations/*": ["migrations/*"],
+      "@routes": ["routes/index"],
+      "@routes/*": ["routes/*"],
+      "@scripts/*": ["scripts/*"],
+      "@services/*": ["services/*"],
+      "@services": ["services/index"],
+      "@custom-types/*": ["custom-types/*"],
+      "@utils/*": ["utils/*"],
+      "@validations": ["validations/index"],
+      "@validations/*": ["validations/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "**/*.spec.ts"]
+}

@@ -1,20 +1,18 @@
-import { Request, Response } from "express"
-import services from "../services"
+import { Request, Response } from 'express';
+import services from '@services/index';
 
-const signUp = async(req:Request, res: Response) => {
-    const redirectURL = services.userService.signup()
-    res.redirect(redirectURL)
-}
+const getUserDetails = async (req: Request, res: Response) => {
+  try {
+    const { currentUser } = res.locals.userInfo;
 
+    const user = await services.userService.getUserDetails(currentUser.id);
+    res.json(user).status(200);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json(err);
+  }
+};
 
-const signIn = async(req: Request, res: Response)=>{
-    console.log('here in signin')
-    const code = req.query.code
-    const userProfileData = await services.userService.signIn(code as string, res)
-    console.log('===========here in signin redirecting', userProfileData)
-    res.redirect('/')
-}
 export default {
-    signUp,
-    signIn
-}
+  getUserDetails,
+};

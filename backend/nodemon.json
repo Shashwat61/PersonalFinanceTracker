@@ -1,5 +1,9 @@
 {
-    "execMap": {
-        "ts": "ts-node -r dotenv/config"
-    }
+  "watch": ["src"],
+  "ext": "ts,js,json",
+  "ignore": ["node_modules", "src/**/*.spec.ts", "coverage", "dist"],
+  "exec": "ts-node -r tsconfig-paths/register ./src/index.ts",
+  "env": {
+    "NODE_ENV": "dev"
+  }
 }
