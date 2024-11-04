@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import services from '@services/index';
 import indexValidation from '@validations/index.validation';
-import { HttpStatusCode } from 'axios';
+
 
 const getAllBankEmails = async (req: Request, res: Response) => {
   try {
@@ -11,11 +11,11 @@ const getAllBankEmails = async (req: Request, res: Response) => {
       body.userId,
       res.locals.userInfo,
     );
-    res.status(HttpStatusCode.Ok).json({ response: bankEmails });
+    res.status(200).json({ response: bankEmails });
   } catch (err) {
     console.error(err, 'in error block');
     res
-      .status(HttpStatusCode.Conflict)
+      .status(500)
       .json({ error_message: (err as Error).message });
   }
 };
@@ -29,11 +29,11 @@ const addBankEmail = async (req: Request, res: Response) => {
       body.userId,
       res.locals.userInfo,
     );
-    res.status(HttpStatusCode.Ok).json(bankEmail);
+    res.status(200).json(bankEmail);
   } catch (err) {
     console.error(err, 'in error block');
     res
-      .status(HttpStatusCode.Conflict)
+      .status(500)
       .json({ error_message: (err as Error).message });
   }
 };

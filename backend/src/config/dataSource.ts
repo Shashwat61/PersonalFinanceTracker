@@ -2,14 +2,14 @@ import { DataSource } from 'typeorm';
 
 const dataSource = new DataSource({
   type: 'postgres',
-  host: 'localhost',
-  port: 5432,
-  username: 'shashwat',
-  password: '',
-  database: 'financetracker',
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT),
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
   logging: true,
-  migrations: ['./src/migrations/data/*.ts'],
-  migrationsTableName: 'data_migrations',
+  migrations: [process.env.DB_DATA_MIGRATIONS_PATH as string],
+  migrationsTableName: process.env.DB_DATA_MIGRATION_TABLE,
 });
 
 export { dataSource };

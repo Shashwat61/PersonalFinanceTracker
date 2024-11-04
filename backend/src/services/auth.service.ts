@@ -1,6 +1,5 @@
 import {
   getAuthenticatedInfo,
-  getAuthenticatedUserDetails,
   oAuth2ClientInstance,
   setCookies,
 } from '@utils/helper';
