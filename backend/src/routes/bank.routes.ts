@@ -1,6 +1,6 @@
 import controllers from '@controllers';
 
-const express = require('express');
+import express from 'express';
 const router = express.Router();
 
 router.get('/', controllers.bankController.getBanksList);

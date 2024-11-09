@@ -10,7 +10,7 @@ class GmailClient {
   private _limit = 50; // fixed this as this would mean less gmail api calls
   private constructor() {
     this.requestManager = new RequestManager(
-      process?.env?.GMAIL_API_ENDPOINT_URL!,
+      process.env.GMAIL_API_ENDPOINT_URL as string,
     );
   }
 

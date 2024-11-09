@@ -4,7 +4,6 @@ import router from './routes';
 import dotenv from 'dotenv';
 const envFile = `.env.${process.env.NODE_ENV}`
 dotenv.config({ path: envFile });
-console.log(envFile, 'envFile')
 import { redisClient } from './lib';
 import { dataSource } from './config/dataSource';
 import { dbSource } from './config/dbSource';
