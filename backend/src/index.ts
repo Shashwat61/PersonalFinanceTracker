@@ -40,6 +40,10 @@ app.listen(port, async () => {
     .catch((err) => {
       console.error('Error during DB Source initialization', err);
     });
-  await redisClient.connect();
+    redisClient.connect()
+    .then(()=> console.log('Redis connected'))
+    .catch((err)=> console.log('Error connecting to redis', err));
+
   console.log(`Example app listening on port ${port}!`);
+  
 });

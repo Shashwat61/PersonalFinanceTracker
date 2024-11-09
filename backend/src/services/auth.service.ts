@@ -13,7 +13,7 @@ const signup = () => {
   const authorizeUrl = oAuth2Client.generateAuthUrl({
     access_type: 'offline',
     scope:
-      'https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ email profile',
+      'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/gmail.readonly email profile',
   });
   return authorizeUrl;
 };
