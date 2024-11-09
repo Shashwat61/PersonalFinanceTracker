@@ -4,7 +4,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import WithLayout from '@/components/WithLayout'
 import TransactionHeader from '@/components/custom/TransactionHeader'
-import useDebounce from '@/hooks/useDebounce'
 import useTransactions from '@/hooks/useTransactions'
 import { useUserContext } from '@/contexts/UserContext'
 import useFilters from '@/hooks/useFilters'
@@ -17,16 +16,16 @@ import TransactionModal from '@/components/custom/TransactionModal'
 
 
  function Transactions() {
-  const {userData, primaryUserBank, primaryUserBankMapping} = useUserContext()
+  const {userData, primaryUserBankMapping} = useUserContext()
   const [mutableTransaction, setMutableTransaction] = useState<Transaction | null>(null
   )
   const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false)
   const [search, setSearch] = useState<string>('')
-  const [debouncedSearch] = useDebounce(search, 500)
+  // const [debouncedSearch] = useDebounce(search, 500)
   const {selectedDate, setSelectedDate} = useFilters()
   let sequence = 0
   console.log(sequence, '=======render=======')
-  const {userTransactions, updateTransactions, updateTransactionsPending,updateTransactionsSuccess, userTransactionsLoading, userTransactionsSuccess, updatedTransactions, variables, fetchMoreUserTransactions, fetchingMoreUserTransactions, userTransactionHasMore, addTransaction, addTransactionPending, addTransactionSuccess} = useTransactions(userData?.id, primaryUserBankMapping, selectedDate, sequence)
+  const {userTransactions, updateTransactions, updateTransactionsPending,updateTransactionsSuccess, fetchMoreUserTransactions, fetchingMoreUserTransactions, userTransactionHasMore, addTransaction} = useTransactions(userData?.id, primaryUserBankMapping, selectedDate, sequence)
   const [similarTransactionsIds, setSimilarTransactionIds] = useState<string[]>([])
   const [isNewTransaction, setIsNewTransaction] = useState<boolean>(false)
 

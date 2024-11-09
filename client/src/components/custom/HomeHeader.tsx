@@ -23,7 +23,7 @@ interface HomeHeaderProps {
   userBankMapping: UserBankMapping[]
 }
 
-function HomeHeader({ addUserBank, userBanks, bankSeedData, addUserBankPending, userData, userDataLoading, primaryUserBank, setSelectedDate, selectedDate, addBankSuccess, primaryUserBankMapping, userBankMapping }: HomeHeaderProps) {
+function HomeHeader({ addUserBank, userBanks, addUserBankPending, userData, userDataLoading, setSelectedDate, selectedDate, addBankSuccess, primaryUserBankMapping, userBankMapping }: HomeHeaderProps) {
   const [openBankModal, setOpenBankModal] = useState<boolean>(false)
 
   function handleOpenBankModal(){

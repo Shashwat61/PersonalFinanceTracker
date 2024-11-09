@@ -29,7 +29,7 @@ function useTransactions(userId:string | undefined, primaryUserBankMapping: User
         retry: false,
         staleTime: QUERY_STALE_TIME,
         initialPageParam: sequence,
-        getNextPageParam: (lastPage, pages) => lastPage.cursor ?? null,
+        getNextPageParam: (lastPage, _pages) => lastPage.cursor ?? null,
     }
 )
 console.log(sequence, '=======sequence in use transaction=======')
@@ -37,7 +37,7 @@ console.log(sequence, '=======sequence in use transaction=======')
     const transactions: Transaction[] = []
     if (userTransactions){
         // console.log(userTransactions, 'userTransactions')
-        userTransactions.pages.forEach((item: TransactionResponse,i)=>{
+        userTransactions.pages.forEach((item: TransactionResponse,_i)=>{
             if (item.transactions){
                 transactions.push(...item.transactions)
                 sequence = item.cursor ?? null
@@ -88,19 +88,19 @@ console.log(sequence, '=======sequence in use transaction=======')
             })
             return {previousTransactionsData}
         },
-        onError(error, variables, context) {
+        onError(error, _variables, context) {
             console.log(error, 'error in onError')
             queryClient.setQueryData(["transactions", userId, primaryUserBankMapping?.id, selectedDate], context?.previousTransactionsData)
             toast.error("Error updating transactions")
         },
-        onSettled: (data, variables, context) => {
+        onSettled: (_data, _variables, _context) => {
             // console.log(data, 'data in onSuccess')
             // sequence = 0
             // queryClient.invalidateQueries({
             //     queryKey: ["transactions", userId, primaryUserBankMapping?.id, selectedDate]
             // })
         },
-        onSuccess(data, variables, context) {
+        onSuccess(_data, _variables, _context) {
             // console.log(data, 'data in onSuccess')
             toast.success("Updated Transactions Successfully")
         },
@@ -157,18 +157,18 @@ console.log(sequence, '=======sequence in use transaction=======')
             })
             return {previousTransactionsData}
         },
-        onError: (error, variables, context) => {
+        onError: (error, _variables, context) => {
             console.log(error, 'error in onError')
             queryClient.setQueryData(["transactions", userId, primaryUserBankMapping?.id, selectedDate], context?.previousTransactionsData)
             toast.error("Error adding transaction")
         },
-        onSettled: (data, variables, context) => {
+        onSettled: (_data, _variables, _context) => {
             // console.log(data, 'data in onSuccess')
             // queryClient.invalidateQueries({
             //     queryKey: ["transactions", userId, primaryUserBankMapping?.id, selectedDate]
             // })
         },
-        onSuccess(data, variables, context) {
+        onSuccess(_data, _variables, _context) {
             // console.log(data, 'data in onSuccess')
             toast.success("Updated Transactions Successfully")
         },

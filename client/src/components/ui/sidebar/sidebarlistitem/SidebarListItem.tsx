@@ -1,5 +1,5 @@
 import React from 'react'
-import { NavLink, redirect } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 
 interface SideBarListItemProps {
     name: string,
@@ -10,7 +10,7 @@ interface SideBarListItemProps {
 function SidebarListItem(props: SideBarListItemProps) {
   
   return (
-    <NavLink to={props.redirectLink} className="flex cursor-pointer my-4">
+    <NavLink to={props.redirectLink} className="flex my-4 cursor-pointer">
       <div>
         {props.icon}
       </div>

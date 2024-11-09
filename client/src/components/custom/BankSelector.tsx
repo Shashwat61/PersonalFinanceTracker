@@ -1,4 +1,4 @@
-import { Bank, UserBankMapping } from "@/types";
+import { UserBankMapping } from "@/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 function BankSelect({ userBankMappings, onChange, placeholder }: { userBankMappings: UserBankMapping[] | undefined, onChange: (val: string) => void, placeholder: string }){
