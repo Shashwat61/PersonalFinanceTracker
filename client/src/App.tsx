@@ -32,7 +32,7 @@ function App() {
   useLayoutEffect(()=>{
     if(!getCookie("token")){
       console.log("redirecting to login")
-      window.location.href = `${import.meta.env.VITE_BASE_API_URL}/signin`
+      // window.location.href = `${import.meta.env.VITE_BASE_API_URL}/signin`
     }
   },[])
   return (
