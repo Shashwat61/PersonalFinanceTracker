@@ -1,7 +1,6 @@
 import express, { Request, Response } from 'express';
 const router = express.Router();
 
-import controllers from '@controllers';
 import { authMiddleware } from '@middlewares';
 
 import apiRoutes from './api.routes';
@@ -40,7 +39,7 @@ router.get('/privacy_policy', (req, res) => {
 
 router.get('/app', authMiddleware.checkForUserSession, (req, res) => {
   // get the build of react and send that.
-  res.redirect('http://localhost:5173');
+  res.redirect(process.env.CLIENT_URL as string);
 });
 
 export default router;
