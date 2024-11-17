@@ -1,9 +1,8 @@
-import React, { Dispatch, SetStateAction, useState } from 'react'
 import { getActivePage, sideBarList } from '@/utils'
-import { NavLink, useLocation, useNavigate, useRoutes } from 'react-router-dom'
-import { LucideProps } from 'lucide-react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { SideBarItem } from '@/types'
 import usePersistentStorage from '@/hooks/usePersistentStorage'
+import React from 'react'
 
 function Sidebar() {
   const {pathname} = useLocation()
@@ -26,7 +25,7 @@ function Sidebar() {
       {sideBarList.map((item) => (
         <div
           key={item.name}
-          onClick={(e:React.SyntheticEvent) => handleActivePage(item)}
+          onClick={() => handleActivePage(item)}
           className={`flex items-center px-6 py-3 cursor-pointer ${
             activePage?.name === item.name
               ? 'text-gray-700 bg-gray-200'

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Card, CardContent } from '../ui/card';
 import { ArrowDownRight, ArrowUpRight, Edit2, Loader2 } from 'lucide-react';
 import { Badge } from '../ui/badge';

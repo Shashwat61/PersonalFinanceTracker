@@ -1,5 +1,5 @@
 import useBankData from "@/hooks/useBankData";
-import { Context, ContextType, createContext, useContext } from "react";
+import { Context, createContext, useContext } from "react";
 import { useUserContext } from "./UserContext";
 
 type BankContextValue = ReturnType<typeof useBankData> | null;

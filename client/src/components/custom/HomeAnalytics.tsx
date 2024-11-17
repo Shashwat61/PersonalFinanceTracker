@@ -1,6 +1,5 @@
-import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
-import { ChevronRight, CreditCard, DollarSign, TrendingDown, TrendingUp } from 'lucide-react'
+import { ChevronRight, DollarSign, TrendingDown, TrendingUp } from 'lucide-react'
 import { Progress } from '../ui/progress'
 import { Button } from '../ui/button'
 import RecentInfoBox from '../RecentInfoBox'

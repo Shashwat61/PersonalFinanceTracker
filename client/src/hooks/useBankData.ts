@@ -1,5 +1,5 @@
 import { Bank } from '@/types'
-import { getMany, getManyWithoutParams } from '@/utils/api'
+import { getManyWithoutParams } from '@/utils/api'
 import { QUERY_STALE_TIME } from '@/utils/constants'
 import { useQuery } from '@tanstack/react-query'
 

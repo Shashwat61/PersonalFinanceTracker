@@ -2,7 +2,6 @@ import { Calendar } from 'lucide-react';
 import { Calendar as CalendarComponent } from '../../components/ui/calendar'
 import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Dispatch, SetStateAction } from 'react';
 
 function DatePicker({ date, setDate }: { date: Date | undefined, setDate: (val: Date) => void }){
   

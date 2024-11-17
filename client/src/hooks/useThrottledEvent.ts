@@ -1,11 +1,4 @@
-import React, { useCallback, useEffect } from 'react'
-type ThrottledEvent = {
-    target: HTMLElement
-    eventName: string
-    interval: number
-    callbackFn: () => void
-    fetchingMore?: boolean
-}
+import  { useCallback, useEffect } from 'react'
 function useThrottledEvent(eventName:string, target: HTMLDivElement | null, interval: number, callbackFn: ()=> void, fetchingMore?: boolean ): void {
     
     const throttledCallback = useCallback(throttle(callbackFn, interval), [callbackFn, fetchingMore])

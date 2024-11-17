@@ -32,7 +32,7 @@ function useUserData(){
 
     const {mutate: addUserBank, isSuccess: addUserBankSuccess, isPending: addUserBankPending} = useMutation({
         mutationFn: (data: AddUserBank) => createSingle<Bank, AddUserBank>('/banks/user', data),
-        onSuccess: (data, variables, context) => {
+        onSuccess: (_data, _variables, _context) => {
             queryClient.invalidateQueries({queryKey: ['user']})
             toast.success("Added Bank Successfully")
         }

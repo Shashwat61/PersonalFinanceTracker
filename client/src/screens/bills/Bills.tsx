@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Upload, ChevronRight } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import WithLayout from '@/components/WithLayout'
 
 function FlexiBenefits() {
-  const [bills, setBills] = useState([
+  const [bills] = useState([
     { id: 1, name: 'WiFi Bill', date: '2023-06-28', amount: 1000, category: 'WiFi' },
     { id: 2, name: 'Petrol Expense', date: '2023-06-27', amount: 1500, category: 'Petrol' },
     { id: 3, name: 'Online Course', date: '2023-06-26', amount: 2000, category: 'Course' },
@@ -17,7 +17,7 @@ function FlexiBenefits() {
 
   return (
     
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Benefits Overview */}
         <Card>
           <CardHeader>
@@ -57,8 +57,8 @@ function FlexiBenefits() {
                   <SelectItem value="food">Food</SelectItem>
                 </SelectContent>
               </Select>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <div className="p-6 text-center border-2 border-gray-300 border-dashed rounded-lg">
+                <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                 <p className="text-sm text-gray-600">Drag and drop your bill here, or click to select a file</p>
               </div>
               <Input type="file" className="hidden" id="bill-upload" />
@@ -76,7 +76,7 @@ function FlexiBenefits() {
             <CardTitle>Recent Bills</CardTitle>
             <Button variant="ghost" size="sm">
               View All
-              <ChevronRight className="ml-2 h-4 w-4" />
+              <ChevronRight className="w-4 h-4 ml-2" />
             </Button>
           </CardHeader>
           <CardContent>

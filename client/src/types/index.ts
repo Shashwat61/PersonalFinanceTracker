@@ -94,13 +94,13 @@ export type EditTransaction = {
 }
 
 export interface UserUpiCategoryNameMapping {
-    id: string
-    user_id: string
+    id?: string
+    user_id?: string
     upi_id?: string
     category_id?: string
     upi_name?: string
-    created_at: string
-    updated_at: string
+    created_at?: string
+    updated_at?: string
     category?: Category
 }
 

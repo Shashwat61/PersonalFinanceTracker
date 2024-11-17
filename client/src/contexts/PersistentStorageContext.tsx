@@ -1,11 +1,11 @@
-import useBankData from "@/hooks/useBankData";
-import {Dispatch, Context, ContextType, createContext, SetStateAction, useContext, useState } from "react";
-import usePersistentStorage from "@/hooks/usePersistentStorage";
+import {Dispatch, Context, createContext, SetStateAction, useContext, useState } from "react";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PersistentStorageValue<T = any> = {
     keyValue: {[key: string]: T} 
     setKeyValue: Dispatch<SetStateAction<{[key: string]: T}>>
 }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const PersistentStorageContext: Context<PersistentStorageValue>  = createContext<PersistentStorageValue<any>>({
     keyValue: {},
     setKeyValue: ()=>{}

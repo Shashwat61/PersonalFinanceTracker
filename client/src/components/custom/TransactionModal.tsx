@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
 import { Label } from '../ui/label'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
-import { AddTransaction, Category, Transaction } from '@/types'
+import {  Category, Transaction } from '@/types'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { deepEqualsObject } from '@/utils'
 
@@ -36,46 +36,45 @@ function TransactionModal({ transaction, onSave, open, onOpenChange, placeholder
         onOpenChange(false)
     }
     
-    function handleEditTransaction(e: React.ChangeEvent<HTMLInputElement> | string){
-      setEditedTransaction((prev)=> {
-        console.log(prev, 'previous value')
-        if(typeof e !== "string" && e.target.id === "upi_id"){
-          return {
+    function handleEditTransaction(e: React.ChangeEvent<HTMLInputElement> | string) {
+      setEditedTransaction((prev) => {
+        console.log(prev, 'previous value');
+        if (typeof e !== "string" && e.target.id === "upi_id") {
+          return prev ? {
             ...prev,
             userUpiCategoryNameMapping: {
-              ...prev?.userUpiCategoryNameMapping,
+              ...prev.userUpiCategoryNameMapping,
               upi_id: e.target.value
             }
-          }
-        }
-        else if(typeof e !== "string" && e.target?.id !== "upi_name"){
-          console.log('hello from block', e.target.value)
-          return {
+          } : null;
+        } else if (typeof e !== "string" && e.target.id !== "upi_name") {
+          console.log('hello from block', e.target.value);
+          return prev ? {
             ...prev,
             [e.target.id]: e.target.value
-          }
-        }
-        else if(typeof e !== "string" && e.target.id === "upi_name"){
-          return {
+          } : null;
+        } else if (typeof e !== "string" && e.target.id === "upi_name") {
+          return prev ? {
             ...prev,
             userUpiCategoryNameMapping: {
-              ...prev?.userUpiCategoryNameMapping,
+              ...prev.userUpiCategoryNameMapping,
               upi_name: e.target.value
             }
-          }
-        }
-        else {
-          return {
+          } : null;
+        } else if (typeof e === "string") {
+          return prev ? {
             ...prev,
             userUpiCategoryNameMapping: {
-              ...prev?.userUpiCategoryNameMapping,
+              ...prev.userUpiCategoryNameMapping,
               category_id: e,
               category: categories?.find(cat => cat.id === e)
             }
-          }
+          } : null;
+        } else {
+          return prev;
         }
-      })
-  }
+      });
+    }
     console.log(editedTransaction, 'editedtransaciton')
     console.log(!!transactionMetaData?.upi_id, 'boolean')
     if (!transaction) return null

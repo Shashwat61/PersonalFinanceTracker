@@ -1,5 +1,5 @@
 import { Transaction, TransactionResponse } from '@/types'
-import React, { MutableRefObject, ReactNode, useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import TransactionSlab from './TransactionSlab'
 import useThrottledEvent from '@/hooks/useThrottledEvent'
 import { InfiniteData, InfiniteQueryObserverResult } from '@tanstack/react-query'
