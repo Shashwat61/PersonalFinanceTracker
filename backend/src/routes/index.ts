@@ -10,8 +10,12 @@ router.use('/api', apiRoutes);
 
 router.get(
   '/',
+  authMiddleware.checkForUserSession,
   (req: Request, res: Response) => {
-    res.render('homepage');
+    if (res.locals.user) {
+      res.redirect('/app');
+    } else res.render('homepage');
+
   },
 );
 
@@ -22,7 +26,11 @@ router.get(
     console.log(req.url, req.route.path, 'after middleware');
     if (res.locals.user) {
       res.redirect('/app');
-    } else res.render('signin');
+    } else if(req.query.error){
+      res.render('signin', { error: req.query.error });
+    } else {
+      res.render('signin')
+    };
   },
 );
 
