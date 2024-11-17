@@ -1,0 +1,191 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Welcome to FinTrack - Your Personal Finance Manager
+    style.
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background-color: #f4f7f9;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+      header {
+        background-color: #ffffff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        position: fixed;
+        width: 100%;
+        top: 0;
+        z-index: 1000;
+      }
+      nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+      }
+      .logo {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #3b82f6;
+      }
+      .nav-links a {
+        color: #4b5563;
+        text-decoration: none;
+        margin-left: 1.5rem;
+        transition: color 0.3s ease;
+      }
+      .nav-links a:hover {
+        color: #3b82f6;
+      }
+      .btn {
+        display: inline-block;
+        background-color: #3b82f6;
+        color: #ffffff;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        text-decoration: none;
+        transition: background-color 0.3s ease;
+      }
+      .btn:hover {
+        background-color: #2563eb;
+      }
+      .hero {
+        background-image: linear-gradient(rgba(59, 130, 246, 0.8), rgba(37, 99, 235, 0.8)), url('/placeholder.svg?height=600&width=1200');
+        background-size: cover;
+        background-position: center;
+        color: #ffffff;
+        text-align: center;
+        padding: 8rem 0;
+        margin-top: 4rem;
+      }
+      .hero h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+      }
+      .hero p {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+      }
+      .features {
+        padding: 4rem 0;
+        background-color: #ffffff;
+      }
+      .features h2 {
+        text-align: center;
+        margin-bottom: 3rem;
+        font-size: 2rem;
+        color: #1f2937;
+      }
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+      }
+      .feature-item {
+        text-align: center;
+        padding: 1.5rem;
+        background-color: #f9fafb;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .cta {
+        background-color: #3b82f6;
+        color: #ffffff;
+        text-align: center;
+        padding: 4rem 0;
+      }
+      footer {
+        background-color: #1f2937;
+        color: #ffffff;
+        text-align: center;
+        padding: 2rem 0;
+      }
+      .footer-links a {
+        color: #ffffff;
+        margin: 0 0.5rem;
+        text-decoration: none;
+      }
+      .footer-links a:hover {
+        text-decoration: underline;
+      }
+  body
+    header
+      nav.container
+        .logo FinTrack
+        .nav-links
+          a(href="#features") Features
+          a.btn(href="/signin") Sign In
+
+    section.hero
+      .container
+        h1 Take Control of Your Finances with FinTrack
+        p Easily manage your personal and group expenses, track your spending, and achieve your financial goals.
+        a.btn(href="/signin") Get Started for Free
+
+    section#features.features
+      .container
+        h2 Why Choose FinTrack?
+        .feature-grid
+          .feature-item
+            i 📊
+            h3 Expense Tracking
+            p Easily log and categorize your expenses to understand your spending habits.
+          .feature-item
+            i 👥
+            h3 Group Expenses
+            p Split bills and manage shared expenses with friends and family effortlessly.
+          .feature-item
+            i 🎯
+            h3 Financial Goals
+            p Set and track your savings goals to achieve your financial dreams.
+          .feature-item
+            i 📈
+            h3 Insightful Reports
+            p Get detailed insights into your financial health with easy-to-understand reports.
+
+    section.cta
+      .container
+        h2 Ready to Take Control of Your Finances?
+        p Join thousands of users who have already improved their financial well-being with FinTrack.
+        a.btn(href="/signin") Sign Up Now
+
+    footer
+      .container
+        p &copy; 2024 FinTrack. All rights reserved.
+        .footer-links
+          a(href="/privacy_policy") Privacy Policy
+          a(href="mailto:shashwat742@gmail.com") Support
+        p Built by Shashwat
+
+    script.
+      // Smooth scrolling for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+          });
+        });
+      });
+
+      // Add a class to the header when scrolling
+      window.addEventListener('scroll', () => {
+        const header = document.querySelector('header');
+        if (window.scrollY > 50) {
+          header.classList.add('scrolled');
+        } else {
+          header.classList.remove('scrolled');
+        }
+      });

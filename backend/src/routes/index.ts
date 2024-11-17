@@ -10,8 +10,9 @@ router.use('/api', apiRoutes);
 
 router.get(
   '/',
-  authMiddleware.checkForUserSession,
-  controllers.rootRouteController,
+  (req: Request, res: Response) => {
+    res.render('homepage');
+  },
 );
 
 router.get(
