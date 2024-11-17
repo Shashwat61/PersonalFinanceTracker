@@ -30,9 +30,11 @@ class ApiManager {
         })
         this.client.interceptors.request.use((config)=>{
             const token = getCookie("token")
+            console.log(token, '=======TOKEN=======')
             if (token) {
                 config.headers.Authorization = token
             }
+            console.log(config, '=======CONFIG=======')
             return config
         })
         this.client.interceptors.response.use((response)=>{ 

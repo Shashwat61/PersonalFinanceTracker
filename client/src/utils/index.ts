@@ -30,6 +30,7 @@ export const sideBarList = [
 
 export function getCookie(key: string) {
   const cookies = document.cookie.split(";")
+  console.log(cookies, '======COOKIES=======')
   const cookie = cookies.find(cookie => cookie.replace(/=.+$/, "")?.trim() === key)
   return cookie?.split("=")[1] || ""
 }
