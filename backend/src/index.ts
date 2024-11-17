@@ -9,12 +9,14 @@ import { dataSource } from './config/dataSource';
 import { dbSource } from './config/dbSource';
 
 
-
 const app = express();
 const port = process.env.PORT || 3000;
+const corsOption = {
+  origin: process.env.CLIENT_URL,
+  optionsSuccessStatus: 200,
+}
 
-
-app.use(cors());
+app.use(cors(corsOption));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
