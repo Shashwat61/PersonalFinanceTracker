@@ -49,7 +49,7 @@ function setCookies(
 ) {
   const currentTimeInSeconds = Math.floor(Date.now() / 1000);
   const maxAgeInSeconds = (tokenIdInfo.exp - currentTimeInSeconds) * 1000; // 1 hour
-  res.cookie('token', id_token, {
+  res.cookie('bearer_token', id_token, {
     ...cookieOptions,
     maxAge: maxAgeInSeconds,
   });
