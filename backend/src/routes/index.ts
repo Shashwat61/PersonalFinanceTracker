@@ -25,6 +25,10 @@ router.get(
   },
 );
 
+router.get('/privacy_policy', (req, res) => {
+  res.render('privacy_policy');
+})
+
 router.get('/app', authMiddleware.checkForUserSession, (req, res) => {
   // get the build of react and send that.
   res.redirect('http://localhost:5173');
