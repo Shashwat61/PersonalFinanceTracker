@@ -22,7 +22,7 @@ class ApiManager {
     constructor() {
         this.client = axios.create({
             baseURL: `${import.meta.env.VITE_BASE_API_URL}/api`,
-            withCredentials: import.meta.env.PROD,
+            withCredentials: import.meta.env.MODE === "production",
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
