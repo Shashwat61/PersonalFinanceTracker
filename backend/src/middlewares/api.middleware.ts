@@ -13,7 +13,7 @@ const checkApiAutheticated = async (
     console.log(cookies, '========cookies in api middleware=======');
     const authorizationToken = cookies?.find(
       (cookie) => cookie.replace(/=.+$/, '').trim() === 'bearer_token',
-    );
+    )?.split('=')[1];
     console.log(authorizationToken, '========authorizationtoken=======');
     if (!authorizationToken)
       throw Error('JWT token not found, please sign in again');
