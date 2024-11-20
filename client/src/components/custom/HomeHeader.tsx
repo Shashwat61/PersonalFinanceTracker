@@ -70,7 +70,7 @@ function HomeHeader({ addUserBank, userBanks, addUserBankPending, userData, user
               Welcome {userData?.name} <span className="wave">👋</span>
             </h1>
             <div className="flex flex-col gap-4 sm:flex-row">
-              <BankSelect banks={bankSeedData} onChange={() => { }} placeholder={primaryUserBankMapping?.bank?.name || "Select Bank"} />
+              <BankSelect bankSeedData={bankSeedData} onChange={() => { }} placeholder={primaryUserBankMapping?.bank?.name || "Select Bank"} />
               <div className="flex flex-1 gap-2">
                 <DatePicker date={selectedDate} setDate={setSelectedDate} />
                 <Select>

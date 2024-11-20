@@ -41,7 +41,7 @@ function BankModal({bankSeedData, open, onSave, setOpen, addingBankPending, titl
             <Label htmlFor="bank" className="text-right">
               Bank
             </Label>
-            <BankSelect banks={bankSeedData} onChange={setSelectedBankId} placeholder="All Bank Branches" />
+            <BankSelect bankSeedData={bankSeedData} onChange={setSelectedBankId} placeholder="All Bank Branches" />
           </div>
           <div className="grid items-center grid-cols-4 gap-4">
             <Label htmlFor="accountNumber" className="text-right">
