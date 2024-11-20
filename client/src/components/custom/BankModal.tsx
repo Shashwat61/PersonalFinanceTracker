@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Loader2, PlusCircle } from 'lucide-react'
-import { UserBankMapping } from '@/types'
+import { Bank, UserBankMapping } from '@/types'
 import BankSelect from './BankSelector'
 
 interface BankModal {
@@ -15,8 +15,9 @@ interface BankModal {
     title: string
     subTitle: string
     userBankMappings: UserBankMapping[]
+    bankSeedData: Bank[] | undefined
 }
-function BankModal({userBankMappings, open, onSave, setOpen, addingBankPending, title, subTitle}: BankModal) {
+function BankModal({bankSeedData, open, onSave, setOpen, addingBankPending, title, subTitle}: BankModal) {
   const [accountNumber, setAccountNumber] = useState<string>('')
   const [selectedBankId, setSelectedBankId] = useState<string>('')
 
@@ -40,7 +41,7 @@ function BankModal({userBankMappings, open, onSave, setOpen, addingBankPending, 
             <Label htmlFor="bank" className="text-right">
               Bank
             </Label>
-            <BankSelect userBankMappings={userBankMappings} onChange={setSelectedBankId} placeholder="All Bank Branches" />
+            <BankSelect banks={bankSeedData} onChange={setSelectedBankId} placeholder="All Bank Branches" />
           </div>
           <div className="grid items-center grid-cols-4 gap-4">
             <Label htmlFor="accountNumber" className="text-right">
