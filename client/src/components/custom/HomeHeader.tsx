@@ -23,7 +23,7 @@ interface HomeHeaderProps {
   userBankMapping: UserBankMapping[]
 }
 
-function HomeHeader({ addUserBank, userBanks, addUserBankPending, userData, userDataLoading, setSelectedDate, selectedDate, addBankSuccess, primaryUserBankMapping, userBankMapping }: HomeHeaderProps) {
+function HomeHeader({ addUserBank, userBanks, addUserBankPending, userData, userDataLoading, setSelectedDate, selectedDate, addBankSuccess, primaryUserBankMapping, userBankMapping, bankSeedData }: HomeHeaderProps) {
   const [openBankModal, setOpenBankModal] = useState<boolean>(false)
 
   function handleOpenBankModal(){
@@ -70,7 +70,7 @@ function HomeHeader({ addUserBank, userBanks, addUserBankPending, userData, user
               Welcome {userData?.name} <span className="wave">👋</span>
             </h1>
             <div className="flex flex-col gap-4 sm:flex-row">
-              <BankSelect userBankMappings={userBankMapping} onChange={() => { }} placeholder={primaryUserBankMapping?.bank?.name || "Select Bank"} />
+              <BankSelect banks={bankSeedData} onChange={() => { }} placeholder={primaryUserBankMapping?.bank?.name || "Select Bank"} />
               <div className="flex flex-1 gap-2">
                 <DatePicker date={selectedDate} setDate={setSelectedDate} />
                 <Select>
@@ -97,6 +97,7 @@ function HomeHeader({ addUserBank, userBanks, addUserBankPending, userData, user
       onSave={handleAddUserBank}
       userBankMappings={userBankMapping}
       addingBankPending = {addUserBankPending}
+      bankSeedData={bankSeedData}
       title={"Add Bank"}
       subTitle = {"Add a new bank account to your FinTrack profile."}
     /> : null}
