@@ -54,12 +54,6 @@ export class CreateTransactionTable1723350863018 implements MigrationInterface {
             isNullable: false,
           },
           {
-            name: 'status',
-            type: 'varchar',
-            default: null,
-            length: '255',
-          },
-          {
             name: 'user_id',
             type: 'uuid',
             isNullable: false,

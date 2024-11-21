@@ -1,0 +1,1 @@
+export const BEARER_TOKEN = 'bearer_token';

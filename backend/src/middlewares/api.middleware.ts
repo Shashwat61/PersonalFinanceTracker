@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { getTokenIdInfo } from '@utils/helper';
 import { User } from '@entity/User';
 import { redisClient } from '@lib';
+import { BEARER_TOKEN } from '@utils/constants';
 
 const checkApiAutheticated = async (
   req: Request,
@@ -12,7 +13,7 @@ const checkApiAutheticated = async (
     const cookies = req.headers.cookie?.split(';');
     console.log(cookies, '========cookies in api middleware=======');
     const authorizationToken = cookies?.find(
-      (cookie) => cookie.replace(/=.+$/, '').trim() === 'bearer_token',
+      (cookie) => cookie.replace(/=.+$/, '').trim() === BEARER_TOKEN,
     )?.split('=')[1];
     console.log(authorizationToken, '========authorizationtoken=======');
     if (!authorizationToken)

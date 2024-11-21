@@ -1,6 +1,7 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express';
 import { getTokenIdInfo, getTokenInfo } from '../utils/helper';
 import { User } from '../entity/User';
+import { BEARER_TOKEN } from '@utils/constants';
 
 const checkForUserSession: RequestHandler = async (
   req: Request,
@@ -12,7 +13,7 @@ const checkForUserSession: RequestHandler = async (
     console.log(cookies, '========cookies=======');
     if (cookies) {
       const jwt_token = cookies?.find(
-        (cookie) => cookie.replace(/=.+$/, '').trim() === 'bearer_token',
+        (cookie) => cookie.replace(/=.+$/, '').trim() === BEARER_TOKEN,
       );
       if (jwt_token) {
         const [jwt_prefix, jwt_token_value] = jwt_token.split('=');
