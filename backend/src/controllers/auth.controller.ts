@@ -23,7 +23,21 @@ const signIn = async (req: Request, res: Response) => {
     res.redirect(`/signin?error=${(error as Error).message}`);
   }
 };
+
+const logout = async (req: Request, res: Response) => {
+  try{
+    console.log(req.cookies, 'cookies');
+    const response = await services.authService.logout(res);
+    console.log(req.headers.cookie, '========cookies in logout');
+    res.json(response).status(200);
+  }
+  catch(error){
+    console.log((error as Error).message);
+    res.status(500).json({message: (error as Error).message});
+  }
+}
 export default {
   signUp,
   signIn,
+  logout,
 };

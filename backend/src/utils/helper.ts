@@ -190,6 +190,9 @@ function getDate(date: string) {
   const day = parseInt(dateParts[0]);
   return new Date(year, month, day);
 }
+
+
+
 export {
   getAuthenticatedInfo,
   getAuthenticatedUserDetails,
@@ -202,4 +205,6 @@ export {
   // modifyTransactionDataVersionOne,
   modifyTransactionDataVersionTwo,
   getDate,
+  cookieOptions
 };
+
