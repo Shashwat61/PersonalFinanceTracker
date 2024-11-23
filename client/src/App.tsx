@@ -44,7 +44,7 @@ function App() {
           </PersistentStorageProvider>
         </BankContextProvider>
       </UserContextProvider>
-      <ReactQueryDevtools buttonPosition="top-right" />
+      <ReactQueryDevtools buttonPosition="bottom-right" />
       <Toaster/>
     </QueryClientProvider>    
   )
