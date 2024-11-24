@@ -36,10 +36,10 @@ async function getAuthenticatedUserDetails(oAuth2Client: OAuth2Client) {
   return data;
 }
 const cookieOptions: CookieOptions = {
-  httpOnly: true,
-  domain: 'fintrack.live',
+  httpOnly: process.env.NODE_ENV==="production",
+  domain: process.env.NODE_ENV==="production" ? 'fintrack.live': "",
   path: '/',
-  sameSite: 'none',
+  sameSite: "strict",
   secure: process.env.NODE_ENV === 'production',
 };
 

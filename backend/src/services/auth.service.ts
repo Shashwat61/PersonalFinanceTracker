@@ -83,7 +83,8 @@ const logout = async(response: Response) => {
   // remove from cookie
   response.clearCookie(BEARER_TOKEN, cookieOptions); // somehow not being removed
   // when ssr is implemented, redirect to home page /
-  return {message: 'logged out successfully'};
+  // return response.redirect('/signin');
+  return;
 }
 
 export default {

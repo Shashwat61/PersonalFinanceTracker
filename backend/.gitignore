@@ -8,3 +8,4 @@ temp/
 .env.dev
 .env.production
 dist/
+build/
