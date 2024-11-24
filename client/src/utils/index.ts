@@ -12,19 +12,19 @@ export const sideBarList = [
     id: 1,
     name: "Dashboard",
     icon: HomeIcon,
-    redirectLink: '/'
+    redirectLink: '/app'
   },
   {
     id: 2,
     name: "Transactions",
     icon: WalletIcon,
-    redirectLink: '/transactions'
+    redirectLink: '/app/transactions'
   },
   {
     id: 3,
     name: "Bills",
     icon: Package2Icon,
-    redirectLink: '/bills'
+    redirectLink: '/app/bills'
   },
 ]
 

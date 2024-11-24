@@ -9,15 +9,15 @@ import Home from '../screens/home/Home'
 
 const router = createBrowserRouter([
     {
-        path: '/',
+        path: '/app',
         element: <Home />,
     },
     {
-        path: '/transactions',
+        path: '/app/transactions',
         element: <Transactions/>
     },
     {
-      path: '/bills',
+      path: '/app/bills',
       element: <FlexiBenefits/>
     }
 ])
