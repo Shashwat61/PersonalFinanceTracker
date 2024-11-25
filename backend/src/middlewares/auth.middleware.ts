@@ -1,6 +1,7 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express';
 import { getTokenIdInfo, getTokenInfo } from '../utils/helper';
 import { User } from '../entity/User';
+import { BEARER_TOKEN } from '@utils/constants';
 
 const checkForUserSession: RequestHandler = async (
   req: Request,
@@ -11,7 +12,7 @@ const checkForUserSession: RequestHandler = async (
     const cookies = req.headers.cookie?.split(';');
     if (cookies) {
       const jwt_token = cookies?.find(
-        (cookie) => cookie.replace(/=.+$/, '').trim() === 'token',
+        (cookie) => cookie.replace(/=.+$/, '').trim() === BEARER_TOKEN,
       );
       if (jwt_token) {
         const [jwt_prefix, jwt_token_value] = jwt_token.split('=');
@@ -23,30 +24,16 @@ const checkForUserSession: RequestHandler = async (
           email: tokenIdInfo?.getPayload()?.email?.toLowerCase(),
         });
         if (!user) throw Error('User not found');
-        res.locals.user = user;
+        res.locals.userInfo = user;
         console.log('user found');
         return next();
       }
     }
     console.log('here in login page');
-
-    req.url.includes('signin')
-      ? req.query.error
-        ? res.render('signin', {
-            error: req.query.error,
-          })
-        : res.render('signin')
-      : res.redirect('/signin');
+    return next();
   } catch (error) {
     console.log(error);
-    req.url.includes('signin')
-      ? req.query.error
-        ? res.render('signin', {
-            error: req.query.error,
-          })
-        : res.render('signin')
-      : res.redirect('/signin');
-    // throw new Error(`something went wrong with message -${(error as Error).message}`)
+    throw new Error(`something went wrong with message -${(error as Error).message}`)
   }
 };
 

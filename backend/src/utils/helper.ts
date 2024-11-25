@@ -5,6 +5,7 @@ import { GmailThreadMessages, Message } from '@custom-types/transaction.types';
 import { Transaction } from '@entity/Transaction';
 import { UserBankMapping } from '@entity/UserBankMapping';
 import { UserUpiCategoryNameMapping } from '@entity/UserUpiCategoryNameMapping';
+import { BEARER_TOKEN } from './constants';
 
 function oAuth2ClientInstance() {
   return new OAuth2Client(
@@ -41,6 +42,7 @@ const cookieOptions: CookieOptions = {
   sameSite: "strict",
   secure: process.env.NODE_ENV === 'production',
 };
+
 function setCookies(
   res: Response,
   id_token: string,
@@ -48,7 +50,7 @@ function setCookies(
 ) {
   const currentTimeInSeconds = Math.floor(Date.now() / 1000);
   const maxAgeInSeconds = (tokenIdInfo.exp - currentTimeInSeconds) * 1000; // 1 hour
-  res.cookie('token', id_token, {
+  res.cookie(BEARER_TOKEN, id_token, {
     ...cookieOptions,
     maxAge: maxAgeInSeconds,
   });
@@ -188,6 +190,9 @@ function getDate(date: string) {
   const day = parseInt(dateParts[0]);
   return new Date(year, month, day);
 }
+
+
+
 export {
   getAuthenticatedInfo,
   getAuthenticatedUserDetails,

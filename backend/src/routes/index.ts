@@ -1,7 +1,5 @@
 import express, { NextFunction, Request, Response } from 'express';
 const router = express.Router();
-
-import controllers from '@controllers';
 import { authMiddleware } from '@middlewares';
 
 import apiRoutes from './api.routes';

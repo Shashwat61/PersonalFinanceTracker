@@ -1,7 +1,6 @@
 import {
   cookieOptions,
   getAuthenticatedInfo,
-  getAuthenticatedUserDetails,
   oAuth2ClientInstance,
   setCookies,
 } from '@utils/helper';
@@ -16,7 +15,7 @@ const signup = () => {
   const authorizeUrl = oAuth2Client.generateAuthUrl({
     access_type: 'offline',
     scope:
-      'https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ email profile',
+      'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/gmail.readonly email profile',
   });
   return authorizeUrl;
 };
@@ -62,7 +61,7 @@ const signIn = async (code: string, res: Response) => {
           '===============tokenid',
         );
         const resp = await redisClient.setKey(
-          'access_token',
+          user.email,
           tokens.access_token,
           tokenIdInfo.exp,
         );

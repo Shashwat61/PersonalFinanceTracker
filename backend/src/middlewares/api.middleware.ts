@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { getTokenIdInfo } from '@utils/helper';
 import { User } from '@entity/User';
 import { redisClient } from '@lib';
+import { BEARER_TOKEN } from '@utils/constants';
 
 const checkApiAutheticated = async (
   req: Request,
@@ -9,7 +10,12 @@ const checkApiAutheticated = async (
   next: NextFunction,
 ) => {
   try {
-    const authorizationToken = req.headers.authorization;
+    const cookies = req.headers.cookie?.split(';');
+    console.log(cookies, '========cookies in api middleware=======');
+    const authorizationToken = cookies?.find(
+      (cookie) => cookie.replace(/=.+$/, '').trim() === BEARER_TOKEN,
+    )?.split('=')[1];
+    console.log(authorizationToken, '========authorizationtoken=======');
     if (!authorizationToken)
       throw Error('JWT token not found, please sign in again');
     const tokenIdInfo = await getTokenIdInfo(authorizationToken);

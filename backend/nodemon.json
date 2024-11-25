@@ -1,9 +1,10 @@
 {
-  "watch": ["src"],
+  "watch": [".env.*, , src"],
   "ext": "ts,js,json",
   "ignore": ["node_modules", "src/**/*.spec.ts", "coverage", "dist"],
-  "exec": "ts-node -r tsconfig-paths/register ./src/index.ts",
+  "exec": "node --inspect --loader ts-node/esm -r tsconfig-paths/register -r dotenv/config ./src/index.ts",
   "env": {
-    "NODE_ENV": "dev"
+    "NODE_ENV": "dev",
+    "DOTENV_CONFIG_PATH": ".env.dev"
   }
 }

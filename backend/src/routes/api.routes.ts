@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import authRoutes from './auth.routes';
 import tranasctionRoutes from './transaction.routes';
 import bankEmailRoutes from './watch-email.routes';
@@ -9,6 +9,11 @@ import categoryRoutes from './category.routes';
 import { apiMiddleware } from '../middlewares';
 
 const router = express.Router();
+
+router.get('/', (req: Request, res: Response) => {
+  res.send('Welcome to the API');
+})
+
 router.use('/auth', authRoutes);
 
 // protected and public routes configure
