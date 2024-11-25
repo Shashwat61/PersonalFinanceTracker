@@ -25,7 +25,7 @@ const checkForUserSession: RequestHandler = async (
           email: tokenIdInfo?.getPayload()?.email?.toLowerCase(),
         });
         if (!user) throw Error('User not found');
-        res.locals.user = user;
+        res.locals.userInfo = user;
         console.log('user found');
         return next();
       }

@@ -29,7 +29,7 @@ const logout = async (req: Request, res: Response) => {
     console.log(req.cookies, 'cookies');
     await services.authService.logout(res);
     console.log(req.headers.cookie, '========cookies in logout');
-    res.status(204)
+    res.sendStatus(204)
   }
   catch(error){
     console.log((error as Error).message);

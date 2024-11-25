@@ -43,6 +43,13 @@ const cookieOptions: CookieOptions = {
   secure: process.env.NODE_ENV === 'production',
 };
 
+function clearCookie(res: Response, cookieName: string, cookieOptions: CookieOptions){
+  res.cookie(cookieName, '', {
+    ...cookieOptions,
+    expires: new Date(0),
+  });
+}
+
 function setCookies(
   res: Response,
   id_token: string,
@@ -205,6 +212,7 @@ export {
   // modifyTransactionDataVersionOne,
   modifyTransactionDataVersionTwo,
   getDate,
-  cookieOptions
+  cookieOptions,
+  clearCookie
 };
 
