@@ -1,4 +1,5 @@
 import {
+  clearCookie,
   cookieOptions,
   getAuthenticatedInfo,
   oAuth2ClientInstance,
@@ -78,13 +79,10 @@ const signIn = async (code: string, res: Response) => {
 
 const logout = async(response: Response) => {
   const {currentUser} = response.locals.userInfo
-  // remove the access token from redis
   await redisClient.deleteKey(currentUser.email);
-  // remove from cookie
-  response.clearCookie(BEARER_TOKEN, cookieOptions); // somehow not being removed
-  // when ssr is implemented, redirect to home page /
-  // return response.redirect('/signin');
+  delete response.locals.userInfo;
   return;
+  // TODO: remove the cookie from the client from here how?
 }
 
 export default {

@@ -46,6 +46,17 @@ router.get('/app', authMiddleware.checkForUserSession, (req: Request, res: Respo
   // res.redirect('http://localhost:5173/app');
 });
 
+router.get('/app/*', authMiddleware.checkForUserSession, (req: Request, res: Response, next: NextFunction)=>{
+  if(!res.locals.userInfo){
+    res.redirect('/signin');
+  }else {
+    next()
+  }
+  // res.redirect('http://localhost:5173/app');
+});
+
+
 router.use('/app', express.static('dist'));
+router.use('/app/*', express.static('dist'));
 
 export default router;

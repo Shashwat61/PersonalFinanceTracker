@@ -8,8 +8,6 @@ import { UserContextProvider } from './contexts/UserContext'
 import { BankContextProvider } from './contexts/BankContext'
 import toast, { Toaster } from 'react-hot-toast'
 import { PersistentStorageProvider } from './contexts/PersistentStorageContext'
-import { useLayoutEffect } from 'react'
-import { getCookie } from './utils'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,13 +26,6 @@ const queryClient = new QueryClient({
 
 
 function App() {
-  // temporary fix until figure out SSR
-  useLayoutEffect(()=>{
-    if(!getCookie("token")){
-      console.log("redirecting to login")
-      // window.location.href = `${import.meta.env.VITE_BASE_API_URL}/signin`
-    }
-  },[])
   return (
     <QueryClientProvider client = {queryClient}>
       <UserContextProvider>
