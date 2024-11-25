@@ -81,6 +81,8 @@ const logout = async(response: Response) => {
   const {currentUser} = response.locals.userInfo
   await redisClient.deleteKey(currentUser.email);
   delete response.locals.userInfo;
+  // this works in production but not in development
+  if(process.env.NODE_ENV==="production") clearCookie(response, BEARER_TOKEN, cookieOptions);
   return;
   // TODO: remove the cookie from the client from here how?
 }

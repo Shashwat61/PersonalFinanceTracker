@@ -56,7 +56,7 @@ router.get('/app/*', authMiddleware.checkForUserSession, (req: Request, res: Res
 });
 
 
-router.use('/app', express.static('dist'));
-router.use('/app/*', express.static('dist'));
+router.use('/app', express.static('build'));
+router.use('/app/*', express.static('build'));
 
 export default router;
