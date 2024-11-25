@@ -5,6 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { SyntheticEvent } from "react"
 import { logout } from "@/lib/auth"
 import toast from "react-hot-toast"
+import { deleteCookie } from "@/utils"
 
 function Header({ title }: { title: string }){
   function handleClick(e: SyntheticEvent<HTMLElement>){
@@ -25,6 +26,7 @@ function Header({ title }: { title: string }){
   async function handleLogout(){
     try{ 
       await logout()
+      deleteCookie('bearer_token')
       window.location.href = "/"
     }
     catch(e){
