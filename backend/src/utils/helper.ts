@@ -35,10 +35,10 @@ async function getAuthenticatedUserDetails(oAuth2Client: OAuth2Client) {
   return data;
 }
 const cookieOptions: CookieOptions = {
-  // httpOnly: true,
-  domain: '',
+  httpOnly: process.env.NODE_ENV==="production",
+  domain: process.env.NODE_ENV==="production" ? 'fintrack.live': "",
   path: '/',
-  sameSite: 'lax',
+  sameSite: "strict",
   secure: process.env.NODE_ENV === 'production',
 };
 function setCookies(
@@ -200,4 +200,5 @@ export {
   // modifyTransactionDataVersionOne,
   modifyTransactionDataVersionTwo,
   getDate,
+  cookieOptions
 };

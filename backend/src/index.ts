@@ -8,8 +8,14 @@ import { dataSource } from './config/dataSource';
 
 const app = express();
 const port = process.env.PORT || 3000;
+const corsOption = {
+  origin: process.env.CLIENT_URL,
+  credentials: process.env.NODE_ENV === 'production',
+  // allowedHeaders: ['Content-Type', 'Authorization'],
+  // methods: ['GET', 'POST', 'PUT', 'DELETE'],
+}
 
-app.use(cors());
+app.use(cors(corsOption));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

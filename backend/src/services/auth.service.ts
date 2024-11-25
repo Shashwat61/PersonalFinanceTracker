@@ -1,4 +1,5 @@
 import {
+  cookieOptions,
   getAuthenticatedInfo,
   getAuthenticatedUserDetails,
   oAuth2ClientInstance,
@@ -7,6 +8,7 @@ import {
 import { Response } from 'express';
 import { redisClient } from '@lib';
 import { User } from '@entity/User';
+import { BEARER_TOKEN } from '@utils/constants';
 
 const signup = () => {
   const oAuth2Client = oAuth2ClientInstance();
@@ -75,7 +77,19 @@ const signIn = async (code: string, res: Response) => {
   }
 };
 
+const logout = async(response: Response) => {
+  const {currentUser} = response.locals.userInfo
+  // remove the access token from redis
+  await redisClient.deleteKey(currentUser.email);
+  // remove from cookie
+  response.clearCookie(BEARER_TOKEN, cookieOptions); // somehow not being removed
+  // when ssr is implemented, redirect to home page /
+  // return response.redirect('/signin');
+  return;
+}
+
 export default {
   signup,
   signIn,
+  logout
 };

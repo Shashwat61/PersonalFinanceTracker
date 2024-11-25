@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 const router = express.Router();
 
 import controllers from '@controllers';
@@ -11,7 +11,12 @@ router.use('/api', apiRoutes);
 router.get(
   '/',
   authMiddleware.checkForUserSession,
-  controllers.rootRouteController,
+  (req: Request, res: Response) => {
+    if (res.locals.userInfo) {
+      res.redirect('/app');
+    } else res.render('homepage');
+
+  },
 );
 
 router.get(
@@ -19,15 +24,30 @@ router.get(
   authMiddleware.checkForUserSession,
   (req: Request, res: Response) => {
     console.log(req.url, req.route.path, 'after middleware');
-    if (res.locals.user) {
+    if (res.locals.userInfo) {
       res.redirect('/app');
-    } else res.render('signin');
+    } else if(req.query.error){
+      res.render('signin', { error: req.query.error });
+    } else {
+      console.log('rendering signin page')
+      res.render('signin')
+    };
   },
 );
 
-router.get('/app', authMiddleware.checkForUserSession, (req, res) => {
-  // get the build of react and send that.
-  res.redirect('http://localhost:5173');
+router.get('/privacy_policy', (req, res) => {
+  res.render('privacy_policy');
+})
+
+router.get('/app', authMiddleware.checkForUserSession, (req: Request, res: Response, next: NextFunction)=>{
+  if(!res.locals.userInfo){
+    res.redirect('/signin');
+  }else {
+    next()
+  }
+  // res.redirect('http://localhost:5173/app');
 });
+
+router.use('/app', express.static('dist'));
 
 export default router;
