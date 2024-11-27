@@ -39,7 +39,7 @@ const cookieOptions: CookieOptions = {
   httpOnly: process.env.NODE_ENV==="production",
   domain: process.env.NODE_ENV==="production" ? 'fintrack.live': "",
   path: '/',
-  sameSite: "strict",
+  sameSite: "lax",
   secure: process.env.NODE_ENV === 'production',
 };
 

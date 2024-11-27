@@ -22,7 +22,7 @@ const checkApiAutheticated = async (
     console.log(tokenIdInfo, 'tokenidinfo');
     if (!tokenIdInfo || !tokenIdInfo.getPayload())
       throw Error('token id not found, please sign in again');
-    console.log(tokenIdInfo.getPayload()?.email!, 'hashkey');
+    console.log(tokenIdInfo.getPayload()?.email, 'hashkey');
     const email = tokenIdInfo.getPayload()?.email;
     if (!email) throw new Error('Email not found');
     const accessToken = await redisClient.getKey(email);
@@ -40,7 +40,7 @@ const checkApiAutheticated = async (
   } catch (error) {
     console.log('in error block', error as Error);
     console.log(error as Error);
-    res.status(500).json({ message: (error as Error).message });
+    res.status(401).json({ message: 'Unauthorized, Please signin again' });
   }
 };
 export default {

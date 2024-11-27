@@ -17,6 +17,7 @@ const signIn = async (req: Request, res: Response) => {
     );
     console.log('===========here in signin redirecting', userProfileData);
     // if user profile data successful, then redirect to /app
+    console.log(req.headers.cookie, '========cookies after signing in and redirecting to app', req.cookies);
     res.redirect('/app');
   } catch (error) {
     console.log((error as Error).message);

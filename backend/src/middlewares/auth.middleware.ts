@@ -10,10 +10,13 @@ const checkForUserSession: RequestHandler = async (
 ) => {
   try {
     const cookies = req.headers.cookie?.split(';');
+    console.log(cookies, '=====cookies in auth middleware')
+    console.log(req.cookies, '=====req.cookies in auth middleware')
     if (cookies) {
       const jwt_token = cookies?.find(
         (cookie) => cookie.replace(/=.+$/, '').trim() === BEARER_TOKEN,
       );
+      console.log(jwt_token, '=====jwt_token in auth middleware')
       if (jwt_token) {
         const [jwt_prefix, jwt_token_value] = jwt_token.split('=');
         console.log(jwt_token_value, 'jwt token');
