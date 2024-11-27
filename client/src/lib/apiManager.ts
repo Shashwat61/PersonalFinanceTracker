@@ -56,6 +56,12 @@ class ApiManager {
                 console.error(`Unknown Error - ${error.message}`)
                 apiError = new ApiError("Unknown Error")
             }
+            if(error.response?.status === 401){
+                console.error("Unauthorized, logging out")
+                setTimeout(()=>{
+                    window.location.href = "/signin"
+                }, 1000)
+            }
             throw apiError
         })
     }
